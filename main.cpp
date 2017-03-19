@@ -35,8 +35,7 @@
 
 #include <QCoreApplication>
 
-#include "AgaveClientInterface/remotedatainterface.h"
-#include "AgaveClientInterface/agaveInterfaces/agavehandler.h"
+#include "../AgaveClientInterface/agaveInterfaces/agavehandler.h"
 
 #include "quickprogramdriver.h"
 

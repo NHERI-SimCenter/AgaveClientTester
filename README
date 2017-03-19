@@ -1,2 +1,6 @@
 # AgaveClientTester
 Simple Command Line Program for testing Agave Client Interface (Use as a guide for programs using Agave Client Interface)
+
+This package requires the AgaveClientProgram, also distributed by NHERI-SimCenter
+
+In order to avoid the problems with sub modules and sub trees, this uses neither. Rather, git clone the AgaveClientInterface in a folder right next to the AgaveClientTester (.ie, a super-folder will contain the folders AgaveClientInterface and AgaveClientTester.)

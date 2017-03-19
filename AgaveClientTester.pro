@@ -10,11 +10,11 @@ CONFIG -= app_bundle
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    AgaveClientInterface/remotedatainterface.cpp \
-    AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
-    AgaveClientInterface/agaveInterfaces/agavetaskguide.cpp \
-    AgaveClientInterface/agaveInterfaces/agavetaskreply.cpp \
-    quickprogramdriver.cpp
+    quickprogramdriver.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavetaskguide.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavetaskreply.cpp \
+    ../AgaveClientInterface/remotedatainterface.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -28,8 +28,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    AgaveClientInterface/remotedatainterface.h \
-    AgaveClientInterface/agaveInterfaces/agavehandler.h \
-    AgaveClientInterface/agaveInterfaces/agavetaskguide.h \
-    AgaveClientInterface/agaveInterfaces/agavetaskreply.h \
-    quickprogramdriver.h
+    quickprogramdriver.h \
+    ../AgaveClientInterface/agaveInterfaces/agavehandler.h \
+    ../AgaveClientInterface/agaveInterfaces/agavetaskguide.h \
+    ../AgaveClientInterface/agaveInterfaces/agavetaskreply.h \
+    ../AgaveClientInterface/remotedatainterface.h
