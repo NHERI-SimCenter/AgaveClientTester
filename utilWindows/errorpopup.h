@@ -33,52 +33,48 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
+// The ErrorPopup is used to halt execution with a useful error message.
+// It has 2 constructors:
+// 1) Uses a VWTerrorType which is an error code. This is meant for fatal errors which might happen from time to time,
+// even if the code is correct.
+// 2) Uses a QString text message. This is meant for fatal errors that should not be possible, except in the case of a logic
+// error elsewhere in the code.
+
+#ifndef ERRORPOPUP_H
+#define ERRORPOPUP_H
+
 #include <QtGlobal>
+#include <QDialog>
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
+enum class VWTerrorType : unsigned int {ERR_NO_DEF = 255,
+                                        CUSTOM_ERROR = 254,
+                                       ERR_NOT_IMPLEMENTED = 1,
+                                       ERR_ACCESS_LOST = 2,
+                                       ERR_WINDOW_SYSTEM = 3,
+                                       ERR_AUTH_BLANK = 4};
 
-#include "explorerwindow.h"
-#include "explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
-{
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
-
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
-
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
-
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
-
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
-
-    programDriver.startup();
-    return mainRunLoop.exec();
+namespace Ui {
+class ErrorPopup;
 }
+
+class ErrorPopup : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit ErrorPopup(VWTerrorType errNum = VWTerrorType::ERR_NO_DEF);
+    explicit ErrorPopup(QString errorText = "No Text");
+    ~ErrorPopup();
+
+private slots:
+    void closeByError();
+
+private:
+    void setErrorLabel(QString errorText);
+    QString getErrorText(VWTerrorType errNum);
+
+    Ui::ErrorPopup *ui;
+    VWTerrorType errorVal;
+};
+
+#endif // ERRORPOPUP_H

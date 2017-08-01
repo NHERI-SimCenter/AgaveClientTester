@@ -33,52 +33,28 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
+
+#ifndef EASYBOOLLOCK_H
+#define EASYBOOLLOCK_H
+
 #include <QObject>
-#include <QtGlobal>
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
-
-#include "explorerwindow.h"
-#include "explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+class EasyBoolLock :public QObject
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    Q_OBJECT
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
+public:
+    EasyBoolLock(QObject * parent);
 
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
+    bool checkAndClaim();
+    bool lockClosed();
+    void release();
 
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
+signals:
+    void lockStateChanged(bool newState);
 
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
+private:
+    bool myValue = false;
+};
 
-    programDriver.startup();
-    return mainRunLoop.exec();
-}
+#endif // EASYBOOLLOCK_H

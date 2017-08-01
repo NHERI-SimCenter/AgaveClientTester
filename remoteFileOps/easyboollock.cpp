@@ -33,52 +33,28 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
-#include <QtGlobal>
+#include "easyboollock.h"
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
+EasyBoolLock::EasyBoolLock(QObject *parent) : QObject(parent) {}
 
-#include "explorerwindow.h"
-#include "explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+bool EasyBoolLock::checkAndClaim()
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    if (myValue == true) return false;
+    myValue = true;
+    emit lockStateChanged(false);
+    return true;
+}
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
+bool EasyBoolLock::lockClosed()
+{
+    return myValue;
+}
+
+void EasyBoolLock::release()
+{
+    if (myValue == true)
     {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
+        myValue = false;
+        emit lockStateChanged(false);
     }
-
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
-
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
-
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
-
-    programDriver.startup();
-    return mainRunLoop.exec();
 }

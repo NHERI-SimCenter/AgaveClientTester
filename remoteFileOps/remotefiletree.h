@@ -33,52 +33,66 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
+#ifndef REMOTEFILEWINDOW_H
+#define REMOTEFILEWINDOW_H
+
+#include <QMainWindow>
 #include <QtGlobal>
+#include <QTreeView>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QObject>
+#include <QLabel>
+#include <QPoint>
+#include <QMenu>
+#include <QCursor>
+#include <QStandardItem>
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
+//NOTE: FILENAME MUST == 0 for these functions to work.
+//The other columns can be changed
+enum class FileColumn : int {FILENAME = 0,
+                             TYPE = 1,
+                             SIZE = 2,
+                             LAST_CHANGED = 3,
+                             FORMAT = 4,
+                             MIME_TYPE = 5,
+                             PERMISSIONS = 6};
 
-#include "explorerwindow.h"
-#include "explorerdriver.h"
+class FileMetaData;
+class FileTreeNode;
+class FileOperator;
+enum class RequestState;
 
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+class RemoteFileTree : public QTreeView
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    Q_OBJECT
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
+public:
+    explicit RemoteFileTree(QWidget *parent = 0);
+    ~RemoteFileTree();
 
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
+    void setFileOperator(FileOperator * theOperator);
+    FileOperator * getFileOperator();
+    void setSelectedLabel(QLabel * selectedFileDisp);
 
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
+    void refreshSelection();
+    FileTreeNode * getSelectedNode();
+    void setupFileView();
 
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
+signals:
+    void newFileSelected(FileTreeNode * newFileData);
 
-    programDriver.startup();
-    return mainRunLoop.exec();
-}
+public slots:
+    void fileEntryTouched(QModelIndex fileIndex);
+
+private slots:
+    void folderExpanded(QModelIndex itemOpened);
+
+private:
+    FileOperator * myFileOperator;
+
+    QLabel * selectedFileDisplay = NULL;
+    FileTreeNode * selectedItem = NULL;
+};
+
+#endif // REMOTEFILEWINDOW_H

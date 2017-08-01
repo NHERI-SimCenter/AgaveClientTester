@@ -33,52 +33,67 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
-#include <QtGlobal>
+#include "errorpopup.h"
+#include "ui_errorpopup.h"
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
-
-#include "explorerwindow.h"
-#include "explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+ErrorPopup::ErrorPopup(VWTerrorType errNum) :
+    QDialog(0),
+    ui(new Ui::ErrorPopup)
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    ui->setupUi(this);
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
+    errorVal = errNum;
+    setErrorLabel(getErrorText(errNum));
+
+    //TODO: not sure if calling exec during constructor is a good idea
+    this->exec();
+}
+
+ErrorPopup::ErrorPopup(QString errorText) :
+    QDialog(0),
+    ui(new Ui::ErrorPopup)
+{
+    ui->setupUi(this);
+
+    errorVal = VWTerrorType::CUSTOM_ERROR;
+    setErrorLabel(errorText);
+
+    //TODO: not sure if calling exec during constructor is a good idea
+    this->exec();
+}
+
+void ErrorPopup::setErrorLabel(QString errorText)
+{
+    QString realErrorText = errorText;
+    realErrorText.prepend(": ");
+    realErrorText.prepend(QString::number((unsigned int)errorVal));
+    realErrorText.prepend("ERROR ");
+
+    ui->errorText->setText(realErrorText);
+    qDebug("%s",qPrintable(realErrorText));
+}
+
+void ErrorPopup::closeByError()
+{
+    qDebug("Graceless shutdown by error.");
+    qApp->exit((unsigned int)errorVal);
+}
+
+ErrorPopup::~ErrorPopup()
+{
+    delete ui;
+}
+
+QString ErrorPopup::getErrorText(VWTerrorType errNum)
+{
+    switch(errNum)
     {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
+        case VWTerrorType::ERR_NO_DEF: return "FATAL ERROR";
+        case VWTerrorType::ERR_NOT_IMPLEMENTED: return "Feature Not Yet Implemented";
+        case VWTerrorType::ERR_ACCESS_LOST: return "Access Connection to Design Safe Lost";
+        case VWTerrorType::ERR_WINDOW_SYSTEM: return "Window System Lost its windows";
+        case VWTerrorType::ERR_AUTH_BLANK: return "Authorization for request not available";
+        default: return "FATAL ERROR";
     }
-
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
-
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
-
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
-
-    programDriver.startup();
-    return mainRunLoop.exec();
+    return "FATAL ERROR";
 }

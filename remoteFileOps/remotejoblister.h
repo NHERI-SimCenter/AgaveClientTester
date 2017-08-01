@@ -33,52 +33,26 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
-#include <QtGlobal>
+#ifndef REMOTEJOBLISTER_H
+#define REMOTEJOBLISTER_H
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
+#include <QListView>
+#include <QMenu>
 
-#include "explorerwindow.h"
-#include "explorerdriver.h"
+class JobOperator;
 
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+class RemoteJobLister : public QListView
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    Q_OBJECT
+public:
+    explicit RemoteJobLister(QWidget *parent = nullptr);
+    void setJobHandle(JobOperator * theJobHandle);
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
+private slots:
+    void needRightClickMenu(QPoint);
 
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
+private:
+    JobOperator * myJobHandle = NULL;
+};
 
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
-
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
-
-    programDriver.startup();
-    return mainRunLoop.exec();
-}
+#endif // REMOTEJOBLISTER_H

@@ -33,52 +33,58 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
+#ifndef FILETREENODE_H
+#define FILETREENODE_H
+
 #include <QObject>
-#include <QtGlobal>
+#include <QList>
+#include <QByteArray>
 
-#include <QSslSocket>
-#include <utilWindows/quickinfopopup.h>
+enum class RequestState;
+class FileMetaData;
+class RemoteDataInterface;
 
-#include "explorerwindow.h"
-#include "explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+class FileTreeNode : public QObject
 {
-    QApplication mainRunLoop(argc, argv);
-    AgaveSetupDriver programDriver;
+    Q_OBJECT
+public:
+    FileTreeNode(FileMetaData contents, FileTreeNode * parent = NULL);
+    FileTreeNode(FileTreeNode * parent = NULL); //This creates either the default root folder, or default load pending,
+                                                //depending if the parent is NULL
+    ~FileTreeNode();
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
+    void updateFileFolder(QList<FileMetaData> newDataList);
 
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
+    bool isRootNode();
+    FileMetaData getFileData();
+    QByteArray * getFileBuffer();
+    void setFileBuffer(QByteArray * newFileBuffer);
 
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
+    FileTreeNode * getNodeWithName(QString filename, bool unrestricted = false);
+    FileTreeNode * getClosestNodeWithName(QString filename, bool unrestricted = false);
+    FileTreeNode * getParentNode();
 
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
+    bool childIsUnloaded();
+    bool childIsEmpty();
+    void clearAllChildren();
 
-    programDriver.startup();
-    return mainRunLoop.exec();
-}
+    QList<FileTreeNode *> * getChildList();
+    FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
+
+    //TODO: Clean up the code to make the algorithms using marks cleaner
+    bool marked = false;
+
+private:
+    void insertFile(FileMetaData *newData);
+    void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
+
+    FileTreeNode * pathSearchHelper(QString filename, bool stopEarly, bool unrestricted = false);
+
+    FileMetaData * fileData = NULL;
+    QList<FileTreeNode *> childList;
+    bool rootNode = false;
+
+    QByteArray * fileDataBuffer = NULL;
+};
+
+#endif // FILETREENODE_H
