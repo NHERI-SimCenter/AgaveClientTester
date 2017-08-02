@@ -51,6 +51,9 @@ AuthForm::AuthForm(AgaveSetupDriver * theDriver, QWidget *parent) :
     myDriver = theDriver;
     theConnection = myDriver->getDataConnection();
 
+    ui->versionLabel->setText(myDriver->getVersion());
+    ui->bannerLabel->setText(myDriver->getBanner());
+
     this->setTabOrder(ui->unameInput, ui->passwordInput);
     this->setTabOrder(ui->passwordInput, ui->loginButton);
     this->setTabOrder(ui->loginButton, ui->quitButton);

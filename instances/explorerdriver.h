@@ -52,6 +52,8 @@ public:
 
     virtual void closeAuthScreen();
 
+    virtual QString getBanner();
+    virtual QString getVersion();
     virtual QString getLicense();
 
 private:

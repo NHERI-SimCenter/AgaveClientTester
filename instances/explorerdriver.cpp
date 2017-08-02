@@ -95,6 +95,16 @@ void ExplorerDriver::closeAuthScreen()
     }
 }
 
+QString ExplorerDriver::getBanner()
+{
+    return "SimCenter Agave Explorer Program";
+}
+
+QString ExplorerDriver::getVersion()
+{
+    return "Version: 0.1";
+}
+
 QString ExplorerDriver::getLicense()
 {
     QString ret;

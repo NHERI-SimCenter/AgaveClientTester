@@ -31,6 +31,8 @@ public:
     JobOperator * getJobHandler();
     FileOperator * getFileHandler();
 
+    virtual QString getBanner() = 0;
+    virtual QString getVersion() = 0;
     virtual QString getLicense() = 0;
 
 private slots:
