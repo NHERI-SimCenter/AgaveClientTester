@@ -36,11 +36,13 @@
 #include "copyrightdialog.h"
 #include "ui_copyrightdialog.h"
 
-CopyrightDialog::CopyrightDialog(QWidget *parent) :
+CopyrightDialog::CopyrightDialog(QString licenseText, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CopyrightDialog)
 {
     ui->setupUi(this);
+
+    ui->licenseArea->setText(licenseText);
 }
 
 CopyrightDialog::~CopyrightDialog()

@@ -31,6 +31,8 @@ public:
     JobOperator * getJobHandler();
     FileOperator * getFileHandler();
 
+    virtual QString getLicense() = 0;
+
 private slots:
     void getAuthReply(RequestState authReply);
     void getFatalInterfaceError(QString errText);

@@ -47,7 +47,7 @@ class CopyrightDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CopyrightDialog(QWidget *parent = 0);
+    explicit CopyrightDialog(QString licenseText, QWidget *parent = 0);
     ~CopyrightDialog();
 
 private:

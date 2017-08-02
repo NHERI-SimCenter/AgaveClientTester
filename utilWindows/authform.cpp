@@ -66,7 +66,7 @@ AuthForm::~AuthForm()
 
 void AuthForm::getCopyingInfo()
 {
-    CopyrightDialog copyrightPopup;
+    CopyrightDialog copyrightPopup(myDriver->getLicense());
     copyrightPopup.exec();
 }
 

@@ -52,6 +52,8 @@ public:
 
     virtual void closeAuthScreen();
 
+    virtual QString getLicense();
+
 private:
     ExplorerWindow * mainWindow = NULL;
 };
