@@ -109,7 +109,7 @@ QString ExplorerDriver::getLicense()
 {
     QString ret;
     //Note: This is a messy way of doing this. Should find a cleaner way, once some stabilty reached.
-    ret = ret.append("The SimCenter Agave Explorer Program and its underlying Agave Client Interface, ");
+    ret = ret.append("The SimCenter Agave Explorer and its underlying Client Interface to Agave, ");
     ret = ret.append("in source and binary forms, is copyright \"The University of Notre Dame\" ");
     ret = ret.append("and \"The Regents of the University of California\" and is licensed under the following copyright and license:\n\n");
     ret = ret.append("BSD 3-Clause License\n\nCopyright (c) 2017, The University of Notre Dame\n");
