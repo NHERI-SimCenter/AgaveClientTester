@@ -39,14 +39,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++11
 
 TARGET = AgaveExplorer
-
 TEMPLATE = app
-
-win32 {
-#    LIBS += OpenGL32.lib
-} else {
-    LIBS += -lz
-}
 
 SOURCES += main.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
@@ -67,9 +60,10 @@ SOURCES += main.cpp \
     utilWindows/errorpopup.cpp \
     utilWindows/quickinfopopup.cpp \
     utilWindows/singlelinedialog.cpp \
-    explorerwindow.cpp \
     utilWindows/agavesetupdriver.cpp \
-    explorerdriver.cpp
+    instances/explorerdriver.cpp \
+    instances/explorerwindow.cpp
+    main.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -101,15 +95,18 @@ HEADERS += \
     utilWindows/errorpopup.h \
     utilWindows/quickinfopopup.h \
     utilWindows/singlelinedialog.h \
-    explorerwindow.h \
     utilWindows/agavesetupdriver.h \
-    explorerdriver.h
+    instances/explorerdriver.h \
+    instances/explorerwindow.h
 
 FORMS += \
+    instances/explorerwindow.ui \
     utilWindows/authform.ui \
     utilWindows/copyrightdialog.ui \
     utilWindows/deleteconfirm.ui \
     utilWindows/errorpopup.ui \
     utilWindows/quickinfopopup.ui \
-    utilWindows/singlelinedialog.ui \
-    explorerwindow.ui
+    utilWindows/singlelinedialog.ui
+
+SUBDIRS += \
+    AgaveExplorer.pro
