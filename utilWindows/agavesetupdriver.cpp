@@ -35,11 +35,11 @@
 
 #include "agavesetupdriver.h"
 
-#include "utilWindows/errorpopup.h"
-#include "utilWindows/authform.h"
-#include "utilWindows/quickinfopopup.h"
-#include "remoteFileOps/fileoperator.h"
-#include "remoteFileOps/joboperator.h"
+#include "../AgaveExplorer/utilWindows/errorpopup.h"
+#include "../AgaveExplorer/utilWindows/authform.h"
+#include "../AgaveExplorer/utilWindows/quickinfopopup.h"
+#include "../AgaveExplorer/remoteFileOps/fileoperator.h"
+#include "../AgaveExplorer/remoteFileOps/joboperator.h"
 
 #include "../AgaveClientInterface/agaveInterfaces/agavehandler.h"
 

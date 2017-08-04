@@ -43,7 +43,6 @@
 JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : QObject((QObject *)parent)
 {
     dataLink = newDataLink;
-    QObject::connect(dataLink, SIGNAL(longRunningTasksUpdated()), this, SLOT(refreshRunningJobList()));
 }
 
 void JobOperator::linkToJobLister(RemoteJobLister * newLister)

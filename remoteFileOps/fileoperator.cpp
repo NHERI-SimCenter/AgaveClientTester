@@ -42,10 +42,10 @@
 #include "../AgaveClientInterface/filemetadata.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 
-#include "utilWindows/errorpopup.h"
-#include "utilWindows/deleteconfirm.h"
-#include "utilWindows/singlelinedialog.h"
-#include "utilWindows/quickinfopopup.h"
+#include "../AgaveExplorer/utilWindows/errorpopup.h"
+#include "../AgaveExplorer/utilWindows/deleteconfirm.h"
+#include "../AgaveExplorer/utilWindows/singlelinedialog.h"
+#include "../AgaveExplorer/utilWindows/quickinfopopup.h"
 
 FileOperator::FileOperator(RemoteDataInterface * newDataLink, QObject *parent) : QObject(parent)
 {
