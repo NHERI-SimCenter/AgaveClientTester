@@ -33,16 +33,42 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "quickprogramdriver.h"
+#ifndef AUTHFORM_H
+#define AUTHFORM_H
 
-#include <QtGlobal>
+#include <QMainWindow>
+#include <QLabel>
+#include <QLineEdit>
+#include <QStatusBar>
 
-QuickProgramDriver::QuickProgramDriver(QObject *parent) : QObject(parent)
-{
+enum class RequestState;
+class AgaveSetupDriver;
+class RemoteDataInterface;
 
+namespace Ui {
+class AuthForm;
 }
 
-void QuickProgramDriver::printoutFatalErrors(QString errorText)
+class AuthForm : public QMainWindow
 {
-    qCritical("Agave Error: %s", qPrintable(errorText));
-}
+    Q_OBJECT
+
+public:
+    explicit AuthForm(AgaveSetupDriver * theDriver, QWidget *parent = 0);
+    ~AuthForm();
+
+private slots:
+    void performAuth();
+    void exitAuth();
+    void getCopyingInfo();
+    void getAuthReply(RequestState authReply);
+
+private:
+    Ui::AuthForm *ui;
+    RemoteDataInterface * theConnection;
+    AgaveSetupDriver * myDriver;
+
+    QLabel * errorTextElement;
+};
+
+#endif // AUTHFORM_H

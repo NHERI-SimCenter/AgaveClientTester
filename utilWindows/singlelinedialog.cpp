@@ -33,19 +33,25 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#ifndef QUICKPROGRAMDRIVER_H
-#define QUICKPROGRAMDRIVER_H
+#include "singlelinedialog.h"
+#include "ui_singlelinedialog.h"
 
-#include <QObject>
-
-class QuickProgramDriver : public QObject
+SingleLineDialog::SingleLineDialog(QString textLine, QString defaultInput, QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::SingleLineDialog)
 {
-    Q_OBJECT
-public:
-    explicit QuickProgramDriver(QObject *parent = 0);
+    ui->setupUi(this);
 
-private slots:
-    void printoutFatalErrors(QString errorText);
-};
+    ui->QueryText->setText(textLine);
+    ui->InputLine->setText(defaultInput);
+}
 
-#endif // QUICKPROGRAMDRIVER_H
+SingleLineDialog::~SingleLineDialog()
+{
+    delete ui;
+}
+
+QString SingleLineDialog::getInputText()
+{
+    return ui->InputLine->text();
+}

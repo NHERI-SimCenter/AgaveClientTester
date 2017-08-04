@@ -33,52 +33,53 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
-#include <QtGlobal>
+#include "joboperator.h"
 
-#include <QSslSocket>
+#include "remotefiletree.h"
+#include "remotejoblister.h"
+#include "../AgaveClientInterface/remotedatainterface.h"
+#include "../AgaveClientInterface/remotejobdata.h"
 
-#include "utilWindows/quickinfopopup.h"
-#include "instances/explorerwindow.h"
-#include "instances/explorerdriver.h"
-
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : QObject((QObject *)parent)
 {
-    QApplication mainRunLoop(argc, argv);
-    ExplorerDriver programDriver;
+    dataLink = newDataLink;
+}
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
+void JobOperator::linkToJobLister(RemoteJobLister * newLister)
+{
+    newLister->setModel(&theJobList);
+}
+
+void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> * theData)
+{
+    if (replyState != RequestState::GOOD)
     {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
+        //TODO: some error here
+        return;
     }
 
-    if (debugLoggingEnabled)
+    rawData.clear(); //TODO: make sure no memory leak here
+    for (auto itr = theData->begin(); itr != theData->end(); itr++)
     {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
-
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
-
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
+        RemoteJobData * newItem = new RemoteJobData();
+        (*newItem) = (*itr);
+        rawData.append(newItem);
     }
 
-    programDriver.startup();
-    return mainRunLoop.exec();
+    theJobList.clear(); //TODO: make sure no memory leak here
+    theJobList.setColumnCount(1);
+
+    for (auto itr = rawData.begin(); itr != rawData.end(); itr++)
+    {
+        QList<QStandardItem *> newRow;
+        newRow.append(new QStandardItem((*itr)->getID()));
+        theJobList.appendRow(newRow);
+    }
+}
+
+void JobOperator::demandJobDataRefresh()
+{
+    RemoteDataReply * listReply = dataLink->getListOfJobs();
+    QObject::connect(listReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>*)),
+                     this, SLOT(refreshRunningJobList(RequestState,QList<RemoteJobData>*)));
 }

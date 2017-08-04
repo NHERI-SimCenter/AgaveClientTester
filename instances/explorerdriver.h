@@ -33,52 +33,31 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include <QApplication>
-#include <QObject>
-#include <QtGlobal>
+#ifndef EXPLORERDRIVER_H
+#define EXPLORERDRIVER_H
 
-#include <QSslSocket>
+#include "utilWindows/agavesetupdriver.h"
 
-#include "utilWindows/quickinfopopup.h"
-#include "instances/explorerwindow.h"
-#include "instances/explorerdriver.h"
+class ExplorerWindow;
 
-void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
-
-int main(int argc, char *argv[])
+class ExplorerDriver : public AgaveSetupDriver
 {
-    QApplication mainRunLoop(argc, argv);
-    ExplorerDriver programDriver;
+    Q_OBJECT
 
-    bool debugLoggingEnabled = false;
-    for (int i = 0; i < argc; i++)
-    {
-        if (strcmp(argv[i],"enableDebugLogging") == 0)
-        {
-            debugLoggingEnabled = true;
-        }
-    }
+public:
+    explicit ExplorerDriver(QObject *parent = nullptr);
+    ~ExplorerDriver();
 
-    if (debugLoggingEnabled)
-    {
-        qDebug("NOTE: Debugging text output is enabled.");
-    }
-    else
-    {
-        qInstallMessageHandler(emptyMessageHandler);
-    }
+    virtual void startup();
 
-    mainRunLoop.setQuitOnLastWindowClosed(false);
-    //Note: Window closeing must link to the shutdown sequence, otherwise the app will not close
-    //Note: Might consider a better way of implementing this.
+    virtual void closeAuthScreen();
 
-    if (QSslSocket::supportsSsl() == false)
-    {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
-    }
+    virtual QString getBanner();
+    virtual QString getVersion();
+    virtual QString getLicense();
 
-    programDriver.startup();
-    return mainRunLoop.exec();
-}
+private:
+    ExplorerWindow * mainWindow = NULL;
+};
+
+#endif // EXPLORERDRIVER_H

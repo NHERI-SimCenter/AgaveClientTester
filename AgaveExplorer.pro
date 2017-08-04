@@ -33,23 +33,37 @@
 # Contributors:
 # Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-QT += core network
-QT -= gui
+QT += core gui network
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-TARGET = AgaveClientTester
-CONFIG += console
-CONFIG -= app_bundle
-
+TARGET = AgaveExplorer
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    quickprogramdriver.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskguide.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskreply.cpp \
-    ../AgaveClientInterface/remotedatainterface.cpp
+    ../AgaveClientInterface/remotedatainterface.cpp \
+    ../AgaveClientInterface/filemetadata.cpp \
+    ../AgaveClientInterface/remotejobdata.cpp \
+    remoteFileOps/easyboollock.cpp \
+    remoteFileOps/fileoperator.cpp \
+    remoteFileOps/filetreenode.cpp \
+    remoteFileOps/joboperator.cpp \
+    remoteFileOps/remotefiletree.cpp \
+    remoteFileOps/remotejoblister.cpp \
+    utilWindows/authform.cpp \
+    utilWindows/copyrightdialog.cpp \
+    utilWindows/deleteconfirm.cpp \
+    utilWindows/errorpopup.cpp \
+    utilWindows/quickinfopopup.cpp \
+    utilWindows/singlelinedialog.cpp \
+    utilWindows/agavesetupdriver.cpp \
+    instances/explorerdriver.cpp \
+    instances/explorerwindow.cpp
+    main.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -63,8 +77,36 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 HEADERS += \
-    quickprogramdriver.h \
     ../AgaveClientInterface/agaveInterfaces/agavehandler.h \
     ../AgaveClientInterface/agaveInterfaces/agavetaskguide.h \
     ../AgaveClientInterface/agaveInterfaces/agavetaskreply.h \
-    ../AgaveClientInterface/remotedatainterface.h
+    ../AgaveClientInterface/remotedatainterface.h \
+    ../AgaveClientInterface/filemetadata.h \
+    ../AgaveClientInterface/remotejobdata.h \
+    remoteFileOps/easyboollock.h \
+    remoteFileOps/fileoperator.h \
+    remoteFileOps/filetreenode.h \
+    remoteFileOps/joboperator.h \
+    remoteFileOps/remotefiletree.h \
+    remoteFileOps/remotejoblister.h \
+    utilWindows/authform.h \
+    utilWindows/copyrightdialog.h \
+    utilWindows/deleteconfirm.h \
+    utilWindows/errorpopup.h \
+    utilWindows/quickinfopopup.h \
+    utilWindows/singlelinedialog.h \
+    utilWindows/agavesetupdriver.h \
+    instances/explorerdriver.h \
+    instances/explorerwindow.h
+
+FORMS += \
+    instances/explorerwindow.ui \
+    utilWindows/authform.ui \
+    utilWindows/copyrightdialog.ui \
+    utilWindows/deleteconfirm.ui \
+    utilWindows/errorpopup.ui \
+    utilWindows/quickinfopopup.ui \
+    utilWindows/singlelinedialog.ui
+
+SUBDIRS += \
+    AgaveExplorer.pro
