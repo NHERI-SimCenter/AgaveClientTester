@@ -54,7 +54,7 @@
     <item>
      <widget class="QTabWidget" name="stackedView">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="filePage">
        <attribute name="title">
@@ -120,9 +120,14 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Agave Jobs</string>
+       </attribute>
+      </widget>
       <widget class="QWidget" name="AgavePassThru">
        <attribute name="title">
-        <string>Agave App Direct</string>
+        <string>Agave Apps</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout">
         <item row="3" column="1" colspan="2">
