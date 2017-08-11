@@ -95,6 +95,12 @@ void ExplorerDriver::closeAuthScreen()
     }
 }
 
+void ExplorerDriver::startOffline()
+{
+    //Placeholder for virtual function which this program does not use
+    return;
+}
+
 QString ExplorerDriver::getBanner()
 {
     return "SimCenter Agave Explorer Program";
