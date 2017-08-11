@@ -60,6 +60,8 @@ public:
     virtual void startup() = 0;
     void shutdown();
 
+    virtual void startOffline() = 0;
+
     virtual void closeAuthScreen() = 0;
 
     RemoteDataInterface * getDataConnection();
