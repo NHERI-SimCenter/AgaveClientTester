@@ -40,6 +40,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QStatusBar>
+#include <QPushButton>
 
 enum class RequestState;
 class AgaveSetupDriver;
@@ -67,8 +68,6 @@ private:
     Ui::AuthForm *ui;
     RemoteDataInterface * theConnection;
     AgaveSetupDriver * myDriver;
-
-    QLabel * errorTextElement;
 };
 
 #endif // AUTHFORM_H

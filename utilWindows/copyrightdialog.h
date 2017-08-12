@@ -37,6 +37,7 @@
 #define COPYRIGHTDIALOG_H
 
 #include <QDialog>
+#include <QFile>
 
 namespace Ui {
 class CopyrightDialog;
@@ -47,7 +48,7 @@ class CopyrightDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CopyrightDialog(QString licenseText, QWidget *parent = 0);
+    explicit CopyrightDialog(QWidget *parent = 0);
     ~CopyrightDialog();
 
 private:

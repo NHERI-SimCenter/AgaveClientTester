@@ -36,13 +36,21 @@
 #include "copyrightdialog.h"
 #include "ui_copyrightdialog.h"
 
-CopyrightDialog::CopyrightDialog(QString licenseText, QWidget *parent) :
+CopyrightDialog::CopyrightDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CopyrightDialog)
 {
     ui->setupUi(this);
 
-    ui->licenseArea->setText(licenseText);
+    QFile copyText(":/copyText.txt");
+    if (!copyText.open(QFile::ReadOnly))
+    {
+        ui->licenseArea->setText("ERROR: Unable to locate copyright and license. Install may be corrupted.");
+        return;
+    }
+
+    QString rawText(copyText.readAll());
+    ui->licenseArea->setText(rawText);
 }
 
 CopyrightDialog::~CopyrightDialog()

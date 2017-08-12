@@ -35,29 +35,32 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 *************************************************************************** */
 
 // Written: fmckenna
+// Modified: Peter Sempolinski, 2017
 
 #include "HeaderWidget.h"
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGroupBox>
 
 //
 // headers for HeaderWidgetDistribution subclasses that user can select
 //
 
 HeaderWidget::HeaderWidget(QWidget *parent)
-    :QGroupBox(parent)
+    :QFrame(parent)
 {
-    layout = new QHBoxLayout();
+    QHBoxLayout * layout = new QHBoxLayout();
+    QHBoxLayout * leftLayout = new QHBoxLayout();
+    subLayout = new QHBoxLayout();
 
     titleText = new QLabel();
     titleText->setObjectName(QString::fromUtf8("titleText"));
     titleText->setText(tr("A SimCenter Application"));
 
-    layout->setAlignment(Qt::AlignLeft); //can this be done in CSS???
-    layout->addWidget(titleText);
+    leftLayout->setAlignment(Qt::AlignLeft); //can this be done in CSS???
+    leftLayout->addWidget(titleText);
 
+    subLayout->setAlignment(Qt::AlignRight);
+
+    layout->addLayout(leftLayout);
+    layout->addLayout(subLayout);
     this->setLayout(layout);
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
@@ -71,4 +74,10 @@ void
 HeaderWidget::setHeadingText(const QString &newText)
 {
   titleText->setText(newText);
+}
+
+void HeaderWidget::appendWidget(QWidget * newWidget)
+{
+    newWidget->setParent(this);
+    subLayout->addWidget(newWidget);
 }

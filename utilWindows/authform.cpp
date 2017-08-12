@@ -51,15 +51,20 @@ AuthForm::AuthForm(AgaveSetupDriver * theDriver, QWidget *parent) :
     myDriver = theDriver;
     theConnection = myDriver->getDataConnection();
 
-    ui->versionLabel->setText(myDriver->getVersion());
-    ui->bannerLabel->setText(myDriver->getBanner());
+    QLabel * versionLabel = new QLabel(myDriver->getVersion());
+
+    ui->headerBox->setHeadingText(myDriver->getBanner());
+    ui->headerBox->appendWidget(versionLabel);
+
+    QPushButton * copyButton = new QPushButton("Click Here for Copyright and License");
+    QObject::connect(copyButton, SIGNAL(clicked(bool)), this, SLOT(getCopyingInfo()));
+    ui->headerBox->appendWidget(copyButton);
+
+    ui->footerBox->condense();
 
     this->setTabOrder(ui->unameInput, ui->passwordInput);
     this->setTabOrder(ui->passwordInput, ui->loginButton);
     this->setTabOrder(ui->loginButton, ui->quitButton);
-
-    errorTextElement = new QLabel("Waiting for Login");
-    this->statusBar()->addWidget(errorTextElement);
 }
 
 AuthForm::~AuthForm()
@@ -69,7 +74,7 @@ AuthForm::~AuthForm()
 
 void AuthForm::getCopyingInfo()
 {
-    CopyrightDialog copyrightPopup(myDriver->getLicense());
+    CopyrightDialog copyrightPopup;
     copyrightPopup.exec();
 }
 
@@ -91,7 +96,7 @@ void AuthForm::performAuth()
 
     if (authReply != NULL)
     {
-        errorTextElement->setText("Connecting to DesignSafe");
+        ui->instructText->setText("Connecting to DesignSafe");
         QObject::connect(authReply,SIGNAL(haveAuthReply(RequestState)),this,SLOT(getAuthReply(RequestState)));
         QObject::connect(authReply,SIGNAL(haveAuthReply(RequestState)),myDriver, SLOT(getAuthReply(RequestState)));
     }
@@ -105,15 +110,15 @@ void AuthForm::getAuthReply(RequestState authReply)
 {
     if (authReply == RequestState::GOOD)
     {
-        errorTextElement->setText("Loading . . .");
+        ui->instructText->setText("Loading . . .");
     }
     else if (authReply == RequestState::FAIL)
     {
-        errorTextElement->setText("Username/Password combination incorrect, verify your credentials and try again.");
+        ui->instructText->setText("Username/Password combination incorrect, verify your credentials and try again.");
     }
     else if (authReply == RequestState::NO_CONNECT)
     {
-        errorTextElement->setText("Unable to contact DesignSafe, verify your connection and try again.");
+        ui->instructText->setText("Unable to contact DesignSafe, verify your connection and try again.");
     }
     else
     {

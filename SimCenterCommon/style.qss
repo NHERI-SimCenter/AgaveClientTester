@@ -59,7 +59,6 @@ QComboBox QAbstractItemView {
     selection-background-color: blue;
 }
 
-
 QLineEdit {
     background-color: #E0E0E0;
     border-radius: 5px;
@@ -69,28 +68,25 @@ QLineEdit {
 * ======= <HEADER AND FOOTER> =======
 */
 
-QGroupBox {
+HeaderWidget {
     background-color: #B0BEC5;
     height: 30px;
     border-radius: 5px;
 }
 
-
-QLabel#titleText {
-    font: bold 15 px;
-    font-weight: bold;
-}
-
-
-
-footerLayout {
+FooterWidget {
     background-color: #B0BEC5;
     height: 30px;
     border-radius: 5px;
     text-align: center;
 }
 
-QLabel#nsfText {
+HeaderWidget > QLabel {
+    font: bold 15 px;
+    font-weight: bold;
+}
+
+FooterWidget > QLabel {
     color: #E0E0E0;
     font: bold 15 px;
 }
@@ -104,6 +100,7 @@ QLabel#nsfText {
 * ======= <SECTION LABEL STYLES> =======
 */
 
+/*
 QLabel#sectionTitle {
     font-size: 12px;
     font-weight: bold;
@@ -128,11 +125,13 @@ QLabel#inTitle {
     font: bold 15 px;
     font-weight: bold;
 }
+*/
 
 /*
 * ======= <SECTION LABEL STYLES> =======
 */
 
+/*
 QFrame#line {
     background-color: #B0BEC5;
     border:none;
@@ -182,4 +181,4 @@ QFrame#outputDataFrame {
 QFrame#pushButtons {
     border:none;
 }
-
+*/

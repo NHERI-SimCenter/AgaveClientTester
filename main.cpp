@@ -36,6 +36,7 @@
 #include <QApplication>
 #include <QObject>
 #include <QtGlobal>
+#include <QFile>
 
 #include <QSslSocket>
 
@@ -48,6 +49,16 @@ void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &)
 int main(int argc, char *argv[])
 {
     QApplication mainRunLoop(argc, argv);
+
+    QFile simCenterStyle(":/styleCommon/style.qss");
+    if (!simCenterStyle.open(QFile::ReadOnly))
+    {
+        QuickInfoPopup noStyle("Missing file for graphics style. Your install is probably corrupted.");
+        noStyle.exec();
+        return -1;
+    }
+    QString commonStyle = QLatin1String(simCenterStyle.readAll());
+
     ExplorerDriver programDriver;
 
     bool debugLoggingEnabled = false;
@@ -80,5 +91,6 @@ int main(int argc, char *argv[])
     }
 
     programDriver.startup();
+    mainRunLoop.setStyleSheet(commonStyle);
     return mainRunLoop.exec();
 }

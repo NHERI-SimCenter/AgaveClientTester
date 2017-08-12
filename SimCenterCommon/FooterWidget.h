@@ -38,21 +38,30 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 *************************************************************************** */
 
 // Written: fmckenna
+//Modified: Peter Sempolinski, 2017
 
-#include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QPixmap>
+#include <QBitmap>
+#include <QDebug>
+#include <QFrame>
 
-class FooterWidget : public QGroupBox
+class FooterWidget : public QFrame
 {
     Q_OBJECT
 public:
     explicit FooterWidget(QWidget *parent = 0);
     ~FooterWidget();
+    void condense();
 
 signals:
 
 public slots:
 
 private:
+    QLabel * nsfText;
 
 };
 

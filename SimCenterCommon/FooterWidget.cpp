@@ -37,18 +37,9 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 // Written: fmckenna
 
 #include "FooterWidget.h"
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QPixmap>
-#include <QBitmap>
-#include <QDebug>
-
 
 FooterWidget::FooterWidget(QWidget *parent)
-    :QGroupBox(parent)
+    :QFrame(parent)
 {
   // putting NSF logo in label
   QLabel *nsfLogo = new QLabel();
@@ -59,7 +50,7 @@ FooterWidget::FooterWidget(QWidget *parent)
   nsfLogo->show();
   
   // putting some text in another
-  QLabel *nsfText = new QLabel();
+  nsfText = new QLabel();
   nsfText->setObjectName(QString::fromUtf8("nsfText"));
   nsfText->setText(tr("This work is based on material supported by the National Science Foundation under grant 1612843"));
 
@@ -86,3 +77,7 @@ FooterWidget::~FooterWidget()
 
 }
 
+void FooterWidget::condense()
+{
+    nsfText->setText("");
+}

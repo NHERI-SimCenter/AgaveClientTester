@@ -38,13 +38,14 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 *************************************************************************** */
 
 // Written: fmckenna
+// Modified: Peter Sempolinski, 2017
 
-#include <QGroupBox>
 #include <QString>
-class QHBoxLayout;
-class QLabel;
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
 
-class HeaderWidget : public QGroupBox
+class HeaderWidget : public QFrame
 {
     Q_OBJECT
 public:
@@ -52,13 +53,14 @@ public:
     ~HeaderWidget();
 
     void setHeadingText(const QString &newText);
+    void appendWidget(QWidget * newWidget);
 
 signals:
 
 public slots:
 
 private:
-    QHBoxLayout *layout;  // leaving visible in case need to add stuff, i.e. login
+    QHBoxLayout *subLayout;// leaving visible in case need to add stuff, i.e. login
     QLabel *titleText;    // need to change title from default
 };
 

@@ -56,7 +56,6 @@ public:
 
     virtual QString getBanner();
     virtual QString getVersion();
-    virtual QString getLicense();
 
 private:
     ExplorerWindow * mainWindow = NULL;

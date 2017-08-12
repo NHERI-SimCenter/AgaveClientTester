@@ -50,7 +50,17 @@
    <string>Agave Explorer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="HeaderWidget" name="frame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
     <item>
      <widget class="QTabWidget" name="stackedView">
       <property name="currentIndex">
@@ -178,7 +188,7 @@
              <x>0</x>
              <y>0</y>
              <width>630</width>
-             <height>550</height>
+             <height>518</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_2"/>
@@ -187,6 +197,16 @@
         </item>
        </layout>
       </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="FooterWidget" name="frame_2">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
      </widget>
     </item>
    </layout>
@@ -208,6 +228,18 @@
    <class>RemoteFileTree</class>
    <extends>QTreeView</extends>
    <header>remoteFileOps/remotefiletree.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HeaderWidget</class>
+   <extends>QFrame</extends>
+   <header>../AgaveExplorer/SimCenterCommon/HeaderWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FooterWidget</class>
+   <extends>QFrame</extends>
+   <header>../AgaveExplorer/SimCenterCommon/FooterWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

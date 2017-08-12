@@ -62,7 +62,9 @@ SOURCES += main.cpp \
     utilWindows/singlelinedialog.cpp \
     utilWindows/agavesetupdriver.cpp \
     instances/explorerdriver.cpp \
-    instances/explorerwindow.cpp
+    instances/explorerwindow.cpp \
+    SimCenterCommon/FooterWidget.cpp \
+    SimCenterCommon/HeaderWidget.cpp
     main.cpp
 
 # The following define makes your compiler emit warnings if you use
@@ -97,7 +99,9 @@ HEADERS += \
     utilWindows/singlelinedialog.h \
     utilWindows/agavesetupdriver.h \
     instances/explorerdriver.h \
-    instances/explorerwindow.h
+    instances/explorerwindow.h \
+    SimCenterCommon/FooterWidget.h \
+    SimCenterCommon/HeaderWidget.h
 
 FORMS += \
     instances/explorerwindow.ui \
@@ -110,3 +114,7 @@ FORMS += \
 
 SUBDIRS += \
     AgaveExplorer.pro
+
+RESOURCES += \
+    SimCenterCommon/commonResources.qrc \
+    instances/explorerfiles.qrc
