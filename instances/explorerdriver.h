@@ -36,7 +36,7 @@
 #ifndef EXPLORERDRIVER_H
 #define EXPLORERDRIVER_H
 
-#include "utilWindows/agavesetupdriver.h"
+#include "utilFuncs/agavesetupdriver.h"
 
 class ExplorerWindow;
 

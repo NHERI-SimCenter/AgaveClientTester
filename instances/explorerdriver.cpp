@@ -36,8 +36,7 @@
 #include "explorerdriver.h"
 #include "explorerwindow.h"
 
-#include "utilWindows/errorpopup.h"
-#include "utilWindows/authform.h"
+#include "utilFuncs/authform.h"
 #include "remoteFileOps/fileoperator.h"
 #include "remoteFileOps/joboperator.h"
 
@@ -52,7 +51,7 @@ ExplorerDriver::ExplorerDriver(QObject *parent) : AgaveSetupDriver(parent)
 
     theConnector = (RemoteDataInterface *) tmpHandle;
 
-    QObject::connect(theConnector, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(getFatalInterfaceError(QString)));
+    QObject::connect(theConnector, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(fatalInterfaceError(QString)));
 }
 
 ExplorerDriver::~ExplorerDriver()
@@ -73,7 +72,7 @@ void ExplorerDriver::closeAuthScreen()
 {
     if (mainWindow == NULL)
     {
-        ErrorPopup anError(VWTerrorType::ERR_WINDOW_SYSTEM);
+        fatalInterfaceError("Fatal Error in window system: No Main Window");
         return;
     }
 

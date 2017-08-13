@@ -6,7 +6,7 @@
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
 **
-** 1. Redistributions of source code must retain the above copyright notice, this
+** 1. Redistributions of source code must retain the above copyright notice, this 
 ** list of conditions and the following disclaimer.
 **
 ** 2. Redistributions in binary form must reproduce the above copyright notice, this
@@ -33,26 +33,64 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "quickinfopopup.h"
-#include "ui_quickinfopopup.h"
+#ifndef AGAVESETUPDRIVER_H
+#define AGAVESETUPDRIVER_H
 
-QuickInfoPopup::QuickInfoPopup(QString message, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::QuickInfoPopup)
+#include <QObject>
+#include <QCoreApplication>
+#include <QWidget>
+#include <QWindow>
+#include <QMessageBox>
+
+enum class RequestState;
+
+class RemoteDataInterface;
+
+class AuthForm;
+
+class ExplorerWindow;
+class JobOperator;
+class FileOperator;
+
+class AgaveSetupDriver : public QObject
 {
-    ui->setupUi(this);
+    Q_OBJECT
+public:
+    explicit AgaveSetupDriver(QObject *parent = nullptr);
+    ~AgaveSetupDriver();
+    virtual void startup() = 0;
 
-    if (message != NULL)
-    {
-        ui->shownText->setText(message);
-    }
-    else
-    {
-        ui->shownText->setText("Error: blank message created.");
-    }
-}
+    virtual void startOffline() = 0;
 
-QuickInfoPopup::~QuickInfoPopup()
-{
-    delete ui;
-}
+    virtual void closeAuthScreen() = 0;
+
+    RemoteDataInterface * getDataConnection();
+    JobOperator * getJobHandler();
+    FileOperator * getFileHandler();
+
+    virtual QString getBanner() = 0;
+    virtual QString getVersion() = 0;
+
+private slots:
+    void getAuthReply(RequestState authReply);
+    void subWindowHidden(bool nowVisible);
+    void shutdownCallback();
+
+public slots:
+    void shutdown();
+    void fatalInterfaceError(QString errText);
+
+protected:
+    RemoteDataInterface * theConnector = NULL;
+    AuthForm * authWindow = NULL;
+    JobOperator * myJobHandle = NULL;
+    FileOperator * myFileHandle = NULL;
+
+    bool doingShutdown = false;
+
+signals:
+
+public slots:
+};
+
+#endif // AGAVESETUPDRIVER_H

@@ -40,7 +40,6 @@
 
 #include <QSslSocket>
 
-#include "utilWindows/quickinfopopup.h"
 #include "instances/explorerwindow.h"
 #include "instances/explorerdriver.h"
 
@@ -50,16 +49,14 @@ int main(int argc, char *argv[])
 {
     QApplication mainRunLoop(argc, argv);
 
+    ExplorerDriver programDriver;
+
     QFile simCenterStyle(":/styleCommon/style.qss");
     if (!simCenterStyle.open(QFile::ReadOnly))
     {
-        QuickInfoPopup noStyle("Missing file for graphics style. Your install is probably corrupted.");
-        noStyle.exec();
-        return -1;
+        programDriver.fatalInterfaceError("Missing file for graphics style. Your install is probably corrupted.");
     }
     QString commonStyle = QLatin1String(simCenterStyle.readAll());
-
-    ExplorerDriver programDriver;
 
     bool debugLoggingEnabled = false;
     for (int i = 0; i < argc; i++)
@@ -85,9 +82,7 @@ int main(int argc, char *argv[])
 
     if (QSslSocket::supportsSsl() == false)
     {
-        QuickInfoPopup noSSL("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
-        noSSL.exec();
-        return -1;
+        programDriver.fatalInterfaceError("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
     }
 
     programDriver.startup();

@@ -37,7 +37,6 @@
 #include "ui_authform.h"
 
 #include "../AgaveClientInterface/remotedatainterface.h"
-#include "errorpopup.h"
 #include "copyrightdialog.h"
 
 #include "agavesetupdriver.h"
@@ -122,6 +121,6 @@ void AuthForm::getAuthReply(RequestState authReply)
     }
     else
     {
-        ErrorPopup("Authentication Problems Detected");
+        myDriver->fatalInterfaceError("Authentication Problems Detected");
     }
 }

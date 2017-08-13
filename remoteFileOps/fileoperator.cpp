@@ -42,14 +42,12 @@
 #include "../AgaveClientInterface/filemetadata.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 
-#include "../AgaveExplorer/utilWindows/errorpopup.h"
-#include "../AgaveExplorer/utilWindows/deleteconfirm.h"
-#include "../AgaveExplorer/utilWindows/singlelinedialog.h"
-#include "../AgaveExplorer/utilWindows/quickinfopopup.h"
+#include "../utilFuncs/agavesetupdriver.h"
 
-FileOperator::FileOperator(RemoteDataInterface * newDataLink, QObject *parent) : QObject(parent)
+FileOperator::FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver *parent) : QObject( (QObject *)parent)
 {
     dataLink = newDataLink;
+    myParent = parent;
 
     //Note: will be deconstructed with parent
     fileOpPending = new EasyBoolLock(this);
@@ -81,7 +79,7 @@ void FileOperator::resetFileData()
 void FileOperator::totalResetErrorProcedure()
 {
     //TODO: Try to recover once by resetting all data on remote files
-    ErrorPopup("Critical Remote file parseing error. Unable to Recover");
+    myParent->fatalInterfaceError("Critical Remote file parseing error. Unable to Recover");
 }
 
 QString FileOperator::getStringFromInitParams(QString stringKey)
@@ -90,13 +88,13 @@ QString FileOperator::getStringFromInitParams(QString stringKey)
     RemoteDataReply * theReply = qobject_cast<RemoteDataReply *> (QObject::sender());
     if (theReply == NULL)
     {
-        ErrorPopup("Unable to get sender object of reply signal");
+        myParent->fatalInterfaceError("Unable to get sender object of reply signal");
         return ret;
     }
     ret = theReply->getTaskParamList()->value(stringKey);
     if (ret.isEmpty())
     {
-        ErrorPopup("Missing init param");
+        myParent->fatalInterfaceError("Missing init param");
         return ret;
     }
     return ret;
@@ -333,13 +331,11 @@ void FileOperator::getDownloadReply(RequestState replyState)
     fileOpPending->release();
     if (replyState != RequestState::GOOD)
     {
-        QuickInfoPopup downloadPopup("Error: Unable to download requested file.");
-        downloadPopup.exec();
+        quickInfoPopup("Error: Unable to download requested file.");
     }
     else
     {
-        QuickInfoPopup downloadPopup(QString("Download complete to: %1").arg(getStringFromInitParams("localDest")));
-        downloadPopup.exec();
+        quickInfoPopup(QString("Download complete to: %1").arg(getStringFromInitParams("localDest")));
     }
 }
 
@@ -548,7 +544,7 @@ void FileOperator::translateFileDataRecurseHelper(FileTreeNode * currentFile, QS
         FileTreeNode * testFile = currentFile->getChildNodeWithName(testItem->text(), true);
         if (testFile == NULL)
         {
-            ErrorPopup("Internal file tree parse is self-inconsistant.");
+            myParent->fatalInterfaceError("Internal file tree parse is self-inconsistant.");
             return;
         }
         translateFileDataRecurseHelper(testFile,testItem);
@@ -586,7 +582,7 @@ void FileOperator::changeModelFromFile(QStandardItem * targetRow, FileTreeNode *
 {
     if ((targetRow == NULL) || (dataSource == NULL))
     {
-        ErrorPopup("NULL pointer in changeModelFromFile method");
+        myParent->fatalInterfaceError("NULL pointer in changeModelFromFile method");
         return;
     }
 
@@ -613,7 +609,7 @@ void FileOperator::newModelRowFromFile(QStandardItem * parentItem, FileTreeNode 
 {
     if ((parentItem == NULL) || (dataSource == NULL))
     {
-        ErrorPopup("NULL pointer in changeModelFromFile method");
+        myParent->fatalInterfaceError("NULL pointer in changeModelFromFile method");
         return;
     }
     FileMetaData rawData = dataSource->getFileData();
@@ -667,4 +663,29 @@ QString FileOperator::getRawColumnData(int i, FileMetaData * rawFileData)
         return QString::number(rawFileData->getSize());
     }
     return "";
+}
+
+void FileOperator::quickInfoPopup(QString infoText)
+{
+    QMessageBox infoMessage;
+    infoMessage.setText(infoText);
+    infoMessage.setIcon(QMessageBox::Information);
+    infoMessage.exec();
+}
+
+bool FileOperator::deletePopup(FileTreeNode * toDelete)
+{
+    QMessageBox deleteQuery;
+    deleteQuery.setText(QString("Are you sure you wish to delete the file:\n\n%1").arg(toDelete->getFileData().getFullPath()));
+    deleteQuery.setStandardButtons(QMessageBox::Cancel | QMessageBox::Yes);
+    deleteQuery.setDefaultButton(QMessageBox::Cancel);
+    int button = deleteQuery.exec();
+    switch (button)
+    {
+      case QMessageBox::Yes:
+          return true;
+      default:
+          return false;
+    }
+    return false;
 }
