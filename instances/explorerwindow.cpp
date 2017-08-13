@@ -44,8 +44,7 @@
 #include "remoteFileOps/remotefiletree.h"
 #include "remoteFileOps/joboperator.h"
 
-#include "utilWindows/singlelinedialog.h"
-#include "utilWindows/deleteconfirm.h"
+#include "../utilFuncs/singlelinedialog.h"
 
 #include "explorerdriver.h"
 
@@ -85,6 +84,13 @@ void ExplorerWindow::startAndShow()
     ui->agaveAppList->setModel(&taskListModel);
     ui->agaveAppList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
+    //Note: Adding widget to header will re-parent them
+    QLabel * username = new QLabel(programDriver->getDataConnection()->getUserName());
+    ui->header->appendWidget(username);
+
+    QPushButton * logoutButton = new QPushButton("Logout");
+    QObject::connect(logoutButton, SIGNAL(clicked(bool)), programDriver, SLOT(shutdown()));
+    ui->header->appendWidget(logoutButton);
     this->show();
 }
 
@@ -269,12 +275,10 @@ void ExplorerWindow::renameMenuItem()
 
 void ExplorerWindow::deleteMenuItem()
 {
-    DeleteConfirm deletePopup(targetNode->getFileData().getFullPath());
-    if (deletePopup.exec() != QDialog::Accepted)
+    if (ui->remoteFileView->getFileOperator()->deletePopup(targetNode))
     {
-        return;
+        ui->remoteFileView->getFileOperator()->sendDeleteReq(targetNode);
     }
-    ui->remoteFileView->getFileOperator()->sendDeleteReq(targetNode);
 }
 
 void ExplorerWindow::uploadMenuItem()

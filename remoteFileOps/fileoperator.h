@@ -46,6 +46,7 @@ class FileMetaData;
 class RemoteDataInterface;
 class FileTreeNode;
 class EasyBoolLock;
+class AgaveSetupDriver;
 
 enum class RequestState;
 
@@ -54,7 +55,7 @@ class FileOperator : public QObject
     Q_OBJECT
 
 public:
-    FileOperator(RemoteDataInterface * newDataLink, QObject * parent);
+    FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver * parent);
     void linkToFileTree(RemoteFileTree * newTreeLink);
 
     void resetFileData();
@@ -83,6 +84,9 @@ public:
 
     void sendCompressReq(FileTreeNode * selectedFolder);
     void sendDecompressReq(FileTreeNode * selectedFolder);
+
+    void quickInfoPopup(QString infoText);
+    bool deletePopup(FileTreeNode * toDelete);
 
 signals:
     void opPendingChange(bool opPending);
@@ -121,6 +125,7 @@ private:
     void changeModelFromFile(QStandardItem * targetRow, FileTreeNode * dataSource);
     void newModelRowFromFile(QStandardItem * parentItem, FileTreeNode * dataSource);
 
+    AgaveSetupDriver * myParent;
     RemoteDataInterface * dataLink;
     FileTreeNode * rootFileNode = NULL;
     QStandardItemModel dataStore;

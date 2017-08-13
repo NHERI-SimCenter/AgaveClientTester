@@ -33,26 +33,26 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "quickinfopopup.h"
-#include "ui_quickinfopopup.h"
+#ifndef COPYRIGHTDIALOG_H
+#define COPYRIGHTDIALOG_H
 
-QuickInfoPopup::QuickInfoPopup(QString message, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::QuickInfoPopup)
-{
-    ui->setupUi(this);
+#include <QDialog>
+#include <QFile>
 
-    if (message != NULL)
-    {
-        ui->shownText->setText(message);
-    }
-    else
-    {
-        ui->shownText->setText("Error: blank message created.");
-    }
+namespace Ui {
+class CopyrightDialog;
 }
 
-QuickInfoPopup::~QuickInfoPopup()
+class CopyrightDialog : public QDialog
 {
-    delete ui;
-}
+    Q_OBJECT
+
+public:
+    explicit CopyrightDialog(QWidget *parent = 0);
+    ~CopyrightDialog();
+
+private:
+    Ui::CopyrightDialog *ui;
+};
+
+#endif // COPYRIGHTDIALOG_H

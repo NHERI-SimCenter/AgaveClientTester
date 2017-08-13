@@ -33,48 +33,27 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-// The ErrorPopup is used to halt execution with a useful error message.
-// It has 2 constructors:
-// 1) Uses a VWTerrorType which is an error code. This is meant for fatal errors which might happen from time to time,
-// even if the code is correct.
-// 2) Uses a QString text message. This is meant for fatal errors that should not be possible, except in the case of a logic
-// error elsewhere in the code.
+#include "copyrightdialog.h"
+#include "ui_copyrightdialog.h"
 
-#ifndef ERRORPOPUP_H
-#define ERRORPOPUP_H
+CopyrightDialog::CopyrightDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::CopyrightDialog)
+{
+    ui->setupUi(this);
 
-#include <QtGlobal>
-#include <QDialog>
+    QFile copyText(":/copyText.txt");
+    if (!copyText.open(QFile::ReadOnly))
+    {
+        ui->licenseArea->setText("ERROR: Unable to locate copyright and license. Install may be corrupted.");
+        return;
+    }
 
-enum class VWTerrorType : unsigned int {ERR_NO_DEF = 255,
-                                        CUSTOM_ERROR = 254,
-                                       ERR_NOT_IMPLEMENTED = 1,
-                                       ERR_ACCESS_LOST = 2,
-                                       ERR_WINDOW_SYSTEM = 3,
-                                       ERR_AUTH_BLANK = 4};
-
-namespace Ui {
-class ErrorPopup;
+    QString rawText(copyText.readAll());
+    ui->licenseArea->setText(rawText);
 }
 
-class ErrorPopup : public QDialog
+CopyrightDialog::~CopyrightDialog()
 {
-    Q_OBJECT
-
-public:
-    explicit ErrorPopup(VWTerrorType errNum = VWTerrorType::ERR_NO_DEF);
-    explicit ErrorPopup(QString errorText = "No Text");
-    ~ErrorPopup();
-
-private slots:
-    void closeByError();
-
-private:
-    void setErrorLabel(QString errorText);
-    QString getErrorText(VWTerrorType errNum);
-
-    Ui::ErrorPopup *ui;
-    VWTerrorType errorVal;
-};
-
-#endif // ERRORPOPUP_H
+    delete ui;
+}

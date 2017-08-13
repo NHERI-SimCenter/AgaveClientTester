@@ -33,19 +33,41 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "copyrightdialog.h"
-#include "ui_copyrightdialog.h"
+#ifndef AUTHFORM_H
+#define AUTHFORM_H
 
-CopyrightDialog::CopyrightDialog(QString licenseText, QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CopyrightDialog)
-{
-    ui->setupUi(this);
+#include <QMainWindow>
+#include <QLabel>
+#include <QLineEdit>
+#include <QStatusBar>
+#include <QPushButton>
 
-    ui->licenseArea->setText(licenseText);
+enum class RequestState;
+class AgaveSetupDriver;
+class RemoteDataInterface;
+
+namespace Ui {
+class AuthForm;
 }
 
-CopyrightDialog::~CopyrightDialog()
+class AuthForm : public QMainWindow
 {
-    delete ui;
-}
+    Q_OBJECT
+
+public:
+    explicit AuthForm(AgaveSetupDriver * theDriver, QWidget *parent = 0);
+    ~AuthForm();
+
+private slots:
+    void performAuth();
+    void exitAuth();
+    void getCopyingInfo();
+    void getAuthReply(RequestState authReply);
+
+private:
+    Ui::AuthForm *ui;
+    RemoteDataInterface * theConnection;
+    AgaveSetupDriver * myDriver;
+};
+
+#endif // AUTHFORM_H

@@ -35,9 +35,7 @@
 
 #include "agavesetupdriver.h"
 
-#include "../AgaveExplorer/utilWindows/errorpopup.h"
-#include "../AgaveExplorer/utilWindows/authform.h"
-#include "../AgaveExplorer/utilWindows/quickinfopopup.h"
+#include "../AgaveExplorer/utilFuncs/authform.h"
 #include "../AgaveExplorer/remoteFileOps/fileoperator.h"
 #include "../AgaveExplorer/remoteFileOps/joboperator.h"
 
@@ -76,9 +74,15 @@ void AgaveSetupDriver::getAuthReply(RequestState authReply)
     }
 }
 
-void AgaveSetupDriver::getFatalInterfaceError(QString errText)
+void AgaveSetupDriver::fatalInterfaceError(QString errText)
 {
-    ErrorPopup((QString)errText);
+    QMessageBox errorMessage;
+    errorMessage.setText(errText);
+    errorMessage.setStandardButtons(QMessageBox::Close);
+    errorMessage.setDefaultButton(QMessageBox::Close);
+    errorMessage.setIcon(QMessageBox::Critical);
+    errorMessage.exec();
+    QCoreApplication::instance()->exit(-1);
 }
 
 void AgaveSetupDriver::subWindowHidden(bool nowVisible)
@@ -104,9 +108,12 @@ void AgaveSetupDriver::shutdown()
         {
             QObject::connect(revokeTask, SIGNAL(connectionsClosed(RequestState)), this, SLOT(shutdownCallback()));
             qDebug("Waiting on outstanding tasks");
-            QuickInfoPopup * waitOnCloseMessage = new QuickInfoPopup("Waiting for network shutdown. Click OK to force quit.");
-            QObject::connect(waitOnCloseMessage, SIGNAL(accepted()), this, SLOT(shutdownCallback()));
-            waitOnCloseMessage->show();
+            QMessageBox * waitBox = new QMessageBox(); //Note: deliberate memory leak, as program closes right after
+            waitBox->setText("Waiting for network shutdown. Click OK to force quit.");
+            waitBox->setStandardButtons(QMessageBox::Close);
+            waitBox->setDefaultButton(QMessageBox::Close);
+            QObject::connect(waitBox, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(shutdownCallback()));
+            waitBox->show();
             return;
         }
     }
