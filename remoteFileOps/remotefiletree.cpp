@@ -41,8 +41,6 @@
 #include "fileoperator.h"
 #include "filetreenode.h"
 
-#include "../AgaveExplorer/utilWindows/errorpopup.h"
-
 RemoteFileTree::RemoteFileTree(QWidget *parent) :
     QTreeView(parent)
 {

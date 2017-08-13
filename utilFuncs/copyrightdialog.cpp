@@ -33,55 +33,27 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#ifndef AGAVESETUPDRIVER_H
-#define AGAVESETUPDRIVER_H
+#include "copyrightdialog.h"
+#include "ui_copyrightdialog.h"
 
-#include <QCoreApplication>
-#include <QObject>
-#include <QWidget>
-#include <QWindow>
-
-enum class RequestState;
-
-class RemoteDataInterface;
-
-class AuthForm;
-
-class ExplorerWindow;
-class JobOperator;
-class FileOperator;
-
-class AgaveSetupDriver : public QObject
+CopyrightDialog::CopyrightDialog(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::CopyrightDialog)
 {
-    Q_OBJECT
+    ui->setupUi(this);
 
-public:
-    explicit AgaveSetupDriver();
-    ~AgaveSetupDriver();
-    void startup();
-    void shutdown();
+    QFile copyText(":/copyText.txt");
+    if (!copyText.open(QFile::ReadOnly))
+    {
+        ui->licenseArea->setText("ERROR: Unable to locate copyright and license. Install may be corrupted.");
+        return;
+    }
 
-    void closeAuthScreen();
+    QString rawText(copyText.readAll());
+    ui->licenseArea->setText(rawText);
+}
 
-    RemoteDataInterface * getDataConnection();
-    JobOperator * getJobHandler();
-    FileOperator * getFileHandler();
-
-private slots:
-    void getAuthReply(RequestState authReply);
-    void getFatalInterfaceError(QString errText);
-    void subWindowHidden(bool nowVisible);
-    void shutdownCallback();
-
-private:
-    RemoteDataInterface * theConnector;
-    AuthForm * authWindow;
-    JobOperator * myJobHandle = NULL;
-    FileOperator * myFileHandle = NULL;
-
-    ExplorerWindow * mainWindow = NULL;
-
-    bool doingShutdown = false;
-};
-
-#endif // AGAVESETUPDRIVER_H
+CopyrightDialog::~CopyrightDialog()
+{
+    delete ui;
+}

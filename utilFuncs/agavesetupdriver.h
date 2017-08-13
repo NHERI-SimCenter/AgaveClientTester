@@ -6,7 +6,7 @@
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
 **
-** 1. Redistributions of source code must retain the above copyright notice, this
+** 1. Redistributions of source code must retain the above copyright notice, this 
 ** list of conditions and the following disclaimer.
 **
 ** 2. Redistributions in binary form must reproduce the above copyright notice, this
@@ -33,42 +33,64 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#ifndef AUTHFORM_H
-#define AUTHFORM_H
+#ifndef AGAVESETUPDRIVER_H
+#define AGAVESETUPDRIVER_H
 
-#include <QMainWindow>
-#include <QLabel>
-#include <QLineEdit>
-#include <QStatusBar>
+#include <QObject>
+#include <QCoreApplication>
+#include <QWidget>
+#include <QWindow>
+#include <QMessageBox>
 
 enum class RequestState;
-class AgaveSetupDriver;
+
 class RemoteDataInterface;
 
-namespace Ui {
 class AuthForm;
-}
 
-class AuthForm : public QMainWindow
+class ExplorerWindow;
+class JobOperator;
+class FileOperator;
+
+class AgaveSetupDriver : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit AuthForm(AgaveSetupDriver * theDriver, QWidget *parent = 0);
-    ~AuthForm();
+    explicit AgaveSetupDriver(QObject *parent = nullptr);
+    ~AgaveSetupDriver();
+    virtual void startup() = 0;
+
+    virtual void startOffline() = 0;
+
+    virtual void closeAuthScreen() = 0;
+
+    RemoteDataInterface * getDataConnection();
+    JobOperator * getJobHandler();
+    FileOperator * getFileHandler();
+
+    virtual QString getBanner() = 0;
+    virtual QString getVersion() = 0;
 
 private slots:
-    void performAuth();
-    void exitAuth();
-    void getCopyingInfo();
     void getAuthReply(RequestState authReply);
+    void subWindowHidden(bool nowVisible);
+    void shutdownCallback();
 
-private:
-    Ui::AuthForm *ui;
-    RemoteDataInterface * theConnection;
-    AgaveSetupDriver * myDriver;
+public slots:
+    void shutdown();
+    void fatalInterfaceError(QString errText);
 
-    QLabel * errorTextElement;
+protected:
+    RemoteDataInterface * theConnector = NULL;
+    AuthForm * authWindow = NULL;
+    JobOperator * myJobHandle = NULL;
+    FileOperator * myFileHandle = NULL;
+
+    bool doingShutdown = false;
+
+signals:
+
+public slots:
 };
 
-#endif // AUTHFORM_H
+#endif // AGAVESETUPDRIVER_H

@@ -54,15 +54,14 @@ SOURCES += main.cpp \
     remoteFileOps/joboperator.cpp \
     remoteFileOps/remotefiletree.cpp \
     remoteFileOps/remotejoblister.cpp \
-    utilWindows/authform.cpp \
-    utilWindows/copyrightdialog.cpp \
-    utilWindows/deleteconfirm.cpp \
-    utilWindows/errorpopup.cpp \
-    utilWindows/quickinfopopup.cpp \
-    utilWindows/singlelinedialog.cpp \
-    utilWindows/agavesetupdriver.cpp \
     instances/explorerdriver.cpp \
-    instances/explorerwindow.cpp
+    instances/explorerwindow.cpp \
+    SimCenterCommon/FooterWidget.cpp \
+    SimCenterCommon/HeaderWidget.cpp \
+    utilFuncs/agavesetupdriver.cpp \
+    utilFuncs/authform.cpp \
+    utilFuncs/copyrightdialog.cpp \
+    utilFuncs/singlelinedialog.cpp
     main.cpp
 
 # The following define makes your compiler emit warnings if you use
@@ -89,24 +88,21 @@ HEADERS += \
     remoteFileOps/joboperator.h \
     remoteFileOps/remotefiletree.h \
     remoteFileOps/remotejoblister.h \
-    utilWindows/authform.h \
-    utilWindows/copyrightdialog.h \
-    utilWindows/deleteconfirm.h \
-    utilWindows/errorpopup.h \
-    utilWindows/quickinfopopup.h \
-    utilWindows/singlelinedialog.h \
-    utilWindows/agavesetupdriver.h \
     instances/explorerdriver.h \
-    instances/explorerwindow.h
+    instances/explorerwindow.h \
+    SimCenterCommon/FooterWidget.h \
+    SimCenterCommon/HeaderWidget.h \
+    utilFuncs/agavesetupdriver.h \
+    utilFuncs/authform.h \
+    utilFuncs/copyrightdialog.h \
+    utilFuncs/singlelinedialog.h
 
 FORMS += \
     instances/explorerwindow.ui \
-    utilWindows/authform.ui \
-    utilWindows/copyrightdialog.ui \
-    utilWindows/deleteconfirm.ui \
-    utilWindows/errorpopup.ui \
-    utilWindows/quickinfopopup.ui \
-    utilWindows/singlelinedialog.ui
+    utilFuncs/authform.ui \
+    utilFuncs/copyrightdialog.ui \
+    utilFuncs/singlelinedialog.ui
 
-SUBDIRS += \
-    AgaveExplorer.pro
+RESOURCES += \
+    SimCenterCommon/commonResources.qrc \
+    instances/explorerfiles.qrc
