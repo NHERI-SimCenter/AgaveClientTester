@@ -36,20 +36,17 @@
 #ifndef REMOTEJOBLISTER_H
 #define REMOTEJOBLISTER_H
 
-#include <QListView>
+#include <QTableView>
 #include <QMenu>
 
 class JobOperator;
 
-class RemoteJobLister : public QListView
+class RemoteJobLister : public QTableView
 {
     Q_OBJECT
 public:
     explicit RemoteJobLister(QWidget *parent = nullptr);
     void setJobHandle(JobOperator * theJobHandle);
-
-private slots:
-    void needRightClickMenu(QPoint);
 
 private:
     JobOperator * myJobHandle = NULL;

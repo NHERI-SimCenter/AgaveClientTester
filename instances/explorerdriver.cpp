@@ -77,6 +77,7 @@ void ExplorerDriver::closeAuthScreen()
     }
 
     myJobHandle = new JobOperator(theConnector,this);
+    myJobHandle->demandJobDataRefresh();
     myFileHandle = new FileOperator(theConnector,this);
     myFileHandle->resetFileData();
 

@@ -58,6 +58,8 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         return;
     }
 
+    //TODO: Subsequent versions should update rather than wholesale re-write
+
     rawData.clear(); //TODO: make sure no memory leak here
     for (auto itr = theData->begin(); itr != theData->end(); itr++)
     {
@@ -67,11 +69,15 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     }
 
     theJobList.clear(); //TODO: make sure no memory leak here
-    theJobList.setColumnCount(1);
+    theJobList.setHorizontalHeaderLabels({"Task Name", "State", "Agave App", "Time Created", "Agave ID"});
 
     for (auto itr = rawData.begin(); itr != rawData.end(); itr++)
     {
         QList<QStandardItem *> newRow;
+        newRow.append(new QStandardItem((*itr)->getName()));
+        newRow.append(new QStandardItem((*itr)->getState()));
+        newRow.append(new QStandardItem((*itr)->getApp()));
+        newRow.append(new QStandardItem((*itr)->getTimeCreated().toString()));
         newRow.append(new QStandardItem((*itr)->getID()));
         theJobList.appendRow(newRow);
     }

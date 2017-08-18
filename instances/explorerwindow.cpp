@@ -82,7 +82,10 @@ void ExplorerWindow::startAndShow()
                      this, SLOT(customFileMenu(QPoint)));
 
     ui->agaveAppList->setModel(&taskListModel);
-    ui->agaveAppList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    ui->jobTable->setJobHandle(programDriver->getJobHandler());
+    QObject::connect(ui->jobTable, SIGNAL(customContextMenuRequested(QPoint)),
+                     this, SLOT(jobRightClickMenu(QPoint)));
 
     //Note: Adding widget to header will re-parent them
     QLabel * username = new QLabel(programDriver->getDataConnection()->getUserName());
@@ -327,4 +330,16 @@ void ExplorerWindow::decompressMenuItem()
 void ExplorerWindow::refreshMenuItem()
 {
     ui->remoteFileView->getFileOperator()->enactFolderRefresh(targetNode);
+}
+
+void ExplorerWindow::jobRightClickMenu(QPoint)
+{
+    if (programDriver->getJobHandler() == NULL)
+    {
+        return;
+    }
+    QMenu jobMenu;
+
+    jobMenu.addAction("Refresh Job Info", programDriver->getJobHandler(), SLOT(demandJobDataRefresh()));
+    jobMenu.exec(QCursor::pos());
 }
