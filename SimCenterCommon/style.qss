@@ -91,7 +91,6 @@ FooterWidget > QLabel {
     font: bold 15 px;
 }
 
-
 /*
 * ======= <HEADER AND FOOTER> =======
 */
