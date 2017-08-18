@@ -87,6 +87,8 @@ private slots:
     void decompressMenuItem();
     void refreshMenuItem();
 
+    void jobRightClickMenu(QPoint);
+
 private:
     Ui::ExplorerWindow *ui;
 

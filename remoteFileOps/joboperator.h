@@ -55,9 +55,11 @@ public:
     explicit JobOperator(RemoteDataInterface * newDataLink, QObject * parent);
     void linkToJobLister(RemoteJobLister * newLister);
 
+public slots:
+    void demandJobDataRefresh();
+
 private slots:
     void refreshRunningJobList(RequestState replyState, QList<RemoteJobData> *theData);
-    void demandJobDataRefresh();
 
 private:
     QList<RemoteJobData *> rawData;

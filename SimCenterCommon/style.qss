@@ -64,6 +64,12 @@ QLineEdit {
     border-radius: 5px;
 }
 
+QTabBar::tab:disabled {
+    width: 300px;
+    color: transparent;
+    background: transparent;
+ }
+
 /*
 * ======= <HEADER AND FOOTER> =======
 */
