@@ -131,6 +131,7 @@ void FileOperator::getLSReply(RequestState cmdReply, QList<FileMetaData> * fileD
     }
     rootFileNode->updateFileFolder(*fileDataList);
     translateFileDataToModel();
+    emit newFileInfo();
 }
 
 void FileOperator::opLockChanged(bool newVal)

@@ -65,7 +65,7 @@ QLineEdit {
 }
 
 QTabBar::tab:disabled {
-    width: 300px;
+    width: 100px;
     color: transparent;
     background: transparent;
  }
