@@ -60,6 +60,7 @@ public:
     QByteArray * getFileBuffer();
     void setFileBuffer(QByteArray * newFileBuffer);
 
+    bool nodeWithNameIsLoading(QString filename);
     FileTreeNode * getNodeWithName(QString filename, bool unrestricted = false);
     FileTreeNode * getClosestNodeWithName(QString filename, bool unrestricted = false);
     FileTreeNode * getParentNode();

@@ -90,6 +90,7 @@ public:
 
 signals:
     void opPendingChange(bool opPending);
+    void newFileInfo();
 
 private slots:
     void opLockChanged(bool newVal);

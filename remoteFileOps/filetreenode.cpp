@@ -300,6 +300,17 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     fileDataBuffer = newFileBuffer;
 }
 
+bool FileTreeNode::nodeWithNameIsLoading(QString filename)
+{
+    //TODO: Revise this so it is faster
+    FileTreeNode * possibleNode = pathSearchHelper(filename,false,false);
+    if (possibleNode != NULL) return false;
+    possibleNode = pathSearchHelper(filename,true,false);
+    if (possibleNode == NULL) return false; // Should never happen
+    if (possibleNode->childIsUnloaded()) return true;
+    return false;
+}
+
 FileTreeNode * FileTreeNode::getNodeWithName(QString filename, bool unrestricted)
 {
     return pathSearchHelper(filename,false,unrestricted);

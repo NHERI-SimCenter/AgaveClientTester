@@ -41,7 +41,7 @@ bool EasyBoolLock::checkAndClaim()
 {
     if (myValue == true) return false;
     myValue = true;
-    emit lockStateChanged(false);
+    emit lockStateChanged(true);
     return true;
 }
 
