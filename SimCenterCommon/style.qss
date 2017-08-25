@@ -65,7 +65,7 @@ QLineEdit {
 }
 
 QTabBar::tab:disabled {
-    width: 300px;
+    width: 100px;
     color: transparent;
     background: transparent;
  }
@@ -96,7 +96,6 @@ FooterWidget > QLabel {
     color: #E0E0E0;
     font: bold 15 px;
 }
-
 
 /*
 * ======= <HEADER AND FOOTER> =======
