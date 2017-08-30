@@ -71,8 +71,8 @@ QTabBar::tab:disabled {
  }
 
 /*
-* ======= <HEADER AND FOOTER> =======
-*/
+ * ======= <HEADER AND FOOTER> =======
+ */
 
 HeaderWidget {
     background-color: #B0BEC5;
@@ -136,6 +136,14 @@ QLabel#inTitle {
 * ======= <SECTION LABEL STYLES> =======
 */
 
+QScrollArea {
+background: white;
+}
+
+QFrame {
+background: white;
+}
+
 /*
 QFrame#line {
     background-color: #B0BEC5;
@@ -187,3 +195,30 @@ QFrame#pushButtons {
     border:none;
 }
 */
+
+QWidget {
+    background-color: white;
+    color: red;
+}
+
+QWidget#CWE_ParameterTab {
+    background-color: white;
+    color: red;
+}
+
+QTabBar::tab:disabled {
+    width: 300px;
+    color: transparent;
+    background: transparent;
+}
+
+QToolBox::tab {
+    border-radius: 5px;
+    color: white;
+}
+
+QToolBox::tab:selected { /* italicize selected tabs */
+    font: italic;
+    color: #64B5F6;
+}
+
