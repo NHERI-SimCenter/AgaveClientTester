@@ -68,8 +68,6 @@ public:
 
     FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
 
-    void translateFileDataToModel();
-
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);
 
@@ -114,20 +112,10 @@ private slots:
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
 
 private:
-    bool columnInUse(int i);
-    QString getRawColumnData(int i, FileMetaData * rawFileData);
     QString getStringFromInitParams(QString stringKey);
 
-    //Note: if not found, will return NULL and call translateFileDataToModel(), to resync
     //If input is NULL, return NULL, but don't resync
     FileTreeNode * getNodeFromModel(QStandardItem * toFind);
-    QStandardItem * getModelEntryFromNode(FileTreeNode * toFind);
-
-    void translateFileDataRecurseHelper(FileTreeNode * currentFile, QStandardItem * currentModelEntry);
-
-    bool fileInModel(FileTreeNode * toFind, QStandardItem * compareTo);
-    void changeModelFromFile(QStandardItem * targetRow, FileTreeNode * dataSource);
-    void newModelRowFromFile(QStandardItem * parentItem, FileTreeNode * dataSource);
 
     AgaveSetupDriver * myParent;
     RemoteDataInterface * dataLink;

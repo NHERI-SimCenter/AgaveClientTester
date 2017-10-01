@@ -91,7 +91,7 @@ void RemoteFileTree::setupFileView()
 void RemoteFileTree::folderExpanded(QModelIndex itemOpened)
 {
     fileEntryTouched(itemOpened);
-//Fix this
+
     if (selectedItem == NULL) return;
     if (!selectedItem->childIsUnloaded()) return;
 
