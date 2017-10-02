@@ -89,14 +89,18 @@ FileTreeNode::FileTreeNode(FileTreeNode * parent, QStandardItem * parentModelNod
 
 FileTreeNode::~FileTreeNode()
 {
+    while (this->childList.size() > 0)
+    {
+        FileTreeNode * toDelete = this->childList.takeLast();
+        delete toDelete;
+    }
     if (fileData != NULL)
     {
         delete fileData;
     }
-    while (this->childList.size() > 0)
+    if (this->fileDataBuffer != NULL)
     {
-        FileTreeNode * toDelete = this->childList.takeLast();
-        toDelete->deleteLater();
+        delete this->fileDataBuffer;
     }
     if (this->parent() != NULL)
     {
@@ -110,10 +114,7 @@ FileTreeNode::~FileTreeNode()
             myParent->getModelNode()->removeRow(myModelNode->row());
         }
     }
-    if (this->fileDataBuffer != NULL)
-    {
-        delete this->fileDataBuffer;
-    }
+
 }
 
 void FileTreeNode::constructModelNodes(QStandardItem * parentNode)
@@ -210,6 +211,10 @@ void FileTreeNode::updateFileFolder(QList<FileMetaData> newDataList)
 
     //If the target node has a loading placeholder, clear it
     if (controllerNode->childIsUnloaded())
+    {
+        controllerNode->clearAllChildren();
+    }
+    else if (controllerNode->childIsEmpty())
     {
         controllerNode->clearAllChildren();
     }
@@ -328,7 +333,7 @@ QStandardItem * FileTreeNode::getModelNode()
 
 void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 {
-    fileDataBuffer = newFileBuffer;
+    fileDataBuffer = new QByteArray(*newFileBuffer);
 }
 
 bool FileTreeNode::nodeWithNameIsLoading(QString filename)

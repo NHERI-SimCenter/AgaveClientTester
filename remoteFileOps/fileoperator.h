@@ -82,6 +82,7 @@ public:
 
     void sendUploadReq(FileTreeNode * uploadTarget, QString localFile);
     void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
+    void sendDownloadBuffReq(FileTreeNode * targetFile);
 
     void sendCompressReq(FileTreeNode * selectedFolder);
     void sendDecompressReq(FileTreeNode * selectedFolder);
@@ -107,6 +108,7 @@ private slots:
 
     void getUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getDownloadReply(RequestState replyState);
+    void getDownloadBuffReply(RequestState replyState, QByteArray *dataBuff);
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
@@ -123,6 +125,7 @@ private:
     QStandardItemModel dataStore;
 
     EasyBoolLock * fileOpPending;
+    FileTreeNode * rememberTargetFile;
 
     const int tableNumCols = 7;
     const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed",

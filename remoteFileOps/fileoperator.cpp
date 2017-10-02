@@ -336,6 +336,35 @@ void FileOperator::getDownloadReply(RequestState replyState)
     }
 }
 
+void FileOperator::sendDownloadBuffReq(FileTreeNode * targetFile)
+{
+    if (!fileOpPending->checkAndClaim()) return;
+    qDebug("Starting download procedure: %s", qPrintable(targetFile->getFileData().getFullPath()));
+    RemoteDataReply * theReply = dataLink->downloadBuffer(targetFile->getFileData().getFullPath());
+    if (theReply == NULL)
+    {
+        fileOpPending->release();
+        return;
+    }
+    rememberTargetFile = targetFile;
+    QObject::connect(theReply, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray*)),
+                     this, SLOT(getDownloadBuffReply(RequestState,QByteArray*)));
+}
+
+void FileOperator::getDownloadBuffReply(RequestState replyState, QByteArray * dataBuff)
+{
+    fileOpPending->release();
+    if (replyState != RequestState::GOOD)
+    {
+        quickInfoPopup("Error: Unable to download requested file.");
+    }
+    else
+    {
+        rememberTargetFile->setFileBuffer(dataBuff);
+        quickInfoPopup(QString("Download complete."));
+    }
+}
+
 void FileOperator::sendCompressReq(FileTreeNode * selectedFolder)
 {
     if (!fileOpPending->checkAndClaim()) return;
@@ -434,15 +463,16 @@ void FileOperator::lsClosestNodeToParent(QString fullPath)
 
 FileTreeNode * FileOperator::getNodeFromModel(QStandardItem * toFind)
 {
-    if (toFind->parent() == NULL)
+    QStandardItem * findParent = toFind->parent();
+    if (findParent == NULL)
     {
-        return rootFileNode;
+        findParent = dataStore.invisibleRootItem();
     }
 
     int colNum = toFind->column();
     if (colNum != 0)
     {
-        toFind = toFind->parent()->child(toFind->row(), 0);
+        toFind = findParent->child(toFind->row(), 0);
     }
     QString realPath;
     while (toFind != NULL)

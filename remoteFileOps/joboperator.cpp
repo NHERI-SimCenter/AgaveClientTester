@@ -39,6 +39,7 @@
 #include "remotejoblister.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../AgaveClientInterface/remotejobdata.h"
+#include "remotejobentry.h"
 
 JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : QObject((QObject *)parent)
 {
@@ -48,6 +49,7 @@ JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : 
 void JobOperator::linkToJobLister(RemoteJobLister * newLister)
 {
     newLister->setModel(&theJobList);
+    theJobList.setHorizontalHeaderLabels({"Task Name", "State", "Agave App", "Time Created", "Agave ID"});
 }
 
 void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> * theData)
@@ -57,30 +59,32 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         //TODO: some error here
         return;
     }
+/*
+    bool notDone = false;
 
-    //TODO: Subsequent versions should update rather than wholesale re-write
-
-    rawData.clear(); //TODO: make sure no memory leak here
-    for (auto itr = theData->begin(); itr != theData->end(); itr++)
+    for (auto itr = theData->rbegin(); itr != theData->rend(); itr++)
     {
-        RemoteJobData * newItem = new RemoteJobData();
-        (*newItem) = (*itr);
-        rawData.append(newItem);
+        if (jobData.contains((*itr).getID()))
+        {
+            RemoteJobEntry * theItem = jobData.value((*itr).getID());
+            theItem->setData(*itr);
+        }
+        else
+        {
+            RemoteJobEntry * theItem = new RemoteJobEntry(*itr, theJobList.invisibleRootItem(), this);
+            jobData.insert(theItem->getData().getID(), theItem);
+        }
+        if (!notDone && ((*itr).getState() != "FINISHED") && ((*itr).getState() != "FAILED"))
+        {
+            notDone = true;
+        }
     }
 
-    theJobList.clear(); //TODO: make sure no memory leak here
-    theJobList.setHorizontalHeaderLabels({"Task Name", "State", "Agave App", "Time Created", "Agave ID"});
-
-    for (auto itr = rawData.begin(); itr != rawData.end(); itr++)
+    if (notDone)
     {
-        QList<QStandardItem *> newRow;
-        newRow.append(new QStandardItem((*itr)->getName()));
-        newRow.append(new QStandardItem((*itr)->getState()));
-        newRow.append(new QStandardItem((*itr)->getApp()));
-        newRow.append(new QStandardItem((*itr)->getTimeCreated().toString()));
-        newRow.append(new QStandardItem((*itr)->getID()));
-        theJobList.appendRow(newRow);
+        QTimer::singleShot(4000, this, SLOT(demandJobDataRefresh()));
     }
+    */
 }
 
 void JobOperator::demandJobDataRefresh()

@@ -91,7 +91,7 @@ private slots:
 private:
     FileOperator * myFileOperator;
 
-    QLabel * selectedFileDisplay = NULL;
+    QList<QLabel *> selectedFileDisplays;
     FileTreeNode * selectedItem = NULL;
 };
 
