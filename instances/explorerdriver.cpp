@@ -53,9 +53,8 @@ ExplorerDriver::ExplorerDriver(QObject *parent) : AgaveSetupDriver(parent)
     tmpHandle->registerAgaveAppInfo("cwe-create", "cwe-create-0.1.0", {"directory", "newFolder", "template"}, {}, "directory");
     tmpHandle->registerAgaveAppInfo("cwe-update", "cwe-update-0.1.0", {"directory", "params"}, {}, "directory");
     tmpHandle->registerAgaveAppInfo("cwe-exec-serial", "cwe-exec-serial-0.1.0", {"directory", "action", "infile"}, {}, "directory");
-    tmpHandle->registerAgaveAppInfo("cwe-sim", "cwe-sim-0.1.0", {}, {"solver", "directory"}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-sim", "cwe-sim-2.4.0", {}, {"solver", "directory"}, "directory");
     tmpHandle->registerAgaveAppInfo("cwe-delete", "cwe-delete-0.1.0", {"directory", "step"}, {}, "directory");
-
 
     theConnector = (RemoteDataInterface *) tmpHandle;
     QObject::connect(theConnector, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(fatalInterfaceError(QString)));

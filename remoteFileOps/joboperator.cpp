@@ -59,7 +59,7 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         //TODO: some error here
         return;
     }
-/*
+
     bool notDone = false;
 
     for (auto itr = theData->rbegin(); itr != theData->rend(); itr++)
@@ -84,7 +84,6 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     {
         QTimer::singleShot(4000, this, SLOT(demandJobDataRefresh()));
     }
-    */
 }
 
 void JobOperator::demandJobDataRefresh()
