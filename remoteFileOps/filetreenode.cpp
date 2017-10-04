@@ -436,6 +436,22 @@ FileTreeNode * FileTreeNode::getChildNodeWithName(QString filename, bool unrestr
     return NULL;
 }
 
+bool FileTreeNode::fileNameMatches(QString fileToMatch)
+{
+    FileTreeNode * rootNode = this;
+    while (rootNode->isRootNode() == false)
+    {
+        rootNode = rootNode->getParentNode();
+    }
+
+    FileTreeNode * checkNode = rootNode->getNodeWithName(fileToMatch);
+    if (checkNode == NULL)
+    {
+        return false;
+    }
+    return (checkNode == this);
+}
+
 QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
 {
     QString headerText = fullModel->horizontalHeaderItem(i)->text();

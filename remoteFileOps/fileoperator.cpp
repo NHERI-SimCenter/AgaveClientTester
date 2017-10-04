@@ -491,6 +491,11 @@ FileTreeNode * FileOperator::getNodeFromIndex(QModelIndex fileIndex)
     return getNodeFromModel(theModelItem);
 }
 
+FileTreeNode * FileOperator::getNodeFromName(QString fullPath)
+{
+    return rootFileNode->getNodeWithName(fullPath);
+}
+
 void FileOperator::quickInfoPopup(QString infoText)
 {
     QMessageBox infoMessage;
