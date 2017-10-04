@@ -67,6 +67,7 @@ public:
     bool operationIsPending();
 
     FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
+    FileTreeNode * getNodeFromName(QString fullPath);
 
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);

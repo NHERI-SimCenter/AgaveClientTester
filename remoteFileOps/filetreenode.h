@@ -74,6 +74,8 @@ public:
     QList<FileTreeNode *> * getChildList();
     FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
 
+    bool folderNameMatches(QString folderToMatch);
+
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
 

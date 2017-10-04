@@ -86,6 +86,22 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     }
 }
 
+QMap<QString, RemoteJobData> JobOperator::getRunningJobs()
+{
+    QMap<QString, RemoteJobData> ret;
+
+    for (auto itr = jobData.cbegin(); itr != jobData.cend(); itr++)
+    {
+        QString myState = (*itr)->getData().getState();
+        if (!myState.isEmpty() && (myState != "FINISHED") && (myState != "FAILED"))
+        {
+            ret.insert((*itr)->getData().getID(), (*itr)->getData());
+        }
+    }
+
+    return ret;
+}
+
 void JobOperator::demandJobDataRefresh()
 {
     RemoteDataReply * listReply = dataLink->getListOfJobs();

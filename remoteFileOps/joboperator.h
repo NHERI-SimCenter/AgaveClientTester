@@ -40,6 +40,7 @@
 #include <QList>
 #include <QListView>
 #include <QStandardItemModel>
+#include <QString>
 
 #include <QTimer>
 
@@ -57,6 +58,8 @@ class JobOperator : public QObject
 public:
     explicit JobOperator(RemoteDataInterface * newDataLink, QObject * parent);
     void linkToJobLister(RemoteJobLister * newLister);
+
+    QMap<QString, RemoteJobData> getRunningJobs();
 
 public slots:
     void demandJobDataRefresh();
