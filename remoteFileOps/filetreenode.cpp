@@ -49,11 +49,14 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     else
     {
         rootNode = false;
+        myParent = parent;
         parent->childList.append(this);
+
+        constructModelNodes(parent->getModelNode());
     }
 }
 
-FileTreeNode::FileTreeNode(FileTreeNode * parent):QObject((QObject *)parent)
+FileTreeNode::FileTreeNode(FileTreeNode * parent, QStandardItem * parentModelNode):QObject((QObject *)parent)
 {
     fileData = new FileMetaData();
     if (parent == NULL)
@@ -62,11 +65,15 @@ FileTreeNode::FileTreeNode(FileTreeNode * parent):QObject((QObject *)parent)
 
         fileData->setFullFilePath("/");
         fileData->setType(FileType::DIR);
+
+        myModelNode = parentModelNode;
+
         new FileTreeNode(this);
     }
     else
     {
         rootNode = false;
+        myParent = parent;
         parent->childList.append(this);
 
         //Create loading placeholder
@@ -75,14 +82,25 @@ FileTreeNode::FileTreeNode(FileTreeNode * parent):QObject((QObject *)parent)
 
         fileData->setFullFilePath(fullPath);
         fileData->setType(FileType::UNLOADED);
+
+        constructModelNodes(parent->getModelNode());
     }
 }
 
 FileTreeNode::~FileTreeNode()
 {
+    while (this->childList.size() > 0)
+    {
+        FileTreeNode * toDelete = this->childList.takeLast();
+        delete toDelete;
+    }
     if (fileData != NULL)
     {
         delete fileData;
+    }
+    if (this->fileDataBuffer != NULL)
+    {
+        delete this->fileDataBuffer;
     }
     if (this->parent() != NULL)
     {
@@ -91,16 +109,25 @@ FileTreeNode::~FileTreeNode()
         {
             parentNode->childList.removeAll(this);
         }
+        if (myModelNode != NULL)
+        {
+            myParent->getModelNode()->removeRow(myModelNode->row());
+        }
     }
-    while (this->childList.size() > 0)
+
+}
+
+void FileTreeNode::constructModelNodes(QStandardItem * parentNode)
+{
+    QList<QStandardItem *> newDataList;
+
+    myModelNode = new QStandardItem(fileData->getFileName());
+    newDataList.append(myModelNode);
+    for (int i = 1; i < parentNode->model()->columnCount(); i++)
     {
-        FileTreeNode * toDelete = this->childList.takeLast();
-        toDelete->deleteLater();
+        newDataList.append(new QStandardItem(getRawColumnData(i, parentNode->model())));
     }
-    if (this->fileDataBuffer != NULL)
-    {
-        delete this->fileDataBuffer;
-    }
+    parentNode->appendRow(newDataList);
 }
 
 void FileTreeNode::updateFileFolder(QList<FileMetaData> newDataList)
@@ -184,6 +211,10 @@ void FileTreeNode::updateFileFolder(QList<FileMetaData> newDataList)
 
     //If the target node has a loading placeholder, clear it
     if (controllerNode->childIsUnloaded())
+    {
+        controllerNode->clearAllChildren();
+    }
+    else if (controllerNode->childIsEmpty())
     {
         controllerNode->clearAllChildren();
     }
@@ -295,9 +326,14 @@ QByteArray * FileTreeNode::getFileBuffer()
     return fileDataBuffer;
 }
 
+QStandardItem * FileTreeNode::getModelNode()
+{
+    return myModelNode;
+}
+
 void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 {
-    fileDataBuffer = newFileBuffer;
+    fileDataBuffer = new QByteArray(*newFileBuffer);
 }
 
 bool FileTreeNode::nodeWithNameIsLoading(QString filename)
@@ -398,4 +434,38 @@ FileTreeNode * FileTreeNode::getChildNodeWithName(QString filename, bool unrestr
         }
     }
     return NULL;
+}
+
+bool FileTreeNode::fileNameMatches(QString fileToMatch)
+{
+    FileTreeNode * rootNode = this;
+    while (rootNode->isRootNode() == false)
+    {
+        rootNode = rootNode->getParentNode();
+    }
+
+    FileTreeNode * checkNode = rootNode->getNodeWithName(fileToMatch);
+    if (checkNode == NULL)
+    {
+        return false;
+    }
+    return (checkNode == this);
+}
+
+QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
+{
+    QString headerText = fullModel->horizontalHeaderItem(i)->text();
+    if (headerText == "File Name")
+    {
+        return fileData->getFileName();
+    }
+    if (headerText == "Type")
+    {
+        return fileData->getFileTypeString();
+    }
+    if (headerText == "Size")
+    {
+        return QString::number(fileData->getSize());
+    }
+    return "";
 }

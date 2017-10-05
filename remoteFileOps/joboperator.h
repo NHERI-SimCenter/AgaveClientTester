@@ -40,11 +40,15 @@
 #include <QList>
 #include <QListView>
 #include <QStandardItemModel>
+#include <QString>
+
+#include <QTimer>
 
 class RemoteFileWindow;
 class RemoteDataInterface;
 class RemoteJobLister;
 class RemoteJobData;
+class RemoteJobEntry;
 
 enum class RequestState;
 
@@ -55,6 +59,8 @@ public:
     explicit JobOperator(RemoteDataInterface * newDataLink, QObject * parent);
     void linkToJobLister(RemoteJobLister * newLister);
 
+    QMap<QString, RemoteJobData> getRunningJobs();
+
 public slots:
     void demandJobDataRefresh();
 
@@ -62,7 +68,7 @@ private slots:
     void refreshRunningJobList(RequestState replyState, QList<RemoteJobData> *theData);
 
 private:
-    QList<RemoteJobData *> rawData;
+    QMap<QString, RemoteJobEntry *> jobData;
     RemoteDataInterface * dataLink;
     bool jobOperationPending = false;
 

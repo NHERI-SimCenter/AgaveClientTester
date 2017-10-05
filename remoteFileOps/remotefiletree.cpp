@@ -68,7 +68,7 @@ FileOperator * RemoteFileTree::getFileOperator()
 
 void RemoteFileTree::setSelectedLabel(QLabel * selectedFileDisp)
 {
-    selectedFileDisplay = selectedFileDisp;
+    selectedFileDisplays.append(selectedFileDisp);
 }
 
 FileTreeNode * RemoteFileTree::getSelectedNode()
@@ -91,7 +91,7 @@ void RemoteFileTree::setupFileView()
 void RemoteFileTree::folderExpanded(QModelIndex itemOpened)
 {
     fileEntryTouched(itemOpened);
-//Fix this
+
     if (selectedItem == NULL) return;
     if (!selectedItem->childIsUnloaded()) return;
 
@@ -102,11 +102,11 @@ void RemoteFileTree::fileEntryTouched(QModelIndex fileIndex)
 {
     selectedItem = myFileOperator->getNodeFromIndex(fileIndex);
 
-    if (selectedFileDisplay != NULL)
+    for (auto itr = selectedFileDisplays.cbegin(); itr != selectedFileDisplays.cend(); itr++)
     {
         if (selectedItem == NULL)
         {
-            selectedFileDisplay->setText("No File Selected.");
+            (*itr)->setText("No File Selected.");
         }
         else
         {
@@ -116,7 +116,7 @@ void RemoteFileTree::fileEntryTouched(QModelIndex fileIndex)
             fileString = fileString.arg(newFileData.getFileName(),
                                 newFileData.getFileTypeString(),
                                 QString::number(newFileData.getSize()));
-            selectedFileDisplay->setText(fileString);
+            (*itr)->setText(fileString);
         }
     }
 

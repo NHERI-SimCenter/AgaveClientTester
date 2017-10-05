@@ -39,6 +39,7 @@
 #include <QObject>
 #include <QList>
 #include <QByteArray>
+#include <QStandardItem>
 
 enum class RequestState;
 class FileMetaData;
@@ -49,7 +50,7 @@ class FileTreeNode : public QObject
     Q_OBJECT
 public:
     FileTreeNode(FileMetaData contents, FileTreeNode * parent = NULL);
-    FileTreeNode(FileTreeNode * parent = NULL); //This creates either the default root folder, or default load pending,
+    FileTreeNode(FileTreeNode * parent = NULL, QStandardItem * parentModelNode = NULL); //This creates either the default root folder, or default load pending,
                                                 //depending if the parent is NULL
     ~FileTreeNode();
 
@@ -58,6 +59,7 @@ public:
     bool isRootNode();
     FileMetaData getFileData();
     QByteArray * getFileBuffer();
+    QStandardItem * getModelNode();
     void setFileBuffer(QByteArray * newFileBuffer);
 
     bool nodeWithNameIsLoading(QString filename);
@@ -72,14 +74,21 @@ public:
     QList<FileTreeNode *> * getChildList();
     FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
 
+    bool fileNameMatches(QString folderToMatch);
+
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
 
 private:
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
+    QString getRawColumnData(int i, QStandardItemModel * fullModel);
+    void constructModelNodes(QStandardItem * parentNode);
 
     FileTreeNode * pathSearchHelper(QString filename, bool stopEarly, bool unrestricted = false);
+
+    FileTreeNode * myParent = NULL;
+    QStandardItem * myModelNode = NULL;
 
     FileMetaData * fileData = NULL;
     QList<FileTreeNode *> childList;

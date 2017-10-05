@@ -67,8 +67,7 @@ public:
     bool operationIsPending();
 
     FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
-
-    void translateFileDataToModel();
+    FileTreeNode * getNodeFromName(QString fullPath);
 
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);
@@ -84,6 +83,7 @@ public:
 
     void sendUploadReq(FileTreeNode * uploadTarget, QString localFile);
     void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
+    void sendDownloadBuffReq(FileTreeNode * targetFile);
 
     void sendCompressReq(FileTreeNode * selectedFolder);
     void sendDecompressReq(FileTreeNode * selectedFolder);
@@ -109,25 +109,16 @@ private slots:
 
     void getUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getDownloadReply(RequestState replyState);
+    void getDownloadBuffReply(RequestState replyState, QByteArray *dataBuff);
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
 
 private:
-    bool columnInUse(int i);
-    QString getRawColumnData(int i, FileMetaData * rawFileData);
     QString getStringFromInitParams(QString stringKey);
 
-    //Note: if not found, will return NULL and call translateFileDataToModel(), to resync
     //If input is NULL, return NULL, but don't resync
     FileTreeNode * getNodeFromModel(QStandardItem * toFind);
-    QStandardItem * getModelEntryFromNode(FileTreeNode * toFind);
-
-    void translateFileDataRecurseHelper(FileTreeNode * currentFile, QStandardItem * currentModelEntry);
-
-    bool fileInModel(FileTreeNode * toFind, QStandardItem * compareTo);
-    void changeModelFromFile(QStandardItem * targetRow, FileTreeNode * dataSource);
-    void newModelRowFromFile(QStandardItem * parentItem, FileTreeNode * dataSource);
 
     AgaveSetupDriver * myParent;
     RemoteDataInterface * dataLink;
@@ -135,6 +126,7 @@ private:
     QStandardItemModel dataStore;
 
     EasyBoolLock * fileOpPending;
+    FileTreeNode * rememberTargetFile;
 
     const int tableNumCols = 7;
     const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed",
