@@ -94,12 +94,9 @@ public:
 
 signals:
     void opPendingChange(bool opPending);
-    void newFileInfo();
 
 private slots:
     void opLockChanged(bool newVal);
-
-    void getLSReply(RequestState cmdReply, QList<FileMetaData> * fileDataList);
 
     void getDeleteReply(RequestState replyState);
     void getMoveReply(RequestState replyState, FileMetaData * revisedFileData);

@@ -126,17 +126,6 @@ bool FileOperator::operationIsPending()
     return fileOpPending->lockClosed();
 }
 
-void FileOperator::getLSReply(RequestState cmdReply, QList<FileMetaData> * fileDataList)
-{
-    if (cmdReply != RequestState::GOOD)
-    {
-        totalResetErrorProcedure();
-        return;
-    }
-    rootFileNode->updateFileFolder(*fileDataList);
-    emit newFileInfo();
-}
-
 void FileOperator::opLockChanged(bool newVal)
 {
     emit opPendingChange(newVal);

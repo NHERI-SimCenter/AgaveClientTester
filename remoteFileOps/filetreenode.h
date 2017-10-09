@@ -90,6 +90,11 @@ public slots:
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
 private:
+    FileTreeNode * getPertinantNode(QList<FileMetaData> * newDataList);
+    bool verifyControlNode(QList<FileMetaData> * newDataList);
+    QString getControlAddress(QList<FileMetaData> * newDataList);
+    void updateFileNodeData(QList<FileMetaData> * newDataList);
+
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
