@@ -58,6 +58,8 @@ FileOperator::FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver *
 void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
 {
     newTreeLink->setModel(&dataStore);
+    QObject::connect(&dataStore, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
+                     newTreeLink, SLOT(fileEntryTouched()));
 }
 
 void FileOperator::resetFileData()
@@ -101,6 +103,10 @@ QString FileOperator::getStringFromInitParams(QString stringKey)
 
 void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode)
 {
+    if (selectedNode->haveLStask())
+    {
+        return;
+    }
     QString fullFilePath = selectedNode->getFileData().getFullPath();
 
     qDebug("File Path Needs refresh: %s", qPrintable(fullFilePath));
@@ -109,11 +115,10 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode)
     {
         //TODO: consider a more fatal error here
         totalResetErrorProcedure();
+        return;
     }
-    else
-    {
-        QObject::connect(theReply, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)), this, SLOT(getLSReply(RequestState,QList<FileMetaData>*)));
-    }
+
+    selectedNode->setLStask(theReply);
 }
 
 bool FileOperator::operationIsPending()
@@ -309,7 +314,7 @@ void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFil
 }
 
 void FileOperator::sendDownloadReq(FileTreeNode * targetFile, QString localDest)
-{
+{   
     if (!fileOpPending->checkAndClaim()) return;
     qDebug("Starting download procedure: %s to %s", qPrintable(targetFile->getFileData().getFullPath()),
            qPrintable(localDest));
@@ -338,30 +343,18 @@ void FileOperator::getDownloadReply(RequestState replyState)
 
 void FileOperator::sendDownloadBuffReq(FileTreeNode * targetFile)
 {
-    if (!fileOpPending->checkAndClaim()) return;
-    qDebug("Starting download procedure: %s", qPrintable(targetFile->getFileData().getFullPath()));
+    if (targetFile->haveBuffTask())
+    {
+        return;
+    }
+    qDebug("Starting download buffer procedure: %s", qPrintable(targetFile->getFileData().getFullPath()));
     RemoteDataReply * theReply = dataLink->downloadBuffer(targetFile->getFileData().getFullPath());
     if (theReply == NULL)
     {
         fileOpPending->release();
         return;
     }
-    rememberTargetFile = targetFile;
-    QObject::connect(theReply, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray*)),
-                     this, SLOT(getDownloadBuffReply(RequestState,QByteArray*)));
-}
-
-void FileOperator::getDownloadBuffReply(RequestState replyState, QByteArray * dataBuff)
-{
-    fileOpPending->release();
-    if (replyState != RequestState::GOOD)
-    {
-        quickInfoPopup("Error: Unable to download requested file.");
-    }
-    else
-    {
-        rememberTargetFile->setFileBuffer(dataBuff);
-    }
+    targetFile->setBuffTask(theReply);
 }
 
 void FileOperator::sendCompressReq(FileTreeNode * selectedFolder)

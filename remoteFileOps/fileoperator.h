@@ -110,7 +110,6 @@ private slots:
 
     void getUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getDownloadReply(RequestState replyState);
-    void getDownloadBuffReply(RequestState replyState, QByteArray *dataBuff);
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);

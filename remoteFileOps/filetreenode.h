@@ -44,6 +44,7 @@
 enum class RequestState;
 class FileMetaData;
 class RemoteDataInterface;
+class RemoteDataReply;
 
 class FileTreeNode : public QObject
 {
@@ -71,6 +72,11 @@ public:
     bool childIsEmpty();
     void clearAllChildren();
 
+    bool haveLStask();
+    void setLStask(RemoteDataReply * newTask);
+    bool haveBuffTask();
+    void setBuffTask(RemoteDataReply * newTask);
+
     QList<FileTreeNode *> * getChildList();
     FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
 
@@ -78,6 +84,10 @@ public:
 
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
+
+public slots:
+    void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
+    void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
 private:
     void insertFile(FileMetaData *newData);
@@ -95,6 +105,9 @@ private:
     bool rootNode = false;
 
     QByteArray * fileDataBuffer = NULL;
+
+    RemoteDataReply * lsTask = NULL;
+    RemoteDataReply * bufferTask = NULL;
 };
 
 #endif // FILETREENODE_H

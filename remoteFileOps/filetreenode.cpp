@@ -234,6 +234,16 @@ QList<FileTreeNode *> * FileTreeNode::getChildList()
     return &childList;
 }
 
+void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList)
+{
+    //TODO
+}
+
+void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferData)
+{
+    //TODO
+}
+
 void FileTreeNode::insertFile(FileMetaData * newData)
 {
     if (newData->getFileName() == ".") return;
@@ -394,6 +404,38 @@ void FileTreeNode::clearAllChildren()
         FileTreeNode *toDestroy = childList.takeLast();
         toDestroy->deleteLater();
     }
+}
+
+bool FileTreeNode::haveLStask()
+{
+    return (lsTask != NULL);
+}
+
+void FileTreeNode::setLStask(RemoteDataReply * newTask)
+{
+    if (lsTask != NULL)
+    {
+        QObject::disconnect(lsTask, 0, this, 0);
+    }
+    lsTask = newTask;
+    QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
+                     this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
+}
+
+bool FileTreeNode::haveBuffTask()
+{
+    return (bufferTask != NULL);
+}
+
+void FileTreeNode::setBuffTask(RemoteDataReply * newTask)
+{
+    if (bufferTask != NULL)
+    {
+        QObject::disconnect(bufferTask, 0, this, 0);
+    }
+    bufferTask = newTask;
+    QObject::connect(bufferTask, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray*)),
+                     this, SLOT(deliverBuffData(RequestState,QByteArray*)));
 }
 
 FileTreeNode * FileTreeNode::pathSearchHelper(QString filename, bool stopEarly, bool unrestricted)

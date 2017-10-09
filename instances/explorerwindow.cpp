@@ -67,8 +67,8 @@ ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
     }
     ui->agaveAppList->setModel(&taskListModel);
 
-    ui->remoteFileView->setSelectedLabel(ui->selectedFileInfo);
-    ui->remoteFileView->setSelectedLabel(ui->selectedFileLabel);
+    ui->selectedFileLabel->connectFileTreeWidget(ui->remoteFileView);
+    ui->selectedFileInfo->connectFileTreeWidget(ui->remoteFileView);
 }
 
 ExplorerWindow::~ExplorerWindow()
