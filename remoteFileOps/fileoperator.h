@@ -68,6 +68,7 @@ public:
 
     FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
     FileTreeNode * getNodeFromName(QString fullPath);
+    FileTreeNode * getClosestNodeFromName(QString fullPath);
 
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);

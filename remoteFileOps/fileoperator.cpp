@@ -361,7 +361,6 @@ void FileOperator::getDownloadBuffReply(RequestState replyState, QByteArray * da
     else
     {
         rememberTargetFile->setFileBuffer(dataBuff);
-        quickInfoPopup(QString("Download complete."));
     }
 }
 
@@ -494,6 +493,11 @@ FileTreeNode * FileOperator::getNodeFromIndex(QModelIndex fileIndex)
 FileTreeNode * FileOperator::getNodeFromName(QString fullPath)
 {
     return rootFileNode->getNodeWithName(fullPath);
+}
+
+FileTreeNode * FileOperator::getClosestNodeFromName(QString fullPath)
+{
+    return rootFileNode->getClosestNodeWithName(fullPath);
 }
 
 void FileOperator::quickInfoPopup(QString infoText)

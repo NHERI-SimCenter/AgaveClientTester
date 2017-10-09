@@ -54,6 +54,11 @@ void JobOperator::linkToJobLister(RemoteJobLister * newLister)
 
 void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> * theData)
 {
+    if (QObject::sender() == currentJobReply)
+    {
+        //Note: RemoteDataReply destroys itself after signal
+        currentJobReply = NULL;
+    }
     if (replyState != RequestState::GOOD)
     {
         //TODO: some error here
@@ -104,7 +109,11 @@ QMap<QString, RemoteJobData> JobOperator::getRunningJobs()
 
 void JobOperator::demandJobDataRefresh()
 {
-    RemoteDataReply * listReply = dataLink->getListOfJobs();
-    QObject::connect(listReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>*)),
+    if (currentJobReply != NULL)
+    {
+        return;
+    }
+    currentJobReply = dataLink->getListOfJobs();
+    QObject::connect(currentJobReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>*)),
                      this, SLOT(refreshRunningJobList(RequestState,QList<RemoteJobData>*)));
 }

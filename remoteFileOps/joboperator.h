@@ -49,6 +49,7 @@ class RemoteDataInterface;
 class RemoteJobLister;
 class RemoteJobData;
 class RemoteJobEntry;
+class RemoteDataReply;
 
 enum class RequestState;
 
@@ -70,7 +71,7 @@ private slots:
 private:
     QMap<QString, RemoteJobEntry *> jobData;
     RemoteDataInterface * dataLink;
-    bool jobOperationPending = false;
+    RemoteDataReply * currentJobReply = NULL;
 
     QStandardItemModel theJobList;
 };
