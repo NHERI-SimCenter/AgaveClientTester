@@ -73,6 +73,7 @@ public:
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);
 
+    void enactRootRefresh();
     void enactFolderRefresh(FileTreeNode * selectedNode);
 
     void sendDeleteReq(FileTreeNode * selectedNode);
@@ -97,6 +98,8 @@ signals:
 
 private slots:
     void opLockChanged(bool newVal);
+
+    void getLSReply(RequestState replyState,QList<FileMetaData> * newFileData);
 
     void getDeleteReply(RequestState replyState);
     void getMoveReply(RequestState replyState, FileMetaData * revisedFileData);

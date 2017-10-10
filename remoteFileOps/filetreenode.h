@@ -55,7 +55,7 @@ public:
                                                 //depending if the parent is NULL
     ~FileTreeNode();
 
-    void updateFileFolder(QList<FileMetaData> newDataList);
+    void updateFileFolder(QList<FileMetaData> * newDataList);
 
     bool isRootNode();
     FileMetaData getFileData();

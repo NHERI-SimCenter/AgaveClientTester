@@ -127,6 +127,11 @@ void ExplorerWindow::addAppToList(QString appName)
         agaveParamLists.insert("cwe-delete", {"step"});
         taskListModel.appendRow(new QStandardItem("cwe-delete"));
     }
+    else if (appName == "cwe-dup")
+    {
+        agaveParamLists.insert("cwe-dup", {"newFolder", "toCopy"});
+        taskListModel.appendRow(new QStandardItem("cwe-dup"));
+    }
 }
 
 void ExplorerWindow::agaveAppSelected(QModelIndex clickedItem)

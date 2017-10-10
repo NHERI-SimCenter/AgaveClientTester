@@ -130,13 +130,13 @@ void FileTreeNode::constructModelNodes(QStandardItem * parentNode)
     parentNode->appendRow(newDataList);
 }
 
-void FileTreeNode::updateFileFolder(QList<FileMetaData> newDataList)
+void FileTreeNode::updateFileFolder(QList<FileMetaData> *newDataList)
 {
     if (rootNode == false) return;
 
-    FileTreeNode * controllerNode = getPertinantNode(&newDataList);
+    FileTreeNode * controllerNode = getPertinantNode(newDataList);
     if (controllerNode == NULL) return;
-    controllerNode->updateFileNodeData(&newDataList);
+    controllerNode->updateFileNodeData(newDataList);
 }
 
 QString FileTreeNode::getControlAddress(QList<FileMetaData> * newDataList)

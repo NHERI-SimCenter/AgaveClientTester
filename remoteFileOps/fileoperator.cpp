@@ -74,7 +74,7 @@ void FileOperator::resetFileData()
     }
     rootFileNode = new FileTreeNode(NULL, dataStore.invisibleRootItem());
 
-    enactFolderRefresh(rootFileNode);
+    enactRootRefresh();
 }
 
 void FileOperator::totalResetErrorProcedure()
@@ -99,6 +99,21 @@ QString FileOperator::getStringFromInitParams(QString stringKey)
         return ret;
     }
     return ret;
+}
+
+void FileOperator::enactRootRefresh()
+{
+    qDebug("Enacting refresh of root.");
+    RemoteDataReply * theReply = dataLink->remoteLS("/");
+    if (theReply == NULL)
+    {
+        //TODO: consider a more fatal error here
+        totalResetErrorProcedure();
+        return;
+    }
+
+    QObject::connect(theReply, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
+                     this, SLOT(getLSReply(RequestState,QList<FileMetaData>*)));
 }
 
 void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode)
@@ -146,6 +161,16 @@ void FileOperator::sendDeleteReq(FileTreeNode * selectedNode)
     }
     QObject::connect(theReply, SIGNAL(haveDeleteReply(RequestState)),
                      this, SLOT(getDeleteReply(RequestState)));
+}
+
+void FileOperator::getLSReply(RequestState replyState,QList<FileMetaData> * newFileData)
+{
+    if (replyState != RequestState::GOOD)
+    {
+        return;
+    }
+
+    rootFileNode->updateFileFolder(newFileData);
 }
 
 void FileOperator::getDeleteReply(RequestState replyState)
