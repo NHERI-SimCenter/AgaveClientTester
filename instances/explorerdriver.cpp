@@ -41,6 +41,7 @@
 #include "remoteFileOps/joboperator.h"
 
 #include "../AgaveClientInterface/agaveInterfaces/agavehandler.h"
+#include "../AgaveClientInterface/agaveInterfaces/agavetaskreply.h"
 
 ExplorerDriver::ExplorerDriver(QObject *parent) : AgaveSetupDriver(parent)
 {
@@ -49,8 +50,14 @@ ExplorerDriver::ExplorerDriver(QObject *parent) : AgaveSetupDriver(parent)
     tmpHandle->registerAgaveAppInfo("extract", "extract-0.1u1",{"inputFile"},{},"");
     tmpHandle->registerAgaveAppInfo("openfoam","openfoam-2.4.0u11",{"solver"},{"inputDirectory"},"inputDirectory");
 
-    theConnector = (RemoteDataInterface *) tmpHandle;
+    tmpHandle->registerAgaveAppInfo("cwe-create", "cwe-create-0.1.0", {"directory", "newFolder", "template"}, {}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-update", "cwe-update-0.1.0", {"directory", "params"}, {}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-exec-serial", "cwe-exec-serial-0.1.0", {"directory", "action", "infile"}, {}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-sim", "cwe-sim-2.4.0", {"solver"}, {"directory"}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-delete", "cwe-delete-0.1.0", {"directory", "step"}, {}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-dup", "cwe-dup-0.1.0", {"directory", "newFolder"}, {"toCopy"}, "directory");
 
+    theConnector = (RemoteDataInterface *) tmpHandle;
     QObject::connect(theConnector, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(fatalInterfaceError(QString)));
 }
 
@@ -93,6 +100,11 @@ void ExplorerDriver::closeAuthScreen()
         authWindow->deleteLater();
         authWindow = NULL;
     }
+
+    AgaveHandler * tmpHandle = (AgaveHandler *) theConnector;
+    AgaveTaskReply * agaveList = tmpHandle->getAgaveAppList();
+
+    QObject::connect(agaveList, SIGNAL(haveAgaveAppList(RequestState,QJsonArray*)), this, SLOT(loadAppList(RequestState,QJsonArray*)));
 }
 
 void ExplorerDriver::startOffline()
@@ -109,4 +121,23 @@ QString ExplorerDriver::getBanner()
 QString ExplorerDriver::getVersion()
 {
     return "Version: 0.1";
+}
+
+void ExplorerDriver::loadAppList(RequestState replyState, QJsonArray * appList)
+{
+    if (replyState != RequestState::GOOD)
+    {
+        qDebug("App List not available.");
+        return;
+    }
+
+    for (auto itr = appList->constBegin(); itr != appList->constEnd(); itr++)
+    {
+        QString appName = (*itr).toObject().value("name").toString();
+
+        if (!appName.isEmpty())
+        {
+            mainWindow->addAppToList(appName);
+        }
+    }
 }

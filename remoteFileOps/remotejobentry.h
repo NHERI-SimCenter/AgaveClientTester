@@ -33,35 +33,31 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#ifndef EXPLORERDRIVER_H
-#define EXPLORERDRIVER_H
+#ifndef REMOTEJOBENTRY_H
+#define REMOTEJOBENTRY_H
 
-#include "utilFuncs/agavesetupdriver.h"
+#include <QObject>
+#include <QStandardItem>
 
-class ExplorerWindow;
+#include "../AgaveClientInterface/remotejobdata.h"
 
-class ExplorerDriver : public AgaveSetupDriver
+class RemoteJobEntry : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit ExplorerDriver(QObject *parent = nullptr);
-    ~ExplorerDriver();
+    explicit RemoteJobEntry(RemoteJobData newData, QStandardItem * modelParent, QObject *parent = nullptr);
 
-    virtual void startup();
+    void setData(RemoteJobData newData);
+    RemoteJobData getData();
+    void setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params);
 
-    virtual void closeAuthScreen();
-
-    virtual void startOffline();
-
-    virtual QString getBanner();
-    virtual QString getVersion();
-
-private slots:
-    void loadAppList(RequestState replyState, QJsonArray * appList);
+signals:
+    void jobStateChanged(RemoteJobData * jobData);
 
 private:
-    ExplorerWindow * mainWindow = NULL;
+    QStandardItem * modelParentNode = NULL;
+    QStandardItem * myModelNode = NULL;
+    RemoteJobData myData;
 };
 
-#endif // EXPLORERDRIVER_H
+#endif // REMOTEJOBENTRY_H

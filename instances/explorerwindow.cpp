@@ -66,6 +66,9 @@ ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
         taskListModel.appendRow(new QStandardItem(*itr));
     }
     ui->agaveAppList->setModel(&taskListModel);
+
+    ui->selectedFileLabel->connectFileTreeWidget(ui->remoteFileView);
+    ui->selectedFileInfo->connectFileTreeWidget(ui->remoteFileView);
 }
 
 ExplorerWindow::~ExplorerWindow()
@@ -95,6 +98,40 @@ void ExplorerWindow::startAndShow()
     QObject::connect(logoutButton, SIGNAL(clicked(bool)), programDriver, SLOT(shutdown()));
     ui->header->appendWidget(logoutButton);
     this->show();
+}
+
+void ExplorerWindow::addAppToList(QString appName)
+{
+    if (appName == "cwe-create")
+    {
+        agaveParamLists.insert("cwe-create", {"newFolder", "template"});
+        taskListModel.appendRow(new QStandardItem("cwe-create"));
+    }
+    else if (appName == "cwe-update")
+    {
+        agaveParamLists.insert("cwe-update", {"params"});
+        taskListModel.appendRow(new QStandardItem("cwe-update"));
+    }
+    else if (appName == "cwe-exec-serial")
+    {
+        agaveParamLists.insert("cwe-exec-serial", {"action", "infile"});
+        taskListModel.appendRow(new QStandardItem("cwe-exec-serial"));
+    }
+    else if (appName == "cwe-sim")
+    {
+        agaveParamLists.insert("cwe-sim", {"solver"});
+        taskListModel.appendRow(new QStandardItem("cwe-sim"));
+    }
+    else if (appName == "cwe-delete")
+    {
+        agaveParamLists.insert("cwe-delete", {"step"});
+        taskListModel.appendRow(new QStandardItem("cwe-delete"));
+    }
+    else if (appName == "cwe-dup")
+    {
+        agaveParamLists.insert("cwe-dup", {"newFolder", "toCopy"});
+        taskListModel.appendRow(new QStandardItem("cwe-dup"));
+    }
 }
 
 void ExplorerWindow::agaveAppSelected(QModelIndex clickedItem)
@@ -177,6 +214,7 @@ void ExplorerWindow::agaveCommandInvoked()
 void ExplorerWindow::finishedAppInvoke(RequestState, QJsonDocument *)
 {
     waitingOnCommand = false;
+    programDriver->getJobHandler()->demandJobDataRefresh();
 }
 
 void ExplorerWindow::customFileMenu(QPoint pos)
@@ -221,6 +259,14 @@ void ExplorerWindow::customFileMenu(QPoint pos)
     if (theFileData.getFileType() == FileType::FILE)
     {
         fileMenu.addAction("Download File",this, SLOT(downloadMenuItem()));
+        if (targetNode->getFileBuffer() != NULL)
+        {
+            fileMenu.addAction("Read File",this, SLOT(readMenuItem()));
+        }
+        else
+        {
+            fileMenu.addAction("Retrive File",this, SLOT(retriveMenuItem()));
+        }
     }
     if (theFileData.getFileType() == FileType::DIR)
     {
@@ -315,6 +361,18 @@ void ExplorerWindow::downloadMenuItem()
         return;
     }
     ui->remoteFileView->getFileOperator()->sendDownloadReq(targetNode, downloadNamePopup.getInputText());
+}
+
+void ExplorerWindow::readMenuItem()
+{
+    QMessageBox dataPopup;
+    dataPopup.setText(QString(*(targetNode->getFileBuffer())));
+    dataPopup.exec();
+}
+
+void ExplorerWindow::retriveMenuItem()
+{
+    ui->remoteFileView->getFileOperator()->sendDownloadBuffReq(targetNode);
 }
 
 void ExplorerWindow::compressMenuItem()
