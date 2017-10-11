@@ -68,11 +68,13 @@ public:
 
     FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
     FileTreeNode * getNodeFromName(QString fullPath);
+    FileTreeNode * getClosestNodeFromName(QString fullPath);
 
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);
 
-    void enactFolderRefresh(FileTreeNode * selectedNode);
+    void enactRootRefresh();
+    void enactFolderRefresh(FileTreeNode * selectedNode, bool clearData = true);
 
     void sendDeleteReq(FileTreeNode * selectedNode);
     void sendMoveReq(FileTreeNode * moveFrom, QString newName);
@@ -93,12 +95,12 @@ public:
 
 signals:
     void opPendingChange(bool opPending);
-    void newFileInfo();
+    void fileSystemChange();
 
 private slots:
     void opLockChanged(bool newVal);
 
-    void getLSReply(RequestState cmdReply, QList<FileMetaData> * fileDataList);
+    void getLSReply(RequestState replyState,QList<FileMetaData> * newFileData);
 
     void getDeleteReply(RequestState replyState);
     void getMoveReply(RequestState replyState, FileMetaData * revisedFileData);
@@ -109,10 +111,11 @@ private slots:
 
     void getUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getDownloadReply(RequestState replyState);
-    void getDownloadBuffReply(RequestState replyState, QByteArray *dataBuff);
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
+
+    void fileNodesChange();
 
 private:
     QString getStringFromInitParams(QString stringKey);

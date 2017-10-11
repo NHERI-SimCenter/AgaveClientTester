@@ -84,3 +84,8 @@ RemoteJobData RemoteJobEntry::getData()
 {
     return myData;
 }
+
+void RemoteJobEntry::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
+{
+    myData.setDetails(inputs, params);
+}

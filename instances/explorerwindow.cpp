@@ -67,8 +67,8 @@ ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
     }
     ui->agaveAppList->setModel(&taskListModel);
 
-    ui->remoteFileView->setSelectedLabel(ui->selectedFileInfo);
-    ui->remoteFileView->setSelectedLabel(ui->selectedFileLabel);
+    ui->selectedFileLabel->connectFileTreeWidget(ui->remoteFileView);
+    ui->selectedFileInfo->connectFileTreeWidget(ui->remoteFileView);
 }
 
 ExplorerWindow::~ExplorerWindow()
@@ -126,6 +126,11 @@ void ExplorerWindow::addAppToList(QString appName)
     {
         agaveParamLists.insert("cwe-delete", {"step"});
         taskListModel.appendRow(new QStandardItem("cwe-delete"));
+    }
+    else if (appName == "cwe-dup")
+    {
+        agaveParamLists.insert("cwe-dup", {"newFolder", "toCopy"});
+        taskListModel.appendRow(new QStandardItem("cwe-dup"));
     }
 }
 

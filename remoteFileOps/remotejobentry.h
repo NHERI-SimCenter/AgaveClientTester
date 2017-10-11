@@ -49,6 +49,7 @@ public:
 
     void setData(RemoteJobData newData);
     RemoteJobData getData();
+    void setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params);
 
 signals:
     void jobStateChanged(RemoteJobData * jobData);

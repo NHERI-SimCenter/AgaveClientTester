@@ -49,6 +49,7 @@ class RemoteDataInterface;
 class RemoteJobLister;
 class RemoteJobData;
 class RemoteJobEntry;
+class RemoteDataReply;
 
 enum class RequestState;
 
@@ -61,16 +62,22 @@ public:
 
     QMap<QString, RemoteJobData> getRunningJobs();
 
+    void requestJobDetails(RemoteJobData * toFetch);
+
+signals:
+    void newJobData();
+
 public slots:
     void demandJobDataRefresh();
 
 private slots:
     void refreshRunningJobList(RequestState replyState, QList<RemoteJobData> *theData);
+    void refreshRunningJobDetails(RequestState replyState, RemoteJobData *theData);
 
 private:
     QMap<QString, RemoteJobEntry *> jobData;
     RemoteDataInterface * dataLink;
-    bool jobOperationPending = false;
+    RemoteDataReply * currentJobReply = NULL;
 
     QStandardItemModel theJobList;
 };

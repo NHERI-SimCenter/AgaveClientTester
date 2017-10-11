@@ -44,6 +44,7 @@
 enum class RequestState;
 class FileMetaData;
 class RemoteDataInterface;
+class RemoteDataReply;
 
 class FileTreeNode : public QObject
 {
@@ -54,7 +55,7 @@ public:
                                                 //depending if the parent is NULL
     ~FileTreeNode();
 
-    void updateFileFolder(QList<FileMetaData> newDataList);
+    void updateFileFolder(QList<FileMetaData> * newDataList);
 
     bool isRootNode();
     FileMetaData getFileData();
@@ -71,6 +72,11 @@ public:
     bool childIsEmpty();
     void clearAllChildren();
 
+    bool haveLStask();
+    void setLStask(RemoteDataReply * newTask, bool clearData = true);
+    bool haveBuffTask();
+    void setBuffTask(RemoteDataReply * newTask);
+
     QList<FileTreeNode *> * getChildList();
     FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
 
@@ -79,13 +85,27 @@ public:
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
 
+signals:
+    void fileSystemChanged();
+
+public slots:
+    void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
+    void deliverBuffData(RequestState taskState, QByteArray * bufferData);
+
 private:
+    FileTreeNode * getPertinantNode(QList<FileMetaData> * newDataList);
+    bool verifyControlNode(QList<FileMetaData> * newDataList);
+    QString getControlAddress(QList<FileMetaData> * newDataList);
+    void updateFileNodeData(QList<FileMetaData> * newDataList);
+
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
     void constructModelNodes(QStandardItem * parentNode);
 
     FileTreeNode * pathSearchHelper(QString filename, bool stopEarly, bool unrestricted = false);
+
+    void underlyingChildChanged();
 
     FileTreeNode * myParent = NULL;
     QStandardItem * myModelNode = NULL;
@@ -95,6 +115,9 @@ private:
     bool rootNode = false;
 
     QByteArray * fileDataBuffer = NULL;
+
+    RemoteDataReply * lsTask = NULL;
+    RemoteDataReply * bufferTask = NULL;
 };
 
 #endif // FILETREENODE_H
