@@ -62,11 +62,17 @@ public:
 
     QMap<QString, RemoteJobData> getRunningJobs();
 
+    void requestJobDetails(RemoteJobData * toFetch);
+
+signals:
+    void newJobData();
+
 public slots:
     void demandJobDataRefresh();
 
 private slots:
     void refreshRunningJobList(RequestState replyState, QList<RemoteJobData> *theData);
+    void refreshRunningJobDetails(RequestState replyState, RemoteJobData *theData);
 
 private:
     QMap<QString, RemoteJobEntry *> jobData;

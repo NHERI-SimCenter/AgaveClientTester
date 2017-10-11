@@ -304,6 +304,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     }
 
     setFileBuffer(bufferData);
+    underlyingChildChanged();
 }
 
 void FileTreeNode::insertFile(FileMetaData * newData)
@@ -473,7 +474,7 @@ bool FileTreeNode::haveLStask()
     return (lsTask != NULL);
 }
 
-void FileTreeNode::setLStask(RemoteDataReply * newTask)
+void FileTreeNode::setLStask(RemoteDataReply * newTask, bool clearData)
 {
     if (lsTask != NULL)
     {
@@ -483,8 +484,11 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask)
     QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
                      this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
 
-    clearAllChildren();
-    new FileTreeNode(this);
+    if (clearData)
+    {
+        clearAllChildren();
+        new FileTreeNode(this);
+    }
 }
 
 bool FileTreeNode::haveBuffTask()

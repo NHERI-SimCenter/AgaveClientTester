@@ -59,7 +59,7 @@ void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
 {
     newTreeLink->setModel(&dataStore);
     QObject::connect(&dataStore, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
-                     newTreeLink, SLOT(fileEntryTouched()));
+                     newTreeLink, SLOT(fileEntryTouched(QModelIndex)));
 }
 
 void FileOperator::resetFileData()
@@ -119,7 +119,7 @@ void FileOperator::enactRootRefresh()
                      this, SLOT(getLSReply(RequestState,QList<FileMetaData>*)));
 }
 
-void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode)
+void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearData)
 {
     if (selectedNode->haveLStask())
     {
@@ -136,7 +136,7 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode)
         return;
     }
 
-    selectedNode->setLStask(theReply);
+    selectedNode->setLStask(theReply, clearData);
 }
 
 bool FileOperator::operationIsPending()
@@ -455,7 +455,7 @@ void FileOperator::fileNodesChange()
 void FileOperator::lsClosestNode(QString fullPath)
 {
     FileTreeNode * nodeToRefresh = rootFileNode->getClosestNodeWithName(fullPath);
-    enactFolderRefresh(nodeToRefresh);
+    enactFolderRefresh(nodeToRefresh, false);
 }
 
 void FileOperator::lsClosestNodeToParent(QString fullPath)
@@ -467,12 +467,12 @@ void FileOperator::lsClosestNodeToParent(QString fullPath)
         {
             nodeToRefresh = nodeToRefresh->getParentNode();
         }
-        enactFolderRefresh(nodeToRefresh);
+        enactFolderRefresh(nodeToRefresh, false);
         return;
     }
 
     nodeToRefresh = rootFileNode->getClosestNodeWithName(fullPath);
-    enactFolderRefresh(nodeToRefresh);
+    enactFolderRefresh(nodeToRefresh, false);
 }
 
 FileTreeNode * FileOperator::getNodeFromModel(QStandardItem * toFind)

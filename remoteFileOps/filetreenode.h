@@ -73,7 +73,7 @@ public:
     void clearAllChildren();
 
     bool haveLStask();
-    void setLStask(RemoteDataReply * newTask);
+    void setLStask(RemoteDataReply * newTask, bool clearData = true);
     bool haveBuffTask();
     void setBuffTask(RemoteDataReply * newTask);
 

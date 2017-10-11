@@ -74,7 +74,7 @@ public:
     void lsClosestNodeToParent(QString fullPath);
 
     void enactRootRefresh();
-    void enactFolderRefresh(FileTreeNode * selectedNode);
+    void enactFolderRefresh(FileTreeNode * selectedNode, bool clearData = true);
 
     void sendDeleteReq(FileTreeNode * selectedNode);
     void sendMoveReq(FileTreeNode * moveFrom, QString newName);
