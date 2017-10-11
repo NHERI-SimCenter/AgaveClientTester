@@ -85,6 +85,9 @@ public:
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
 
+signals:
+    void fileSystemChanged();
+
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
@@ -101,6 +104,8 @@ private:
     void constructModelNodes(QStandardItem * parentNode);
 
     FileTreeNode * pathSearchHelper(QString filename, bool stopEarly, bool unrestricted = false);
+
+    void underlyingChildChanged();
 
     FileTreeNode * myParent = NULL;
     QStandardItem * myModelNode = NULL;

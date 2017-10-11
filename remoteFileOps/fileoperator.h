@@ -95,6 +95,7 @@ public:
 
 signals:
     void opPendingChange(bool opPending);
+    void fileSystemChange();
 
 private slots:
     void opLockChanged(bool newVal);
@@ -113,6 +114,8 @@ private slots:
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
+
+    void fileNodesChange();
 
 private:
     QString getStringFromInitParams(QString stringKey);

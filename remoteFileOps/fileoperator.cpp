@@ -74,6 +74,9 @@ void FileOperator::resetFileData()
     }
     rootFileNode = new FileTreeNode(NULL, dataStore.invisibleRootItem());
 
+    QObject::connect(rootFileNode, SIGNAL(fileSystemChanged()),
+                     this, SLOT(fileNodesChange()));
+
     enactRootRefresh();
 }
 
@@ -442,6 +445,11 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
     }
 
     //TODO: ask for refresh of relevant containing folder
+}
+
+void FileOperator::fileNodesChange()
+{
+    emit fileSystemChange();
 }
 
 void FileOperator::lsClosestNode(QString fullPath)

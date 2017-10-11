@@ -53,6 +53,7 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
         parent->childList.append(this);
 
         constructModelNodes(parent->getModelNode());
+        myParent->underlyingChildChanged();
     }
 }
 
@@ -84,6 +85,8 @@ FileTreeNode::FileTreeNode(FileTreeNode * parent, QStandardItem * parentModelNod
         fileData->setType(FileType::UNLOADED);
 
         constructModelNodes(parent->getModelNode());
+
+        myParent->underlyingChildChanged();
     }
 }
 
@@ -479,6 +482,9 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask)
     lsTask = newTask;
     QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
                      this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
+
+    clearAllChildren();
+    new FileTreeNode(this);
 }
 
 bool FileTreeNode::haveBuffTask()
@@ -569,4 +575,16 @@ QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
         return QString::number(fileData->getSize());
     }
     return "";
+}
+
+void FileTreeNode::underlyingChildChanged()
+{
+    if (rootNode == false)
+    {
+        myParent->underlyingChildChanged();
+    }
+    else
+    {
+        emit fileSystemChanged();
+    }
 }
