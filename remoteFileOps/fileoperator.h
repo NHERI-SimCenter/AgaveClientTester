@@ -94,12 +94,10 @@ public:
     bool deletePopup(FileTreeNode * toDelete);
 
 signals:
-    void opPendingChange(bool opPending);
+    void fileOpDone(RequestState opState);
     void fileSystemChange();
 
 private slots:
-    void opLockChanged(bool newVal);
-
     void getLSReply(RequestState replyState,QList<FileMetaData> * newFileData);
 
     void getDeleteReply(RequestState replyState);

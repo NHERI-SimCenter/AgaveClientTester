@@ -51,8 +51,6 @@ FileOperator::FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver *
 
     //Note: will be deconstructed with parent
     fileOpPending = new EasyBoolLock(this);
-    QObject::connect(fileOpPending, SIGNAL(lockStateChanged(bool)),
-                     this, SLOT(opLockChanged(bool)));
 }
 
 void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
@@ -144,11 +142,6 @@ bool FileOperator::operationIsPending()
     return fileOpPending->lockClosed();
 }
 
-void FileOperator::opLockChanged(bool newVal)
-{
-    emit opPendingChange(newVal);
-}
-
 void FileOperator::sendDeleteReq(FileTreeNode * selectedNode)
 {
     if (!fileOpPending->checkAndClaim()) return;
@@ -179,6 +172,9 @@ void FileOperator::getLSReply(RequestState replyState,QList<FileMetaData> * newF
 void FileOperator::getDeleteReply(RequestState replyState)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -208,6 +204,9 @@ void FileOperator::sendMoveReq(FileTreeNode * moveFrom, QString newName)
 void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedFileData)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -238,6 +237,9 @@ void FileOperator::sendCopyReq(FileTreeNode * copyFrom, QString newName)
 void FileOperator::getCopyReply(RequestState replyState, FileMetaData * newFileData)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -266,6 +268,9 @@ void FileOperator::sendRenameReq(FileTreeNode * selectedNode, QString newName)
 void FileOperator::getRenameReply(RequestState replyState, FileMetaData * newFileData)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -296,6 +301,9 @@ void FileOperator::sendCreateFolderReq(FileTreeNode * selectedNode, QString newN
 void FileOperator::getMkdirReply(RequestState replyState, FileMetaData * newFolderData)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -322,6 +330,9 @@ void FileOperator::sendUploadReq(FileTreeNode * uploadTarget, QString localFile)
 void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFileData)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         return;
@@ -348,6 +359,9 @@ void FileOperator::sendDownloadReq(FileTreeNode * targetFile, QString localDest)
 void FileOperator::getDownloadReply(RequestState replyState)
 {
     fileOpPending->release();
+
+    emit fileOpDone(replyState);
+
     if (replyState != RequestState::GOOD)
     {
         quickInfoPopup("Error: Unable to download requested file.");
@@ -401,6 +415,9 @@ void FileOperator::sendCompressReq(FileTreeNode * selectedFolder)
 void FileOperator::getCompressReply(RequestState finalState, QJsonDocument *)
 {
     fileOpPending->release();
+
+    emit fileOpDone(finalState);
+
     if (finalState != RequestState::GOOD)
     {
         //TODO: give reasonable error
@@ -438,6 +455,9 @@ void FileOperator::sendDecompressReq(FileTreeNode * selectedFolder)
 void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
 {
     fileOpPending->release();
+
+    emit fileOpDone(finalState);
+
     if (finalState != RequestState::GOOD)
     {
         //TODO: give reasonable error
@@ -455,7 +475,7 @@ void FileOperator::fileNodesChange()
 void FileOperator::lsClosestNode(QString fullPath)
 {
     FileTreeNode * nodeToRefresh = rootFileNode->getClosestNodeWithName(fullPath);
-    enactFolderRefresh(nodeToRefresh, false);
+    enactFolderRefresh(nodeToRefresh);
 }
 
 void FileOperator::lsClosestNodeToParent(QString fullPath)
@@ -467,12 +487,12 @@ void FileOperator::lsClosestNodeToParent(QString fullPath)
         {
             nodeToRefresh = nodeToRefresh->getParentNode();
         }
-        enactFolderRefresh(nodeToRefresh, false);
+        enactFolderRefresh(nodeToRefresh);
         return;
     }
 
     nodeToRefresh = rootFileNode->getClosestNodeWithName(fullPath);
-    enactFolderRefresh(nodeToRefresh, false);
+    enactFolderRefresh(nodeToRefresh);
 }
 
 FileTreeNode * FileOperator::getNodeFromModel(QStandardItem * toFind)
