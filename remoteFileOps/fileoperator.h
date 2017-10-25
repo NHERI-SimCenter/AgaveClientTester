@@ -84,6 +84,7 @@ public:
     void sendCreateFolderReq(FileTreeNode * selectedNode, QString newName);
 
     void sendUploadReq(FileTreeNode * uploadTarget, QString localFile);
+    void sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fileBuff, QString newName);
     void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
     void sendDownloadBuffReq(FileTreeNode * targetFile);
 

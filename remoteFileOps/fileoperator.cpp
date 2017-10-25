@@ -327,6 +327,20 @@ void FileOperator::sendUploadReq(FileTreeNode * uploadTarget, QString localFile)
                      this, SLOT(getUploadReply(RequestState,FileMetaData*)));
 }
 
+void FileOperator::sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fileBuff, QString newName)
+{
+    if (!fileOpPending->checkAndClaim()) return;
+    qDebug("Starting upload procedure: to %s", qPrintable(uploadTarget->getFileData().getFullPath()));
+    RemoteDataReply * theReply = dataLink->uploadBuffer(uploadTarget->getFileData().getFullPath(), fileBuff, newName);
+    if (theReply == NULL)
+    {
+        fileOpPending->release();
+        return;
+    }
+    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
+                     this, SLOT(getUploadReply(RequestState,FileMetaData*)));
+}
+
 void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFileData)
 {
     fileOpPending->release();
