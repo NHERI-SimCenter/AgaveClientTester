@@ -84,6 +84,7 @@ public:
     void sendCreateFolderReq(FileTreeNode * selectedNode, QString newName);
 
     void sendUploadReq(FileTreeNode * uploadTarget, QString localFile);
+    void sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fileBuff, QString newName);
     void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
     void sendDownloadBuffReq(FileTreeNode * targetFile);
 
@@ -94,12 +95,10 @@ public:
     bool deletePopup(FileTreeNode * toDelete);
 
 signals:
-    void opPendingChange(bool opPending);
+    void fileOpDone(RequestState opState);
     void fileSystemChange();
 
 private slots:
-    void opLockChanged(bool newVal);
-
     void getLSReply(RequestState replyState,QList<FileMetaData> * newFileData);
 
     void getDeleteReply(RequestState replyState);
