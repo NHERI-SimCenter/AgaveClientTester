@@ -53,7 +53,6 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
         parent->childList.append(this);
 
         constructModelNodes(parent->getModelNode());
-        myParent->underlyingChildChanged();
     }
 }
 
@@ -85,8 +84,6 @@ FileTreeNode::FileTreeNode(FileTreeNode * parent, QStandardItem * parentModelNod
         fileData->setType(FileType::UNLOADED);
 
         constructModelNodes(parent->getModelNode());
-
-        myParent->underlyingChildChanged();
     }
 }
 
@@ -245,6 +242,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         emptyFolder.setFullFilePath(emptyName);
         emptyFolder.setType(FileType::EMPTY_FOLDER);
         new FileTreeNode(emptyFolder,this);
+        underlyingChildChanged();
         return;
     }
 
@@ -266,6 +264,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         insertFile(&(*itr));
     }
+    underlyingChildChanged();
 }
 
 QList<FileTreeNode *> * FileTreeNode::getChildList()
@@ -406,7 +405,19 @@ QStandardItem * FileTreeNode::getModelNode()
 
 void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 {
-    fileDataBuffer = new QByteArray(*newFileBuffer);
+    if (fileDataBuffer != NULL)
+    {
+        delete fileDataBuffer;
+    }
+
+    if (newFileBuffer == NULL)
+    {
+        fileDataBuffer = NULL;
+    }
+    else
+    {
+        fileDataBuffer = new QByteArray(*newFileBuffer);
+    }
 }
 
 bool FileTreeNode::nodeWithNameIsLoading(QString filename)
