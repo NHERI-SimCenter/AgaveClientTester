@@ -102,35 +102,20 @@ void ExplorerWindow::startAndShow()
 
 void ExplorerWindow::addAppToList(QString appName)
 {
-    if (appName == "cwe-create")
+    if (appName == "cwe-mesh")
     {
-        agaveParamLists.insert("cwe-create", {"newFolder", "template"});
-        taskListModel.appendRow(new QStandardItem("cwe-create"));
-    }
-    else if (appName == "cwe-update")
-    {
-        agaveParamLists.insert("cwe-update", {"params"});
-        taskListModel.appendRow(new QStandardItem("cwe-update"));
-    }
-    else if (appName == "cwe-exec-serial")
-    {
-        agaveParamLists.insert("cwe-exec-serial", {"action", "infile"});
-        taskListModel.appendRow(new QStandardItem("cwe-exec-serial"));
+        agaveParamLists.insert("cwe-mesh", {});
+        taskListModel.appendRow(new QStandardItem("cwe-mesh"));
     }
     else if (appName == "cwe-sim")
     {
-        agaveParamLists.insert("cwe-sim", {"solver"});
+        agaveParamLists.insert("cwe-sim", {});
         taskListModel.appendRow(new QStandardItem("cwe-sim"));
     }
-    else if (appName == "cwe-delete")
+    else if (appName == "cwe-post")
     {
-        agaveParamLists.insert("cwe-delete", {"step"});
-        taskListModel.appendRow(new QStandardItem("cwe-delete"));
-    }
-    else if (appName == "cwe-dup")
-    {
-        agaveParamLists.insert("cwe-dup", {"newFolder", "toCopy"});
-        taskListModel.appendRow(new QStandardItem("cwe-dup"));
+        agaveParamLists.insert("cwe-post", {});
+        taskListModel.appendRow(new QStandardItem("cwe-post"));
     }
 }
 
