@@ -57,7 +57,7 @@ ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
     programDriver = theDriver;
     dataLink = programDriver->getDataConnection();
 
-    agaveParamLists.insert("compress",{"directory", "compression_type"});
+    agaveParamLists.insert("compress",{"compression_type"});
     agaveParamLists.insert("extract", {"inputFile"});
     agaveParamLists.insert("openfoam", {"solver","inputDirectory"});
 
