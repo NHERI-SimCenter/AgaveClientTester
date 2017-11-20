@@ -43,7 +43,7 @@
 #include "../AgaveClientInterface/agaveInterfaces/agavehandler.h"
 #include "../AgaveClientInterface/agaveInterfaces/agavetaskreply.h"
 
-ExplorerDriver::ExplorerDriver(QObject *parent) : AgaveSetupDriver(parent)
+ExplorerDriver::ExplorerDriver(QObject *parent, bool debug) : AgaveSetupDriver(parent, debug)
 {
     AgaveHandler * tmpHandle = new AgaveHandler(this);
     tmpHandle->registerAgaveAppInfo("compress", "compress-0.1u1",{"directory", "compression_type"},{},"directory");
