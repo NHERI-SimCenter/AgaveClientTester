@@ -45,7 +45,7 @@ class ExplorerDriver : public AgaveSetupDriver
     Q_OBJECT
 
 public:
-    explicit ExplorerDriver(QObject *parent = nullptr);
+    explicit ExplorerDriver(QObject *parent = nullptr, bool debug = false);
     ~ExplorerDriver();
 
     virtual void startup();
