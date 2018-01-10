@@ -81,6 +81,7 @@ public:
     FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
 
     bool fileNameMatches(QString folderToMatch);
+    bool isFolder();
 
     //TODO: Clean up the code to make the algorithms using marks cleaner
     bool marked = false;
