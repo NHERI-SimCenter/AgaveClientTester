@@ -574,6 +574,19 @@ bool FileTreeNode::fileNameMatches(QString fileToMatch)
     return (checkNode == this);
 }
 
+bool FileTreeNode::isFolder()
+{
+    if (fileData == NULL)
+    {
+        return false;
+    }
+    if (fileData->getFileType() == FileType::DIR)
+    {
+        return true;
+    }
+    return false;
+}
+
 QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
 {
     QString headerText = fullModel->horizontalHeaderItem(i)->text();
