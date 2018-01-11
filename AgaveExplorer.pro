@@ -45,6 +45,7 @@ SOURCES += main.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskguide.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskreply.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.cpp \
     ../AgaveClientInterface/remotedatainterface.cpp \
     ../AgaveClientInterface/filemetadata.cpp \
     ../AgaveClientInterface/remotejobdata.cpp \
