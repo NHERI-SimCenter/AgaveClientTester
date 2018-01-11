@@ -438,7 +438,7 @@ void FileOperator::getCompressReply(RequestState finalState, QJsonDocument *)
         return;
     }
 
-    //TODO: ask for refresh of relevant containing folder
+    //TODO: ask for refresh of relevant containing folder, after finishing job
 }
 
 void FileOperator::sendDecompressReq(FileTreeNode * selectedFolder)
@@ -478,7 +478,7 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
         return;
     }
 
-    //TODO: ask for refresh of relevant containing folder
+    //TODO: ask for refresh of relevant containing folder, after finishing job
 }
 
 void FileOperator::fileNodesChange()
