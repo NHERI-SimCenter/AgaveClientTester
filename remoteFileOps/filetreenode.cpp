@@ -302,6 +302,8 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
         return;
     }
 
+    qDebug("Download of buffer complete: %s", qPrintable(fileData->getFullPath()));
+
     setFileBuffer(bufferData);
     underlyingChildChanged();
 }
