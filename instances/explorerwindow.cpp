@@ -41,7 +41,6 @@
 
 #include "remoteFileOps/filetreenode.h"
 #include "remoteFileOps/fileoperator.h"
-#include "remoteFileOps/remotefiletree.h"
 #include "remoteFileOps/joboperator.h"
 
 #include "../utilFuncs/singlelinedialog.h"

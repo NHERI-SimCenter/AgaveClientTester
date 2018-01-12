@@ -35,8 +35,6 @@
 
 #include "remotejobentry.h"
 
-#include "../AgaveClientInterface/remotejobdata.h"
-
 RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItem * modelParent, QObject *parent) : QObject(parent)
 {
     modelParentNode = modelParent;
