@@ -37,8 +37,6 @@
 #define FILETREENODE_H
 
 #include <QObject>
-#include <QList>
-#include <QByteArray>
 #include <QStandardItem>
 
 enum class RequestState;

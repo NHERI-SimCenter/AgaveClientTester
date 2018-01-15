@@ -36,7 +36,6 @@
 #ifndef SELECTEDFILELABEL_H
 #define SELECTEDFILELABEL_H
 
-#include <QObject>
 #include <QLabel>
 
 class FileTreeNode;

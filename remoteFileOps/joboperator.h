@@ -37,11 +37,8 @@
 #define JOBOPERATOR_H
 
 #include <QObject>
-#include <QList>
-#include <QListView>
+#include <QMap>
 #include <QStandardItemModel>
-#include <QString>
-
 #include <QTimer>
 
 class RemoteFileWindow;

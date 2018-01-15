@@ -37,13 +37,9 @@
 #define EXPLORERWINDOW_H
 
 #include <QMainWindow>
-#include <QTreeView>
 #include <QStandardItemModel>
-#include <QStackedWidget>
 #include <QLineEdit>
-
-#include <QMap>
-#include <QStringList>
+#include <QMenu>
 
 class RemoteFileTree;
 class FileMetaData;

@@ -35,7 +35,6 @@
 
 #include "joboperator.h"
 
-#include "remotefiletree.h"
 #include "remotejoblister.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../AgaveClientInterface/remotejobdata.h"

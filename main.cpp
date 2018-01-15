@@ -34,13 +34,10 @@
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
 #include <QApplication>
-#include <QObject>
 #include <QtGlobal>
 #include <QFile>
-
 #include <QSslSocket>
 
-#include "instances/explorerwindow.h"
 #include "instances/explorerdriver.h"
 
 void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
@@ -65,7 +62,6 @@ int main(int argc, char *argv[])
     {
         qInstallMessageHandler(emptyMessageHandler);
     }
-
 
     ExplorerDriver programDriver(NULL, debugLoggingEnabled);
 

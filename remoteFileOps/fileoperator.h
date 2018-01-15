@@ -40,9 +40,8 @@
 #define FILEOPERATOR_H
 
 #include <QObject>
-#include <QList>
 #include <QStandardItemModel>
-#include <QStandardItem>
+#include <QMessageBox>
 
 class RemoteFileTree;
 class FileMetaData;
