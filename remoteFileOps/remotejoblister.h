@@ -37,7 +37,6 @@
 #define REMOTEJOBLISTER_H
 
 #include <QTableView>
-#include <QMenu>
 
 class JobOperator;
 

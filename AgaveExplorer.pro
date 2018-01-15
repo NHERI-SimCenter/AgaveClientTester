@@ -45,6 +45,7 @@ SOURCES += main.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavehandler.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskguide.cpp \
     ../AgaveClientInterface/agaveInterfaces/agavetaskreply.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.cpp \
     ../AgaveClientInterface/remotedatainterface.cpp \
     ../AgaveClientInterface/filemetadata.cpp \
     ../AgaveClientInterface/remotejobdata.cpp \
@@ -64,7 +65,6 @@ SOURCES += main.cpp \
     utilFuncs/singlelinedialog.cpp \
     remoteFileOps/remotejobentry.cpp \
     remoteFileOps/selectedfilelabel.cpp
-    main.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -99,7 +99,8 @@ HEADERS += \
     utilFuncs/copyrightdialog.h \
     utilFuncs/singlelinedialog.h \
     remoteFileOps/remotejobentry.h \
-    remoteFileOps/selectedfilelabel.h
+    remoteFileOps/selectedfilelabel.h \
+    ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.h
 
 FORMS += \
     instances/explorerwindow.ui \

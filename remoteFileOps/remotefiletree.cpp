@@ -35,9 +35,6 @@
 
 #include "remotefiletree.h"
 
-#include "../AgaveClientInterface/remotedatainterface.h"
-#include "../AgaveClientInterface/filemetadata.h"
-
 #include "fileoperator.h"
 #include "filetreenode.h"
 

@@ -34,8 +34,8 @@
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
 #include "explorerdriver.h"
-#include "explorerwindow.h"
 
+#include "explorerwindow.h"
 #include "utilFuncs/authform.h"
 #include "remoteFileOps/fileoperator.h"
 #include "remoteFileOps/joboperator.h"
