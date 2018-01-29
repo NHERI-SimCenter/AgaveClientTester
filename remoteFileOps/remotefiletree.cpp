@@ -43,6 +43,7 @@ RemoteFileTree::RemoteFileTree(QWidget *parent) :
 {
     QObject::connect(this, SIGNAL(expanded(QModelIndex)), this, SLOT(folderExpanded(QModelIndex)));
     QObject::connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(fileEntryTouched(QModelIndex)));
+    this->setEditTriggers(QTreeView::NoEditTriggers);
 }
 
 void RemoteFileTree::setFileOperator(FileOperator * theOperator)
