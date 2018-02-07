@@ -105,6 +105,11 @@ void JobOperator::refreshRunningJobDetails(RequestState replyState, RemoteJobDat
         RemoteJobEntry * theItem = jobData.value(theData->getID());
         theItem->setDetails(theData->getInputs(), theData->getParams());
     }
+    else
+    {
+        RemoteJobEntry * theItem = new RemoteJobEntry(*theData, theJobList.invisibleRootItem(), this);
+        jobData.insert(theItem->getData().getID(), theItem);
+    }
 }
 
 QMap<QString, RemoteJobData> JobOperator::getRunningJobs()
