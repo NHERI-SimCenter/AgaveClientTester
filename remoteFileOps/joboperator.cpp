@@ -45,6 +45,14 @@ JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : 
     dataLink = newDataLink;
 }
 
+JobOperator::~JobOperator()
+{
+    for (auto itr = jobData.begin(); itr != jobData.end(); itr++)
+    {
+        delete (*itr);
+    }
+}
+
 void JobOperator::linkToJobLister(RemoteJobLister * newLister)
 {
     newLister->setModel(&theJobList);
@@ -75,7 +83,7 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         }
         else
         {
-            RemoteJobEntry * theItem = new RemoteJobEntry(*itr, theJobList.invisibleRootItem(), this);
+            RemoteJobEntry * theItem = new RemoteJobEntry(*itr, &theJobList, this);
             jobData.insert(theItem->getData().getID(), theItem);
         }
         if (!notDone && ((*itr).getState() != "FINISHED") && ((*itr).getState() != "FAILED"))
@@ -107,7 +115,7 @@ void JobOperator::refreshRunningJobDetails(RequestState replyState, RemoteJobDat
     }
     else
     {
-        RemoteJobEntry * theItem = new RemoteJobEntry(*theData, theJobList.invisibleRootItem(), this);
+        RemoteJobEntry * theItem = new RemoteJobEntry(*theData, &theJobList, this);
         jobData.insert(theItem->getData().getID(), theItem);
     }
 }

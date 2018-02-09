@@ -35,10 +35,28 @@
 
 #include "remotejobentry.h"
 
-RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItem * modelParent, QObject *parent) : QObject(parent)
+#include "../utilFuncs/linkedstandarditem.h"
+
+RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent) : QObject(parent)
 {
-    modelParentNode = modelParent;
+    myModel = theModel;
+    if (myModel == NULL)
+    {
+        this->deleteLater();
+        return;
+    }
+
     setData(newData);
+}
+
+RemoteJobEntry::~RemoteJobEntry()
+{
+    //TODO: Fix error if model deleted first
+    while (!myModelItems.isEmpty())
+    {
+        QStandardItem * anItem = myModelItems.takeLast();
+        delete anItem;
+    }
 }
 
 void RemoteJobEntry::setData(RemoteJobData newData)
@@ -50,26 +68,56 @@ void RemoteJobEntry::setData(RemoteJobData newData)
     }
     myData = newData;
 
-    if (myModelNode == NULL)
+    if (myModelItems.size() == 0)
     {
-        QList<QStandardItem *> newRow;
-        myModelNode = new QStandardItem(myData.getName());
-        newRow.append(myModelNode);
-        newRow.append(new QStandardItem(myData.getState()));
-        newRow.append(new QStandardItem(myData.getApp()));
-        newRow.append(new QStandardItem(myData.getTimeCreated().toString()));
-        newRow.append(new QStandardItem(myData.getID()));
-        modelParentNode->insertRow(0,newRow);
-    }
-    else
-    {
-        int rowNum = myModelNode->row();
+        int numHeaders = 0;
+        QStandardItem * headerItem = myModel->horizontalHeaderItem(numHeaders);
+        while (headerItem != NULL)
+        {
+            myModelItems.append(new LinkedStandardItem(this));
 
-        modelParentNode->child(rowNum,0)->setText(myData.getName());
-        modelParentNode->child(rowNum,1)->setText(myData.getState());
-        modelParentNode->child(rowNum,2)->setText(myData.getApp());
-        modelParentNode->child(rowNum,3)->setText(myData.getTimeCreated().toString());
-        modelParentNode->child(rowNum,4)->setText(myData.getID());
+            numHeaders++;
+            headerItem = myModel->horizontalHeaderItem(numHeaders);
+        }
+
+        myModel->insertRow(0, myModelItems);
+    }
+
+    int i = 0;
+    QStandardItem * headerItem = myModel->horizontalHeaderItem(i);
+    while (headerItem != NULL)
+    {
+        QString headerText = headerItem->text();
+        QStandardItem * dataEntry = myModelItems.at(i);
+        if (dataEntry == NULL)
+        {
+            qDebug("ERROR: Column Mismatch in job list.");
+            return;
+        }
+
+        if (headerText == "Task Name")
+        {
+            dataEntry->setText(myData.getName());
+        }
+        else if (headerText == "State")
+        {
+            dataEntry->setText(myData.getState());
+        }
+        else if (headerText == "Agave App")
+        {
+            dataEntry->setText(myData.getApp());
+        }
+        else if (headerText == "Time Created")
+        {
+            dataEntry->setText(myData.getTimeCreated().toString());
+        }
+        else if (headerText == "Agave ID")
+        {
+            dataEntry->setText(myData.getID());
+        }
+
+        i++;
+        headerItem = myModel->horizontalHeaderItem(i);
     }
 
     if (signalChange)

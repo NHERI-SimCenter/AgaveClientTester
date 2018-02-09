@@ -55,6 +55,7 @@ class JobOperator : public QObject
     Q_OBJECT
 public:
     explicit JobOperator(RemoteDataInterface * newDataLink, QObject * parent);
+    ~JobOperator();
     void linkToJobLister(RemoteJobLister * newLister);
 
     QMap<QString, RemoteJobData> getRunningJobs();

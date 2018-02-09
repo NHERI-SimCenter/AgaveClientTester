@@ -39,13 +39,16 @@
 #include <QObject>
 #include <QStandardItem>
 
+class LinkedStandardItem;
+
 #include "../AgaveClientInterface/remotejobdata.h"
 
 class RemoteJobEntry : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteJobEntry(RemoteJobData newData, QStandardItem * modelParent, QObject *parent = nullptr);
+    explicit RemoteJobEntry(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent = nullptr);
+    ~RemoteJobEntry();
 
     void setData(RemoteJobData newData);
     RemoteJobData getData();
@@ -55,8 +58,8 @@ signals:
     void jobStateChanged(RemoteJobData * jobData);
 
 private:
-    QStandardItem * modelParentNode = NULL;
-    QStandardItem * myModelNode = NULL;
+    QStandardItemModel * myModel = NULL;
+    QList<QStandardItem *> myModelItems;
     RemoteJobData myData;
 };
 
