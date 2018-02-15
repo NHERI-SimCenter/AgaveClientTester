@@ -14,8 +14,3 @@ QObject * LinkedStandardItem::getLinkedObject()
 {
     return myLinkedObject;
 }
-
-template <class T> T * LinkedStandardItem::linked_obj_cast()
-{
-    return qobject_cast<T *>(myLinkedObject);
-}

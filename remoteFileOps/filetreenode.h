@@ -39,50 +39,47 @@
 #include <QObject>
 #include <QStandardItem>
 
+enum class NodeState {FILE_BUFF_LOADED, FILE_BUFF_RELOADING, FILE_BUFF_LOADING, FILE_KNOWN, FILE_SPECULATE,
+                      FOLDER_CONTENTS_LOADED, FOLDER_CONTENTS_RELOADING, FOLDER_CONTENTS_LOADING, FOLDER_KNOWN_CONTENTS_NOT, FOLDER_SPECULATE,
+                     ERROR};
+
 enum class RequestState;
 class FileMetaData;
 class RemoteDataInterface;
 class RemoteDataReply;
+class LinkedStandardItem;
 
 class FileTreeNode : public QObject
 {
     Q_OBJECT
 public:
     FileTreeNode(FileMetaData contents, FileTreeNode * parent = NULL);
-    FileTreeNode(FileTreeNode * parent = NULL, QStandardItem * parentModelNode = NULL); //This creates either the default root folder, or default load pending,
-                                                //depending if the parent is NULL
+    FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName, QObject * parent = NULL); //This creates the default root folder
     ~FileTreeNode();
 
-    void updateFileFolder(QList<FileMetaData> * newDataList); //DEPRECATED
-
     bool isRootNode();
+    bool nodeIsDisplayed();
+    void displayNode();
+    NodeState getNodeState();
     FileMetaData getFileData();
     QByteArray * getFileBuffer();
-    QStandardItem * getModelNode();
-    void setFileBuffer(QByteArray * newFileBuffer);
-
-    bool nodeWithNameIsLoading(QString filename);
-    FileTreeNode * getNodeWithName(QString filename, bool unrestricted = false);
-    FileTreeNode * getClosestNodeWithName(QString filename, bool unrestricted = false);
+    QList<LinkedStandardItem *> getModelNodes();
+    FileTreeNode * getNodeWithName(QString filename);
+    FileTreeNode * getClosestNodeWithName(QString filename);
     FileTreeNode * getParentNode();
 
-    bool childIsUnloaded();
-    bool childIsEmpty();
-    void clearAllChildren();
+    void setFileBuffer(QByteArray * newFileBuffer);
 
     bool haveLStask();
     void setLStask(RemoteDataReply * newTask, bool clearData = true);
     bool haveBuffTask();
     void setBuffTask(RemoteDataReply * newTask);
 
-    QList<FileTreeNode *> * getChildList();
-    FileTreeNode * getChildNodeWithName(QString filename, bool unrestricted = false);
+    QList<FileTreeNode *> getChildList();
+    FileTreeNode * getChildNodeWithName(QString filename);
 
     bool fileNameMatches(QString folderToMatch);
     bool isFolder();
-
-    //TODO: Clean up the code to make the algorithms using marks cleaner
-    bool marked = false;
 
 signals:
     void fileSystemChanged();
@@ -91,27 +88,31 @@ public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
+private slots:
+    void fileTreeChanged();
+
 private:
-    FileTreeNode * getPertinantNode(QList<FileMetaData> * newDataList);
+    void getModelLink();
+    FileTreeNode * pathSearchHelper(QString filename, bool stopEarly);
+
     bool verifyControlNode(QList<FileMetaData> * newDataList);
     QString getControlAddress(QList<FileMetaData> * newDataList);
     void updateFileNodeData(QList<FileMetaData> * newDataList);
 
+    void clearAllChildren();
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
-    void constructModelNodes(QStandardItem * parentNode);
+    void addUpdateModelNodes();
 
-    FileTreeNode * pathSearchHelper(QString filename, bool stopEarly, bool unrestricted = false);
-
-    void underlyingChildChanged();
-
+    QStandardItemModel * myModel = NULL;
     FileTreeNode * myParent = NULL;
-    QStandardItem * myModelNode = NULL;
+    QList<LinkedStandardItem *> myModelNodes;
+    LinkedStandardItem * myLoadingNode = NULL;
+    LinkedStandardItem * myEmptyNode = NULL;
 
     FileMetaData * fileData = NULL;
     QList<FileTreeNode *> childList;
-    bool rootNode = false;
 
     QByteArray * fileDataBuffer = NULL;
 

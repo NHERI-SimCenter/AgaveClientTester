@@ -38,7 +38,7 @@
 #include "remotejoblister.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../AgaveClientInterface/remotejobdata.h"
-#include "remotejobentry.h"
+#include "joblistnode.h"
 
 JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : QObject((QObject *)parent)
 {
@@ -78,12 +78,12 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     {
         if (jobData.contains((*itr).getID()))
         {
-            RemoteJobEntry * theItem = jobData.value((*itr).getID());
+            JobListNode * theItem = jobData.value((*itr).getID());
             theItem->setData(*itr);
         }
         else
         {
-            RemoteJobEntry * theItem = new RemoteJobEntry(*itr, &theJobList, this);
+            JobListNode * theItem = new JobListNode(*itr, &theJobList, this);
             jobData.insert(theItem->getData().getID(), theItem);
         }
         if (!notDone && ((*itr).getState() != "FINISHED") && ((*itr).getState() != "FAILED"))
@@ -110,12 +110,12 @@ void JobOperator::refreshRunningJobDetails(RequestState replyState, RemoteJobDat
 
     if (jobData.contains(theData->getID()))
     {
-        RemoteJobEntry * theItem = jobData.value(theData->getID());
+        JobListNode * theItem = jobData.value(theData->getID());
         theItem->setDetails(theData->getInputs(), theData->getParams());
     }
     else
     {
-        RemoteJobEntry * theItem = new RemoteJobEntry(*theData, &theJobList, this);
+        JobListNode * theItem = new JobListNode(*theData, &theJobList, this);
         jobData.insert(theItem->getData().getID(), theItem);
     }
 }

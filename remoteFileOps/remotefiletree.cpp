@@ -35,6 +35,7 @@
 
 #include "remotefiletree.h"
 
+#include "../utilFuncs/linkedstandarditem.h"
 #include "fileoperator.h"
 #include "filetreenode.h"
 
@@ -82,7 +83,7 @@ void RemoteFileTree::folderExpanded(QModelIndex fileIndex)
     fileEntryTouched(fileIndex);
     FileTreeNode * selectedItem = getSelectedNode();
     if (selectedItem == NULL) return;
-    if (!selectedItem->childIsUnloaded()) return;
+    if (selectedItem->getNodeState() == NodeState::FOLDER_CONTENTS_LOADED) return;
 
     myFileOperator->enactFolderRefresh(selectedItem);
 }
@@ -96,15 +97,23 @@ void RemoteFileTree::fileEntryTouched(QModelIndex itemTouched)
     {
         return;
     }
-    QStandardItem * parentNode = selectedItem->parent();
-    int rowNum = selectedItem->row();
-    if (parentNode == NULL)
+
+    LinkedStandardItem * linkedItem = (LinkedStandardItem *)(selectedItem);
+
+    FileTreeNode * clickedNode = qobject_cast<FileTreeNode *>(linkedItem->getLinkedObject());
+    if (clickedNode == NULL)
     {
-        parentNode = dataStore->invisibleRootItem();
+        return;
     }
 
-    this->selectionModel()->select(QItemSelection(parentNode->child(rowNum, 0)->index(),
-                                                  parentNode->child(rowNum, parentNode->columnCount() - 1)->index()),
+    QList<LinkedStandardItem *> modelNodeList = clickedNode->getModelNodes();
+    if (modelNodeList.isEmpty())
+    {
+        return;
+    }
+
+    this->selectionModel()->select(QItemSelection(modelNodeList.at(0)->index(),
+                                                  modelNodeList.at(modelNodeList.size()-1)->index()),
                                    QItemSelectionModel::Select);
     emit newFileSelected(getSelectedNode());
 }

@@ -53,6 +53,11 @@ FileOperator::FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver *
     fileOpPending = new EasyBoolLock(this);
 }
 
+FileOperator::~FileOperator()
+{
+    delete rootFileNode;
+}
+
 void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
 {
     newTreeLink->setModel(&dataStore);
@@ -70,7 +75,7 @@ void FileOperator::resetFileData()
     {
         rootFileNode->deleteLater();
     }
-    rootFileNode = new FileTreeNode(NULL, dataStore.invisibleRootItem());
+    rootFileNode = new FileTreeNode(&dataStore, dataLink->getUserName(), this);
 
     QObject::connect(rootFileNode, SIGNAL(fileSystemChanged()),
                      this, SLOT(fileNodesChange()));
@@ -113,8 +118,7 @@ void FileOperator::enactRootRefresh()
         return;
     }
 
-    QObject::connect(theReply, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
-                     this, SLOT(getLSReply(RequestState,QList<FileMetaData>*)));
+    rootFileNode->setLStask(theReply, false);
 }
 
 void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearData)
@@ -157,16 +161,6 @@ void FileOperator::sendDeleteReq(FileTreeNode * selectedNode)
     }
     QObject::connect(theReply, SIGNAL(haveDeleteReply(RequestState)),
                      this, SLOT(getDeleteReply(RequestState)));
-}
-
-void FileOperator::getLSReply(RequestState replyState,QList<FileMetaData> * newFileData)
-{
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
-    rootFileNode->updateFileFolder(newFileData);
 }
 
 void FileOperator::getDeleteReply(RequestState replyState)

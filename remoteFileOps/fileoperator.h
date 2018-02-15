@@ -58,6 +58,7 @@ class FileOperator : public QObject
 
 public:
     FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver * parent);
+    ~FileOperator();
     void linkToFileTree(RemoteFileTree * newTreeLink);
 
     void resetFileData();
@@ -98,8 +99,6 @@ signals:
     void fileSystemChange();
 
 private slots:
-    void getLSReply(RequestState replyState,QList<FileMetaData> * newFileData);
-
     void getDeleteReply(RequestState replyState);
     void getMoveReply(RequestState replyState, FileMetaData * revisedFileData);
     void getCopyReply(RequestState replyState, FileMetaData * newFileData);

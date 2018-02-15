@@ -45,7 +45,7 @@ class RemoteFileWindow;
 class RemoteDataInterface;
 class RemoteJobLister;
 class RemoteJobData;
-class RemoteJobEntry;
+class JobListNode;
 class RemoteDataReply;
 
 enum class RequestState;
@@ -73,7 +73,7 @@ private slots:
     void refreshRunningJobDetails(RequestState replyState, RemoteJobData *theData);
 
 private:
-    QMap<QString, RemoteJobEntry *> jobData;
+    QMap<QString, JobListNode *> jobData;
     RemoteDataInterface * dataLink;
     RemoteDataReply * currentJobReply = NULL;
 

@@ -33,11 +33,11 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "remotejobentry.h"
+#include "joblistnode.h"
 
 #include "../utilFuncs/linkedstandarditem.h"
 
-RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent) : QObject(parent)
+JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent) : QObject(parent)
 {
     myModel = theModel;
     if (myModel == NULL)
@@ -49,7 +49,7 @@ RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItemModel * theMo
     setData(newData);
 }
 
-RemoteJobEntry::~RemoteJobEntry()
+JobListNode::~JobListNode()
 {
     //TODO: Fix error if model deleted first
     while (!myModelItems.isEmpty())
@@ -59,7 +59,7 @@ RemoteJobEntry::~RemoteJobEntry()
     }
 }
 
-void RemoteJobEntry::setData(RemoteJobData newData)
+void JobListNode::setData(RemoteJobData newData)
 {
     bool signalChange = false;
     if ((newData.getState() != myData.getState()) && (myData.getState() != "APP_INIT"))
@@ -126,12 +126,12 @@ void RemoteJobEntry::setData(RemoteJobData newData)
     }
 }
 
-RemoteJobData RemoteJobEntry::getData()
+RemoteJobData JobListNode::getData()
 {
     return myData;
 }
 
-void RemoteJobEntry::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
+void JobListNode::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
 {
     myData.setDetails(inputs, params);
 }
