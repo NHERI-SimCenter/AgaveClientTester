@@ -46,15 +46,13 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     myParent = parent;
     parent->childList.append(this);
 
-    QObject::connect(this, SIGNAL(fileSystemChanged()), myParent, SLOT(fileTreeChanged()));
+    QObject::connect(this, SIGNAL(fileDataChanged()), myParent, SLOT(underlyingFilesChanged()));
 
     getModelLink();
-    addUpdateModelNodes();
 
     if (isFolder())
     {
-        myLoadingNode = new LinkedStandardItem(this,"Loading . . .");
-        myModelNodes.at(0)->appendRow(myLoadingNode);
+        myLoadingNode = new LinkedStandardItem(this, "Loading . . .");
     }
 }
 
@@ -70,11 +68,9 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
     fileData->setFullFilePath(fullPath);
     fileData->setType(FileType::DIR);
 
-    addUpdateModelNodes();
+    myLoadingNode = new LinkedStandardItem(this, "Loading . . .");
 
-    myLoadingNode = new LinkedStandardItem(this,"Loading . . .");
-    myModelNodes.at(0)->appendRow(myLoadingNode);
-    displayNode();
+    updateNodeDisplay();
 }
 
 FileTreeNode::~FileTreeNode()
@@ -92,19 +88,30 @@ FileTreeNode::~FileTreeNode()
     {
         delete this->fileDataBuffer;
     }
-    //TODO: Verify order of loseing model elements on model teardown
+
     if (myLoadingNode != NULL)
     {
-        delete myLoadingNode;
+        firstDataNode->removeRow(myLoadingNode->row());
+        myLoadingNode = NULL;
     }
     if (myEmptyNode != NULL)
     {
-        delete myEmptyNode;
+        firstDataNode->removeRow(myEmptyNode->row());
+        myEmptyNode = NULL;
     }
-    while (!myModelNodes.isEmpty())
+    while (firstDataNode != NULL)
     {
-        QStandardItem * toDelete = myModelNodes.takeLast();
-        delete toDelete; //This should also remove it from model
+        QStandardItem * parentNode;
+        if (firstDataNode->parent() == NULL)
+        {
+            parentNode = myModel->invisibleRootItem();
+        }
+        else
+        {
+            parentNode = firstDataNode->parent();
+        }
+        parentNode->removeRow(firstDataNode->row());
+        firstDataNode = NULL;
     }
     if (myParent != NULL)
     {
@@ -122,50 +129,63 @@ bool FileTreeNode::isRootNode()
 
 bool FileTreeNode::nodeIsDisplayed()
 {
-    if (myParent == NULL)
-    {
-        return true;
-    }
-    if (myModelNodes.isEmpty())
-    {
-        return false;
-    }
-    if (myParent->nodeIsDisplayed() == false)
-    {
-        return false;
-    }
-
-    LinkedStandardItem * parentNode = myParent->myModelNodes.at(0);
-    if (!parentNode->hasChildren())
-    {
-        return false;
-    }
-    if (parentNode == myModelNodes.at(0)->parent())
-    {
-        return true;
-    }
-    return false;
+    return (firstDataNode != NULL);
 }
 
-void FileTreeNode::displayNode()
+void FileTreeNode::updateNodeDisplay()
 {
-    if ((myParent != NULL) && !myParent->nodeIsDisplayed())
+    if (!nodeIsDisplayed())
     {
-        myParent->displayNode();
+        if ((myParent != NULL) && !myParent->nodeIsDisplayed())
+        {
+            myParent->updateNodeDisplay();
+        }
+
+        QList<QStandardItem *> appendList;
+
+        firstDataNode = new LinkedStandardItem(this);
+        appendList.append(firstDataNode);
+        for (int i = 1; i < myModel->columnCount(); i++)
+        {
+            appendList.append(new LinkedStandardItem(this));
+        }
+
+        if (myParent == NULL)
+        {
+            myModel->appendRow(appendList);
+        }
+        else
+        {
+            myParent->firstDataNode->appendRow(appendList);
+        }
     }
-    addUpdateModelNodes();
-    QList<QStandardItem *> appendList;
-    for (auto itr = myModelNodes.cbegin(); itr != myModelNodes.cend(); itr++)
-    {
-        appendList.append(*itr);
-    }
+
+    QStandardItem * parentItem;
     if (myParent == NULL)
     {
-        myModel->appendRow(appendList);
+        parentItem = myModel->invisibleRootItem();
     }
     else
     {
-        myParent->myModelNodes.at(0)->appendRow(appendList);
+        parentItem = myParent->firstDataNode;
+    }
+    int rowNum = firstDataNode->row();
+
+    for (int i = 0; i < parentItem->columnCount(); i++)
+    {
+        QStandardItem * itemToUpdate = parentItem->child(rowNum, i);
+        itemToUpdate->setText(getRawColumnData(i, myModel));
+    }
+
+    //Note: consider making loading and empty nodes more generic
+    if ((myLoadingNode != NULL) && (myLoadingNode->model() == NULL))
+    {
+        firstDataNode->appendRow(myLoadingNode);
+    }
+
+    if ((myEmptyNode != NULL) && (myEmptyNode->model() == NULL))
+    {
+        firstDataNode->appendRow(myEmptyNode);
     }
 }
 
@@ -235,9 +255,9 @@ QByteArray * FileTreeNode::getFileBuffer()
     return fileDataBuffer;
 }
 
-QList<LinkedStandardItem *> FileTreeNode::getModelNodes()
-{
-    return myModelNodes;
+LinkedStandardItem * FileTreeNode::getFirstDataNode()
+{//TODO: Check if this function is really needed
+    return firstDataNode;
 }
 
 FileTreeNode * FileTreeNode::getNodeWithName(QString filename)
@@ -262,7 +282,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         if (newFileBuffer != NULL)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
-            fileTreeChanged();
+            underlyingFilesChanged();
         }
         return;
     }
@@ -271,7 +291,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        fileTreeChanged();
+        underlyingFilesChanged();
         return;
     }
 
@@ -282,7 +302,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 
     delete fileDataBuffer;
     fileDataBuffer = new QByteArray(*newFileBuffer);
-    fileTreeChanged();
+    underlyingFilesChanged();
 }
 
 bool FileTreeNode::haveLStask()
@@ -401,17 +421,17 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
 
     qDebug("Download of buffer complete: %s", qPrintable(fileData->getFullPath()));
 
-    if ((bufferData != NULL) && !nodeIsDisplayed())
+    if (bufferData != NULL)
     {
-        displayNode();
+        updateNodeDisplay();
     }
 
     setFileBuffer(bufferData);
 }
 
-void FileTreeNode::fileTreeChanged()
+void FileTreeNode::underlyingFilesChanged()
 {
-    emit fileSystemChanged();
+    emit fileDataChanged();
 }
 
 void FileTreeNode::getModelLink()
@@ -427,7 +447,7 @@ void FileTreeNode::getModelLink()
 }
 
 FileTreeNode * FileTreeNode::pathSearchHelper(QString filename, bool stopEarly)
-{//TODO: I am worried about how generic this function is.
+{//I am worried about how generic this function is.
     //Our current agave setup has a named root folder
     if (isRootNode() == false) return NULL;
 
@@ -489,13 +509,27 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
 {
     if (myLoadingNode != NULL)
     {
-        delete myLoadingNode;
+        if (nodeIsDisplayed())
+        {
+            firstDataNode->removeRow(myLoadingNode->row());
+        }
+        else
+        {
+            delete myLoadingNode;
+        }
         myLoadingNode = NULL;
     }
 
     if (myEmptyNode != NULL)
     {
-        delete myEmptyNode;
+        if (nodeIsDisplayed())
+        {
+            firstDataNode->removeRow(myEmptyNode->row());
+        }
+        else
+        {
+            delete myEmptyNode;
+        }
         myEmptyNode = NULL;
     }
 
@@ -504,7 +538,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         clearAllChildren();
         myLoadingNode = new LinkedStandardItem(this, "Empty Folder");
-        fileTreeChanged();
+        underlyingFilesChanged();
         return;
     }
 
@@ -518,20 +552,16 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     if (newDataList->isEmpty())
     {
         myEmptyNode = new LinkedStandardItem(this,"Empty Folder");
-        myModelNodes.at(0)->appendRow(myEmptyNode);
     }
 
-    if (!nodeIsDisplayed())
-    {
-        displayNode();
-    }
+    updateNodeDisplay();
 
     for (auto itr = childList.begin(); itr != childList.end(); itr++)
     {
-        (*itr)->displayNode();
+        (*itr)->updateNodeDisplay();
     }
 
-    fileTreeChanged();
+    underlyingFilesChanged();
 }
 
 void FileTreeNode::clearAllChildren()
@@ -623,22 +653,4 @@ QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
         return QString::number(fileData->getSize());
     }
     return "";
-}
-
-void FileTreeNode::addUpdateModelNodes()
-{
-    for (int i = 0; i < myModel->columnCount(); i++)
-    {
-        QString dataText = getRawColumnData(i, myModel);
-        if (myModelNodes.size() <= i)
-        {
-            myModelNodes.append(new LinkedStandardItem(this, dataText));
-        }
-        else
-        {
-            myModelNodes.at(i)->setText(dataText);
-        }
-    }
-
-
 }

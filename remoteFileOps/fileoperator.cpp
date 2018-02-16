@@ -503,36 +503,6 @@ void FileOperator::lsClosestNodeToParent(QString fullPath)
     enactFolderRefresh(nodeToRefresh);
 }
 
-FileTreeNode * FileOperator::getNodeFromModel(QStandardItem * toFind)
-{
-    QStandardItem * findParent = toFind->parent();
-    if (findParent == NULL)
-    {
-        findParent = dataStore.invisibleRootItem();
-    }
-
-    int colNum = toFind->column();
-    if (colNum != 0)
-    {
-        toFind = findParent->child(toFind->row(), 0);
-    }
-    QString realPath;
-    while (toFind != NULL)
-    {
-        realPath = realPath.prepend(toFind->text());
-        realPath = realPath.prepend("/");
-
-        toFind = toFind->parent();
-    }
-    return rootFileNode->getNodeWithName(realPath);
-}
-
-FileTreeNode * FileOperator::getNodeFromIndex(QModelIndex fileIndex)
-{
-    QStandardItem * theModelItem = dataStore.itemFromIndex(fileIndex);
-    return getNodeFromModel(theModelItem);
-}
-
 FileTreeNode * FileOperator::getNodeFromName(QString fullPath)
 {
     return rootFileNode->getNodeWithName(fullPath);

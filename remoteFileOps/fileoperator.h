@@ -66,7 +66,6 @@ public:
     void totalResetErrorProcedure();
     bool operationIsPending();
 
-    FileTreeNode * getNodeFromIndex(QModelIndex fileIndex);
     FileTreeNode * getNodeFromName(QString fullPath);
     FileTreeNode * getClosestNodeFromName(QString fullPath);
 
@@ -116,9 +115,6 @@ private slots:
 
 private:
     QString getStringFromInitParams(QString stringKey);
-
-    //If input is NULL, return NULL, but don't resync
-    FileTreeNode * getNodeFromModel(QStandardItem * toFind);
 
     AgaveSetupDriver * myParent;
     RemoteDataInterface * dataLink;

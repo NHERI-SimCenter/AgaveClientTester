@@ -59,7 +59,7 @@ signals:
 
 private:
     QStandardItemModel * myModel = NULL;
-    QList<QStandardItem *> myModelItems;
+    LinkedStandardItem * myModelItem = NULL;
     RemoteJobData myData;
 };
 

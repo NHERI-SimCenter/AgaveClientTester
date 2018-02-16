@@ -51,11 +51,10 @@ JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, Q
 
 JobListNode::~JobListNode()
 {
-    //TODO: Fix error if model deleted first
-    while (!myModelItems.isEmpty())
+    if (myModelItem != NULL)
     {
-        QStandardItem * anItem = myModelItems.takeLast();
-        delete anItem;
+        myModel->removeRow(myModelItem->row());
+        myModelItem = NULL;
     }
 }
 
@@ -68,19 +67,23 @@ void JobListNode::setData(RemoteJobData newData)
     }
     myData = newData;
 
-    if (myModelItems.size() == 0)
-    {
-        int numHeaders = 0;
-        QStandardItem * headerItem = myModel->horizontalHeaderItem(numHeaders);
-        while (headerItem != NULL)
-        {
-            myModelItems.append(new LinkedStandardItem(this));
+    QList<QStandardItem *> myModelRow;
 
-            numHeaders++;
-            headerItem = myModel->horizontalHeaderItem(numHeaders);
+    if (myModelItem == NULL)
+    {
+        for (int i = 0; i < myModel->columnCount(); i++)
+        {
+            myModelRow.append(new LinkedStandardItem(this));
         }
 
-        myModel->insertRow(0, myModelItems);
+        myModel->insertRow(0, myModelRow);
+    }
+    else
+    {
+        for (int i = 0; i < myModel->columnCount(); i++)
+        {
+            myModelRow.append(myModel->item(myModelItem->row(),i));
+        }
     }
 
     int i = 0;
@@ -88,7 +91,7 @@ void JobListNode::setData(RemoteJobData newData)
     while (headerItem != NULL)
     {
         QString headerText = headerItem->text();
-        QStandardItem * dataEntry = myModelItems.at(i);
+        QStandardItem * dataEntry = myModelRow.at(i);
         if (dataEntry == NULL)
         {
             qDebug("ERROR: Column Mismatch in job list.");

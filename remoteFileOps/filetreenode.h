@@ -49,6 +49,9 @@ class RemoteDataInterface;
 class RemoteDataReply;
 class LinkedStandardItem;
 
+//Note: Quite a bit of this object is less well written than I would like
+//Need to make data movements cleaner
+
 class FileTreeNode : public QObject
 {
     Q_OBJECT
@@ -59,11 +62,11 @@ public:
 
     bool isRootNode();
     bool nodeIsDisplayed();
-    void displayNode();
+    void updateNodeDisplay();
     NodeState getNodeState();
     FileMetaData getFileData();
     QByteArray * getFileBuffer();
-    QList<LinkedStandardItem *> getModelNodes();
+    LinkedStandardItem * getFirstDataNode();
     FileTreeNode * getNodeWithName(QString filename);
     FileTreeNode * getClosestNodeWithName(QString filename);
     FileTreeNode * getParentNode();
@@ -82,14 +85,14 @@ public:
     bool isFolder();
 
 signals:
-    void fileSystemChanged();
+    void fileDataChanged();
 
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
 private slots:
-    void fileTreeChanged();
+    void underlyingFilesChanged();
 
 private:
     void getModelLink();
@@ -103,11 +106,11 @@ private:
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
-    void addUpdateModelNodes();
 
     QStandardItemModel * myModel = NULL;
     FileTreeNode * myParent = NULL;
-    QList<LinkedStandardItem *> myModelNodes;
+    LinkedStandardItem * firstDataNode = NULL;
+    //Note: consider making loading and empty nodes more generic
     LinkedStandardItem * myLoadingNode = NULL;
     LinkedStandardItem * myEmptyNode = NULL;
 
