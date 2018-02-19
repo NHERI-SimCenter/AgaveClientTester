@@ -218,17 +218,17 @@ void ExplorerWindow::customFileMenu(QPoint pos)
 
     //If we did not click anything, we should return
     if (targetNode == NULL) return;
-    if (targetNode->isRootNode()) return;
     FileMetaData theFileData = targetNode->getFileData();
 
     if (theFileData.getFileType() == FileType::INVALID) return;
 
-    fileMenu.addAction("Copy To . . .",this, SLOT(copyMenuItem()));
-    fileMenu.addAction("Move To . . .",this, SLOT(moveMenuItem()));
-    fileMenu.addAction("Rename",this, SLOT(renameMenuItem()));
-    //We don't let the user delete the username folder
-    if (!(targetNode->getParentNode()->isRootNode()))
+    //We don't let the user fiddle with the username folder
+    if (!(targetNode->isRootNode()))
     {
+        fileMenu.addAction("Copy To . . .",this, SLOT(copyMenuItem()));
+        fileMenu.addAction("Move To . . .",this, SLOT(moveMenuItem()));
+        fileMenu.addAction("Rename",this, SLOT(renameMenuItem()));
+
         fileMenu.addSeparator();
         fileMenu.addAction("Delete",this, SLOT(deleteMenuItem()));
         fileMenu.addSeparator();
@@ -250,7 +250,7 @@ void ExplorerWindow::customFileMenu(QPoint pos)
             fileMenu.addAction("Retrive File",this, SLOT(retriveMenuItem()));
         }
     }
-    if (theFileData.getFileType() == FileType::DIR)
+    if ((theFileData.getFileType() == FileType::DIR) && (!targetNode->isRootNode()))
     {
         fileMenu.addAction("Compress Folder",this, SLOT(compressMenuItem()));
     }

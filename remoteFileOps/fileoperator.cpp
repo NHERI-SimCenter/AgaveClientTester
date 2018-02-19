@@ -61,8 +61,6 @@ FileOperator::~FileOperator()
 void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
 {
     newTreeLink->setModel(&dataStore);
-    QObject::connect(&dataStore, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
-                     newTreeLink, SLOT(fileEntryTouched(QModelIndex)));
 }
 
 void FileOperator::resetFileData()
@@ -118,7 +116,7 @@ void FileOperator::enactRootRefresh()
         return;
     }
 
-    rootFileNode->setLStask(theReply, false);
+    rootFileNode->setLStask(theReply);
 }
 
 void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearData)
@@ -138,7 +136,7 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearDat
         return;
     }
 
-    selectedNode->setLStask(theReply, clearData);
+    selectedNode->setLStask(theReply);
 }
 
 bool FileOperator::operationIsPending()

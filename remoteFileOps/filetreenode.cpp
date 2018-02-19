@@ -52,7 +52,7 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
 
     if (isFolder())
     {
-        myLoadingNode = new LinkedStandardItem(this, "Loading . . .");
+        setSpaceholderNode("Loading . . .");
     }
 }
 
@@ -68,8 +68,7 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
     fileData->setFullFilePath(fullPath);
     fileData->setType(FileType::DIR);
 
-    myLoadingNode = new LinkedStandardItem(this, "Loading . . .");
-
+    setSpaceholderNode("Loading . . .");
     updateNodeDisplay();
 }
 
@@ -89,17 +88,14 @@ FileTreeNode::~FileTreeNode()
         delete this->fileDataBuffer;
     }
 
-    if (myLoadingNode != NULL)
+    if (mySpaceHolderNode != NULL)
     {
-        firstDataNode->removeRow(myLoadingNode->row());
-        myLoadingNode = NULL;
+        if (mySpaceHolderNode->model() != NULL)
+        {
+            mySpaceHolderNode->parent()->removeRow(mySpaceHolderNode->row());
+        }
     }
-    if (myEmptyNode != NULL)
-    {
-        firstDataNode->removeRow(myEmptyNode->row());
-        myEmptyNode = NULL;
-    }
-    while (firstDataNode != NULL)
+    if (firstDataNode != NULL)
     {
         QStandardItem * parentNode;
         if (firstDataNode->parent() == NULL)
@@ -176,16 +172,12 @@ void FileTreeNode::updateNodeDisplay()
         QStandardItem * itemToUpdate = parentItem->child(rowNum, i);
         itemToUpdate->setText(getRawColumnData(i, myModel));
     }
-
-    //Note: consider making loading and empty nodes more generic
-    if ((myLoadingNode != NULL) && (myLoadingNode->model() == NULL))
+    if (mySpaceHolderNode != NULL)
     {
-        firstDataNode->appendRow(myLoadingNode);
-    }
-
-    if ((myEmptyNode != NULL) && (myEmptyNode->model() == NULL))
-    {
-        firstDataNode->appendRow(myEmptyNode);
+        if (mySpaceHolderNode->model() == NULL)
+        {
+            firstDataNode->appendRow(mySpaceHolderNode);
+        }
     }
 }
 
@@ -209,7 +201,7 @@ NodeState FileTreeNode::getNodeState()
         }
         else
         {
-            if (myLoadingNode != NULL)
+            if (mySpaceHolderNode != NULL)//TODO:Debug here, should only trigger if LOADING, not if spaceholder is Empty
             {
                 return NodeState::FOLDER_KNOWN_CONTENTS_NOT;
             }
@@ -256,7 +248,7 @@ QByteArray * FileTreeNode::getFileBuffer()
 }
 
 LinkedStandardItem * FileTreeNode::getFirstDataNode()
-{//TODO: Check if this function is really needed
+{
     return firstDataNode;
 }
 
@@ -310,7 +302,7 @@ bool FileTreeNode::haveLStask()
     return (lsTask != NULL);
 }
 
-void FileTreeNode::setLStask(RemoteDataReply * newTask, bool clearData)
+void FileTreeNode::setLStask(RemoteDataReply * newTask)
 {
     if (lsTask != NULL)
     {
@@ -319,11 +311,6 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask, bool clearData)
     lsTask = newTask;
     QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
                      this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
-
-    if (clearData)
-    {
-        clearAllChildren();
-    }
 }
 
 bool FileTreeNode::haveBuffTask()
@@ -507,37 +494,24 @@ QString FileTreeNode::getControlAddress(QList<FileMetaData> * newDataList)
 
 void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
 {
-    if (myLoadingNode != NULL)
+    if (mySpaceHolderNode != NULL)
     {
-        if (nodeIsDisplayed())
+        if (mySpaceHolderNode->model() == NULL)
         {
-            firstDataNode->removeRow(myLoadingNode->row());
+            delete mySpaceHolderNode;
         }
         else
         {
-            delete myLoadingNode;
+            firstDataNode->removeRow(mySpaceHolderNode->row());
         }
-        myLoadingNode = NULL;
-    }
-
-    if (myEmptyNode != NULL)
-    {
-        if (nodeIsDisplayed())
-        {
-            firstDataNode->removeRow(myEmptyNode->row());
-        }
-        else
-        {
-            delete myEmptyNode;
-        }
-        myEmptyNode = NULL;
+        mySpaceHolderNode = NULL;
     }
 
     //If the incoming list is empty, ie. has one entry (.), place empty file item
     if (newDataList->size() <= 1)
     {
-        clearAllChildren();
-        myLoadingNode = new LinkedStandardItem(this, "Empty Folder");
+        clearAllChildren("Empty Folder");
+        updateNodeDisplay();
         underlyingFilesChanged();
         return;
     }
@@ -547,11 +521,6 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     for (auto itr = newDataList->begin(); itr != newDataList->end(); itr++)
     {
         insertFile(&(*itr));
-    }
-
-    if (newDataList->isEmpty())
-    {
-        myEmptyNode = new LinkedStandardItem(this,"Empty Folder");
     }
 
     updateNodeDisplay();
@@ -564,12 +533,35 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     underlyingFilesChanged();
 }
 
-void FileTreeNode::clearAllChildren()
+void FileTreeNode::clearAllChildren(QString spaceholderText)
 {
     while (!childList.isEmpty())
     {
         FileTreeNode * aChild = childList.takeLast();
         delete aChild;
+    }
+    setSpaceholderNode(spaceholderText);
+    updateNodeDisplay();
+}
+
+void FileTreeNode::setSpaceholderNode(QString spaceholderText)
+{
+    if (spaceholderText.isEmpty())
+    {
+        return;
+    }
+    if (mySpaceHolderNode != NULL)
+    {
+        if (mySpaceHolderNode->model() != NULL)
+        {
+            mySpaceHolderNode->parent()->removeRow(mySpaceHolderNode->row());
+        }
+        mySpaceHolderNode = NULL;
+    }
+    mySpaceHolderNode = new LinkedStandardItem(this, spaceholderText);
+    if (nodeIsDisplayed())
+    {
+        firstDataNode->appendRow(mySpaceHolderNode);
     }
 }
 

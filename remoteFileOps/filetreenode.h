@@ -74,7 +74,7 @@ public:
     void setFileBuffer(QByteArray * newFileBuffer);
 
     bool haveLStask();
-    void setLStask(RemoteDataReply * newTask, bool clearData = true);
+    void setLStask(RemoteDataReply * newTask);
     bool haveBuffTask();
     void setBuffTask(RemoteDataReply * newTask);
 
@@ -102,7 +102,8 @@ private:
     QString getControlAddress(QList<FileMetaData> * newDataList);
     void updateFileNodeData(QList<FileMetaData> * newDataList);
 
-    void clearAllChildren();
+    void clearAllChildren(QString spaceholderText);
+    void setSpaceholderNode(QString spaceholderText);
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
@@ -110,9 +111,7 @@ private:
     QStandardItemModel * myModel = NULL;
     FileTreeNode * myParent = NULL;
     LinkedStandardItem * firstDataNode = NULL;
-    //Note: consider making loading and empty nodes more generic
-    LinkedStandardItem * myLoadingNode = NULL;
-    LinkedStandardItem * myEmptyNode = NULL;
+    LinkedStandardItem * mySpaceHolderNode = NULL;
 
     FileMetaData * fileData = NULL;
     QList<FileTreeNode *> childList;

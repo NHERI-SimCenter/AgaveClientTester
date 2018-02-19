@@ -115,13 +115,17 @@ void RemoteFileTree::fileEntryTouched(QModelIndex itemTouched)
         return;
     }
 
-    QStandardItem * parentNode = selectedItem->parent();
-    if (parentNode == NULL)
+    QStandardItem * parentNode;
+    if (clickedNode->isRootNode())
     {
         parentNode = selectedItem->model()->invisibleRootItem();
     }
+    else
+    {
+        parentNode = clickedNode->getParentNode()->getFirstDataNode();
+    }
 
-    int rowNum = selectedItem->row();
+    int rowNum = clickedNode->getFirstDataNode()->row();
 
     this->selectionModel()->select(QItemSelection(parentNode->child(rowNum,0)->index(),
                                                   parentNode->child(rowNum,parentNode->columnCount()-1)->index()),
