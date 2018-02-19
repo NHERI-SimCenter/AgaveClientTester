@@ -42,6 +42,7 @@
 enum class NodeState {FILE_BUFF_LOADED, FILE_BUFF_RELOADING, FILE_BUFF_LOADING, FILE_KNOWN, FILE_SPECULATE,
                       FOLDER_CONTENTS_LOADED, FOLDER_CONTENTS_RELOADING, FOLDER_CONTENTS_LOADING, FOLDER_KNOWN_CONTENTS_NOT, FOLDER_SPECULATE,
                      ERROR};
+enum class SpaceHolderState {LOADING, EMPTY, NONE};
 
 enum class RequestState;
 class FileMetaData;
@@ -102,8 +103,8 @@ private:
     QString getControlAddress(QList<FileMetaData> * newDataList);
     void updateFileNodeData(QList<FileMetaData> * newDataList);
 
-    void clearAllChildren(QString spaceholderText);
-    void setSpaceholderNode(QString spaceholderText);
+    void clearAllChildren(SpaceHolderState spaceholderVal);
+    void setSpaceholderNode(SpaceHolderState spaceholderVal);
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
@@ -112,6 +113,7 @@ private:
     FileTreeNode * myParent = NULL;
     LinkedStandardItem * firstDataNode = NULL;
     LinkedStandardItem * mySpaceHolderNode = NULL;
+    SpaceHolderState mySpaceHolderState = SpaceHolderState::NONE;
 
     FileMetaData * fileData = NULL;
     QList<FileTreeNode *> childList;
