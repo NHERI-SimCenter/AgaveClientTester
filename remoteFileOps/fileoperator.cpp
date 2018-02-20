@@ -136,6 +136,10 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearDat
         return;
     }
 
+    if (clearData)
+    {
+        selectedNode->deleteFolderContentsData();
+    }
     selectedNode->setLStask(theReply);
 }
 
@@ -388,7 +392,6 @@ void FileOperator::sendDownloadBuffReq(FileTreeNode * targetFile)
     RemoteDataReply * theReply = dataLink->downloadBuffer(targetFile->getFileData().getFullPath());
     if (theReply == NULL)
     {
-        fileOpPending->release();
         return;
     }
     targetFile->setBuffTask(theReply);
@@ -509,6 +512,66 @@ FileTreeNode * FileOperator::getNodeFromName(QString fullPath)
 FileTreeNode * FileOperator::getClosestNodeFromName(QString fullPath)
 {
     return rootFileNode->getClosestNodeWithName(fullPath);
+}
+
+FileTreeNode * FileOperator::speculateNodeWithName(QString fullPath, bool folder)
+{
+    FileTreeNode * scanNode = rootFileNode->getNodeWithName(fullPath);
+    if (scanNode != NULL)
+    {
+        return scanNode;
+    }
+    scanNode = rootFileNode->getClosestNodeWithName(fullPath);
+    if (scanNode == NULL)
+    {
+        return NULL;
+    }
+    QStringList fullPathParts = FileMetaData::getPathNameList(fullPath);
+    QStringList scanPathParts = FileMetaData::getPathNameList(scanNode->getFileData().getFullPath());
+
+    for (int i = 0; i < scanPathParts.size(); i++)
+    {
+        fullPathParts.takeFirst();
+    }
+
+    QString pathSoFar = "";
+
+    for (auto itr = fullPathParts.cbegin(); itr != fullPathParts.cend(); itr++)
+    {
+        pathSoFar = pathSoFar.append("/");
+        pathSoFar = pathSoFar.append(*itr);
+    }
+    return speculateNodeWithName(scanNode, pathSoFar, folder);
+}
+
+FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QString addedPath, bool folder)
+{
+    FileTreeNode * searchNode = baseNode;
+    QStringList pathParts = FileMetaData::getPathNameList(addedPath);
+    for (auto itr = pathParts.cbegin(); itr != pathParts.cend(); itr++)
+    {
+        FileTreeNode * nextNode = searchNode->getChildNodeWithName(*itr);
+        if (nextNode != NULL)
+        {
+            searchNode = nextNode;
+            continue;
+        }
+        FileMetaData newFolderData;
+        QString newPath = searchNode->getFileData().getFullPath();
+        newPath = newPath.append("/");
+        newPath = newPath.append(*itr);
+        newFolderData.setFullFilePath(newPath);
+        newFolderData.setType(FileType::DIR);
+        if ((itr + 1 == pathParts.cend()) && (folder == false))
+        {
+            newFolderData.setType(FileType::FILE);
+        }
+        newFolderData.setSize(0);
+        nextNode = new FileTreeNode(newFolderData, searchNode);
+        searchNode = nextNode;
+    }
+
+    return searchNode;
 }
 
 void FileOperator::quickInfoPopup(QString infoText)

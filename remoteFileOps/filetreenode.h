@@ -72,6 +72,7 @@ public:
     FileTreeNode * getClosestNodeWithName(QString filename);
     FileTreeNode * getParentNode();
 
+    void deleteFolderContentsData();
     void setFileBuffer(QByteArray * newFileBuffer);
 
     bool haveLStask();

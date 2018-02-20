@@ -33,9 +33,6 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-//NOTE: TODO Need to rethink multiple nested ls requests in a tree
-//Suggest using a pending record queue. ls of an arbitrary path sould insigate several ls from last known node
-
 #ifndef FILEOPERATOR_H
 #define FILEOPERATOR_H
 
@@ -68,6 +65,8 @@ public:
 
     FileTreeNode * getNodeFromName(QString fullPath);
     FileTreeNode * getClosestNodeFromName(QString fullPath);
+    FileTreeNode * speculateNodeWithName(QString fullPath, bool folder);
+    FileTreeNode * speculateNodeWithName(FileTreeNode * baseNode, QString addedPath, bool folder);
 
     void lsClosestNode(QString fullPath);
     void lsClosestNodeToParent(QString fullPath);

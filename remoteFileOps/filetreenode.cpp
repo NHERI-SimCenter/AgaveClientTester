@@ -267,6 +267,11 @@ FileTreeNode * FileTreeNode::getParentNode()
     return myParent;
 }
 
+void FileTreeNode::deleteFolderContentsData()
+{
+    clearAllChildren(SpaceHolderState::LOADING);
+}
+
 void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 {
     if (fileDataBuffer == NULL)
