@@ -68,11 +68,11 @@ public:
     FileTreeNode * speculateNodeWithName(QString fullPath, bool folder);
     FileTreeNode * speculateNodeWithName(FileTreeNode * baseNode, QString addedPath, bool folder);
 
-    void lsClosestNode(QString fullPath);
-    void lsClosestNodeToParent(QString fullPath);
+    void lsClosestNode(QString fullPath, bool clearData = false);
+    void lsClosestNodeToParent(QString fullPath, bool clearData = false);
 
     void enactRootRefresh();
-    void enactFolderRefresh(FileTreeNode * selectedNode, bool clearData = true);
+    void enactFolderRefresh(FileTreeNode * selectedNode, bool clearData = false);
 
     void sendDeleteReq(FileTreeNode * selectedNode);
     void sendMoveReq(FileTreeNode * moveFrom, QString newName);

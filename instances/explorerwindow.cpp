@@ -101,20 +101,15 @@ void ExplorerWindow::startAndShow()
 
 void ExplorerWindow::addAppToList(QString appName)
 {
-    if (appName == "cwe-mesh")
+    if (appName == "cwe-serial")
     {
-        agaveParamLists.insert("cwe-mesh", {});
-        taskListModel.appendRow(new QStandardItem("cwe-mesh"));
+        agaveParamLists.insert("cwe-serial", {"stage", "file_input"});
+        taskListModel.appendRow(new QStandardItem("cwe-serial"));
     }
-    else if (appName == "cwe-sim")
+    else if (appName == "cwe-parallel")
     {
-        agaveParamLists.insert("cwe-sim", {});
-        taskListModel.appendRow(new QStandardItem("cwe-sim"));
-    }
-    else if (appName == "cwe-post")
-    {
-        agaveParamLists.insert("cwe-post", {});
-        taskListModel.appendRow(new QStandardItem("cwe-post"));
+        agaveParamLists.insert("cwe-parallel", {"stage", "file_input"});
+        taskListModel.appendRow(new QStandardItem("cwe-parallel"));
     }
 }
 

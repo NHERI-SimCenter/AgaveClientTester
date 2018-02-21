@@ -75,7 +75,7 @@ void FileOperator::resetFileData()
     }
     rootFileNode = new FileTreeNode(&dataStore, dataLink->getUserName(), this);
 
-    QObject::connect(rootFileNode, SIGNAL(fileSystemChanged()),
+    QObject::connect(rootFileNode, SIGNAL(fileDataChanged()),
                      this, SLOT(fileNodesChange()));
 
     enactRootRefresh();
@@ -481,13 +481,13 @@ void FileOperator::fileNodesChange()
     emit fileSystemChange();
 }
 
-void FileOperator::lsClosestNode(QString fullPath)
+void FileOperator::lsClosestNode(QString fullPath, bool clearData)
 {
     FileTreeNode * nodeToRefresh = rootFileNode->getClosestNodeWithName(fullPath);
-    enactFolderRefresh(nodeToRefresh);
+    enactFolderRefresh(nodeToRefresh, clearData);
 }
 
-void FileOperator::lsClosestNodeToParent(QString fullPath)
+void FileOperator::lsClosestNodeToParent(QString fullPath, bool clearData)
 {
     FileTreeNode * nodeToRefresh = rootFileNode->getNodeWithName(fullPath);
     if (nodeToRefresh != NULL)
@@ -496,7 +496,7 @@ void FileOperator::lsClosestNodeToParent(QString fullPath)
         {
             nodeToRefresh = nodeToRefresh->getParentNode();
         }
-        enactFolderRefresh(nodeToRefresh);
+        enactFolderRefresh(nodeToRefresh, clearData);
         return;
     }
 
@@ -529,17 +529,20 @@ FileTreeNode * FileOperator::speculateNodeWithName(QString fullPath, bool folder
     QStringList fullPathParts = FileMetaData::getPathNameList(fullPath);
     QStringList scanPathParts = FileMetaData::getPathNameList(scanNode->getFileData().getFullPath());
 
-    for (int i = 0; i < scanPathParts.size(); i++)
-    {
-        fullPathParts.takeFirst();
-    }
-
+    int accountedParts = scanPathParts.size();
     QString pathSoFar = "";
 
     for (auto itr = fullPathParts.cbegin(); itr != fullPathParts.cend(); itr++)
     {
-        pathSoFar = pathSoFar.append("/");
-        pathSoFar = pathSoFar.append(*itr);
+        if (accountedParts <= 0)
+        {
+            pathSoFar = pathSoFar.append("/");
+            pathSoFar = pathSoFar.append(*itr);
+        }
+        else
+        {
+            accountedParts--;
+        }
     }
     return speculateNodeWithName(scanNode, pathSoFar, folder);
 }
@@ -568,7 +571,17 @@ FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QStr
         }
         newFolderData.setSize(0);
         nextNode = new FileTreeNode(newFolderData, searchNode);
+        enactFolderRefresh(searchNode);
         searchNode = nextNode;
+    }
+
+    if (folder)
+    {
+        enactFolderRefresh(searchNode);
+    }
+    else
+    {
+        sendDownloadBuffReq(searchNode);
     }
 
     return searchNode;

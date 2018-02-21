@@ -185,13 +185,20 @@ NodeState FileTreeNode::getNodeState()
 {
     if (isFolder())
     {
+        if (!nodeIsDisplayed())
+        {
+            if (haveLStask())
+            {
+                return NodeState::FOLDER_SPECULATE_LOADING;
+            }
+            else
+            {
+                return NodeState::FOLDER_SPECULATE_IDLE;
+            }
+        }
+
         if (haveLStask())
         {
-            if (!nodeIsDisplayed())
-            {
-                return NodeState::FOLDER_SPECULATE;
-            }
-
             if (!childList.isEmpty())
             {
                 return NodeState::FOLDER_CONTENTS_RELOADING;
@@ -210,13 +217,20 @@ NodeState FileTreeNode::getNodeState()
     }
     else
     {
+        if (!nodeIsDisplayed())
+        {
+            if (haveBuffTask())
+            {
+                return NodeState::FILE_SPECULATE_LOADING;
+            }
+            else
+            {
+                return NodeState::FILE_SPECULATE_IDLE;
+            }
+        }
+
         if (haveBuffTask())
         {
-            if (!nodeIsDisplayed())
-            {
-                return NodeState::FILE_SPECULATE;
-            }
-
             if (fileDataBuffer != NULL)
             {
                 return NodeState::FILE_BUFF_RELOADING;

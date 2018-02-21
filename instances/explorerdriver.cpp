@@ -50,9 +50,8 @@ ExplorerDriver::ExplorerDriver(QObject *parent, bool debug) : AgaveSetupDriver(p
     tmpHandle->registerAgaveAppInfo("extract", "extract-0.1u1",{"inputFile"},{},"");
     tmpHandle->registerAgaveAppInfo("openfoam","openfoam-2.4.0u11",{"solver"},{"inputDirectory"},"inputDirectory");
 
-    tmpHandle->registerAgaveAppInfo("cwe-mesh", "cwe-mesh-0.1.0", {"directory"}, {}, "directory");
-    tmpHandle->registerAgaveAppInfo("cwe-sim", "cwe-sim-2.4.0", {}, {"directory"}, "directory");
-    tmpHandle->registerAgaveAppInfo("cwe-post", "cwe-post-0.1.0", {"directory"}, {}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-serial", "cwe-serial-0.1.0", {"stage"}, {"file_input", "directory"}, "directory");
+    tmpHandle->registerAgaveAppInfo("cwe-parallel", "cwe-parallel-0.1.0", {"stage"}, {"file_input", "directory"}, "directory");
 
     theConnector = (RemoteDataInterface *) tmpHandle;
     QObject::connect(theConnector, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(fatalInterfaceError(QString)));
