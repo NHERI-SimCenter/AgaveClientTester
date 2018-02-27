@@ -401,7 +401,17 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
     {
         lsTask = NULL;
     }
-    if (taskState != RequestState::GOOD)
+    if (taskState == RequestState::FAIL)
+    {
+        if ((getNodeState() == NodeState::FOLDER_SPECULATE_IDLE) ||
+                (getNodeState() == NodeState::FOLDER_SPECULATE_LOADING))
+        {
+            this->deleteLater();
+        }
+
+        return;
+    }
+    if (taskState == RequestState::NO_CONNECT)
     {
         return;
     }
@@ -420,7 +430,16 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     {
         bufferTask = NULL;
     }
-    if (taskState != RequestState::GOOD)
+    if (taskState == RequestState::FAIL)
+    {
+        if ((getNodeState() == NodeState::FILE_SPECULATE_IDLE) ||
+                (getNodeState() == NodeState::FILE_SPECULATE_LOADING))
+        {
+            this->deleteLater();
+        }
+        return;
+    }
+    if (taskState == RequestState::NO_CONNECT)
     {
         return;
     }

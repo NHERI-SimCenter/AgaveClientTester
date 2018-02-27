@@ -559,6 +559,17 @@ FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QStr
             searchNode = nextNode;
             continue;
         }
+        if (!searchNode->isFolder())
+        {
+            qDebug("Invalid file speculation path.");
+            return NULL;
+        }
+        if (searchNode->getNodeState() == NodeState::FOLDER_CONTENTS_LOADED)
+        {
+            //Speculation failed, file known not to exist
+            return NULL;
+        }
+
         FileMetaData newFolderData;
         QString newPath = searchNode->getFileData().getFullPath();
         newPath = newPath.append("/");
@@ -571,7 +582,12 @@ FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QStr
         }
         newFolderData.setSize(0);
         nextNode = new FileTreeNode(newFolderData, searchNode);
-        enactFolderRefresh(searchNode);
+        if ((searchNode->getNodeState() == NodeState::FOLDER_KNOWN_CONTENTS_NOT) ||
+               (searchNode->getNodeState() == NodeState::FOLDER_SPECULATE_IDLE))
+        {
+            enactFolderRefresh(searchNode);
+        }
+
         searchNode = nextNode;
     }
 
