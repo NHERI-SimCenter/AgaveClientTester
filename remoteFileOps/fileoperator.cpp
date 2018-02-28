@@ -195,8 +195,11 @@ void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedF
 {
     fileOpPending->release();
 
-    lsClosestNodeToParent(getStringFromInitParams("from"));
-    lsClosestNode(revisedFileData->getFullPath());
+    if (replyState == RequestState::GOOD)
+    {
+        lsClosestNodeToParent(getStringFromInitParams("from"));
+        lsClosestNode(revisedFileData->getFullPath());
+    }
 
     emit fileOpDone(replyState);
 }
@@ -223,7 +226,11 @@ void FileOperator::getCopyReply(RequestState replyState, FileMetaData * newFileD
 {
     fileOpPending->release();
 
-    lsClosestNode(newFileData->getFullPath());
+    if (replyState == RequestState::GOOD)
+    {
+        lsClosestNode(newFileData->getFullPath());
+    }
+
     emit fileOpDone(replyState);
 }
 
@@ -248,8 +255,11 @@ void FileOperator::getRenameReply(RequestState replyState, FileMetaData * newFil
 {
     fileOpPending->release();
 
-    lsClosestNodeToParent(getStringFromInitParams("fullName"));
-    lsClosestNodeToParent(newFileData->getFullPath());
+    if (replyState == RequestState::GOOD)
+    {
+        lsClosestNodeToParent(getStringFromInitParams("fullName"));
+        lsClosestNodeToParent(newFileData->getFullPath());
+    }
 
     emit fileOpDone(replyState);
 }
@@ -276,7 +286,11 @@ void FileOperator::getMkdirReply(RequestState replyState, FileMetaData * newFold
 {
     fileOpPending->release();
 
-    lsClosestNode(newFolderData->getContainingPath());
+    if (replyState == RequestState::GOOD)
+    {
+        lsClosestNode(newFolderData->getContainingPath());
+    }
+
     emit fileOpDone(replyState);
 }
 
@@ -313,7 +327,10 @@ void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFil
 {
     fileOpPending->release();
 
-    lsClosestNode(newFileData->getFullPath());
+    if (replyState == RequestState::GOOD)
+    {
+        lsClosestNodeToParent(newFileData->getFullPath());
+    }
 
     emit fileOpDone(replyState);
 }

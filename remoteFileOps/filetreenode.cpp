@@ -323,6 +323,11 @@ bool FileTreeNode::haveLStask()
 
 void FileTreeNode::setLStask(RemoteDataReply * newTask)
 {
+    if (!isFolder())
+    {
+        qDebug("ERROR: LS called on file rather than folder.");
+        return;
+    }
     if (lsTask != NULL)
     {
         QObject::disconnect(lsTask, 0, this, 0);
@@ -339,6 +344,11 @@ bool FileTreeNode::haveBuffTask()
 
 void FileTreeNode::setBuffTask(RemoteDataReply * newTask)
 {
+    if (isFolder())
+    {
+        qDebug("ERROR: Buffer download called on folder.");
+        return;
+    }
     if (bufferTask != NULL)
     {
         QObject::disconnect(bufferTask, 0, this, 0);
