@@ -169,14 +169,8 @@ void FileOperator::getDeleteReply(RequestState replyState)
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNodeToParent(getStringFromInitParams("toDelete"));
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendMoveReq(FileTreeNode * moveFrom, QString newName)
@@ -201,15 +195,10 @@ void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedF
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNodeToParent(getStringFromInitParams("from"));
     lsClosestNode(revisedFileData->getFullPath());
+
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendCopyReq(FileTreeNode * copyFrom, QString newName)
@@ -234,14 +223,8 @@ void FileOperator::getCopyReply(RequestState replyState, FileMetaData * newFileD
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNode(newFileData->getFullPath());
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendRenameReq(FileTreeNode * selectedNode, QString newName)
@@ -265,15 +248,10 @@ void FileOperator::getRenameReply(RequestState replyState, FileMetaData * newFil
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNodeToParent(getStringFromInitParams("fullName"));
     lsClosestNodeToParent(newFileData->getFullPath());
+
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendCreateFolderReq(FileTreeNode * selectedNode, QString newName)
@@ -298,14 +276,8 @@ void FileOperator::getMkdirReply(RequestState replyState, FileMetaData * newFold
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNode(newFolderData->getContainingPath());
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendUploadReq(FileTreeNode * uploadTarget, QString localFile)
@@ -341,14 +313,9 @@ void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFil
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState);
-
-    if (replyState != RequestState::GOOD)
-    {
-        return;
-    }
-
     lsClosestNode(newFileData->getFullPath());
+
+    emit fileOpDone(replyState);
 }
 
 void FileOperator::sendDownloadReq(FileTreeNode * targetFile, QString localDest)
@@ -425,15 +392,13 @@ void FileOperator::getCompressReply(RequestState finalState, QJsonDocument *)
 {
     fileOpPending->release();
 
+    //TODO: ask for refresh of relevant containing folder, after finishing job
     emit fileOpDone(finalState);
 
     if (finalState != RequestState::GOOD)
     {
         //TODO: give reasonable error
-        return;
     }
-
-    //TODO: ask for refresh of relevant containing folder, after finishing job
 }
 
 void FileOperator::sendDecompressReq(FileTreeNode * selectedFolder)
@@ -465,15 +430,13 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
 {
     fileOpPending->release();
 
+    //TODO: ask for refresh of relevant containing folder, after finishing job
     emit fileOpDone(finalState);
 
     if (finalState != RequestState::GOOD)
     {
         //TODO: give reasonable error
-        return;
     }
-
-    //TODO: ask for refresh of relevant containing folder, after finishing job
 }
 
 void FileOperator::fileNodesChange()
