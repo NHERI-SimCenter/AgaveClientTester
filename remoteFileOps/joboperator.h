@@ -70,7 +70,6 @@ public slots:
 
 private slots:
     void refreshRunningJobList(RequestState replyState, QList<RemoteJobData> *theData);
-    void refreshRunningJobDetails(RequestState replyState, RemoteJobData *theData);
 
 private:
     QMap<QString, JobListNode *> jobData;

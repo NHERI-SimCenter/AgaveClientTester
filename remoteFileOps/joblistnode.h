@@ -40,6 +40,8 @@
 #include <QStandardItem>
 
 class LinkedStandardItem;
+class RemoteDataReply;
+enum class RequestState;
 
 #include "../AgaveClientInterface/remotejobdata.h"
 
@@ -52,15 +54,24 @@ public:
 
     void setData(RemoteJobData newData);
     RemoteJobData getData();
+    bool haveDetails();
     void setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params);
 
+    bool haveDetailTask();
+    void setDetailTask(RemoteDataReply * newTask);
+
 signals:
-    void jobStateChanged(RemoteJobData * jobData);
+    void jobDataChanged(JobListNode * theNode);
+
+private slots:
+    void deliverJobDetails(RequestState taskState, RemoteJobData * fullJobData);
 
 private:
     QStandardItemModel * myModel = NULL;
     LinkedStandardItem * myModelItem = NULL;
     RemoteJobData myData;
+
+    RemoteDataReply * myDetailTask = NULL;
 };
 
 #endif // REMOTEJOBENTRY_H

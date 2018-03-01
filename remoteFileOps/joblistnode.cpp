@@ -37,6 +37,8 @@
 
 #include "../utilFuncs/linkedstandarditem.h"
 
+#include "../AgaveClientInterface/remotedatainterface.h"
+
 JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent) : QObject(parent)
 {
     myModel = theModel;
@@ -125,7 +127,7 @@ void JobListNode::setData(RemoteJobData newData)
 
     if (signalChange)
     {
-        emit jobStateChanged(&myData);
+        emit jobDataChanged(this);
     }
 }
 
@@ -134,7 +136,55 @@ RemoteJobData JobListNode::getData()
     return myData;
 }
 
+bool JobListNode::haveDetails()
+{
+    return myData.detailsLoaded();
+}
+
 void JobListNode::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
 {
     myData.setDetails(inputs, params);
+    emit jobDataChanged(this);
+}
+
+bool JobListNode::haveDetailTask()
+{
+    return (myDetailTask != NULL);
+}
+
+void JobListNode::setDetailTask(RemoteDataReply * newTask)
+{
+    if (myDetailTask != NULL)
+    {
+        QObject::disconnect(myDetailTask, 0, this, 0);
+    }
+    myDetailTask = newTask;
+    QObject::connect(myDetailTask, SIGNAL(haveJobDetails(RequestState,RemoteJobData*)),
+                     this, SLOT(deliverJobDetails(RequestState,RemoteJobData*)));
+}
+
+void JobListNode::deliverJobDetails(RequestState taskState, RemoteJobData * fullJobData)
+{
+    if (myDetailTask == QObject::sender())
+    {
+        myDetailTask = NULL;
+    }
+    if (taskState != RequestState::GOOD)
+    {
+        qDebug("Unable to get task details");
+        return;
+    }
+
+    if (fullJobData->getID() != myData.getID())
+    {
+        qDebug("ERROR: Job data and detail request mismatch.");
+        return;
+    }
+
+    if (fullJobData->detailsLoaded() == false)
+    {
+        qDebug("ERROR: Job details query reply does not have details data.");
+    }
+
+    myData.setDetails(fullJobData->getInputs(), fullJobData->getParams());
 }
