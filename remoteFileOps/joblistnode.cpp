@@ -34,15 +34,17 @@
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
 #include "joblistnode.h"
+#include "joboperator.h"
 
 #include "../utilFuncs/linkedstandarditem.h"
 
 #include "../AgaveClientInterface/remotedatainterface.h"
 
-JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent) : QObject(parent)
+JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, JobOperator *parent) : QObject(parent)
 {
     myModel = theModel;
-    if (myModel == NULL)
+    myController = parent;
+    if ((myModel == NULL) || (myController == NULL))
     {
         this->deleteLater();
         return;
@@ -128,6 +130,7 @@ void JobListNode::setData(RemoteJobData newData)
     if (signalChange)
     {
         emit jobDataChanged(this);
+        myController->underlyingJobChanged();
     }
 }
 
@@ -145,6 +148,7 @@ void JobListNode::setDetails(QMap<QString, QString> inputs, QMap<QString, QStrin
 {
     myData.setDetails(inputs, params);
     emit jobDataChanged(this);
+    myController->underlyingJobChanged();
 }
 
 bool JobListNode::haveDetailTask()

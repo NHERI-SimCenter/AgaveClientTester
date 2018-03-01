@@ -100,32 +100,6 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     }
 }
 
-void JobOperator::refreshRunningJobDetails(RequestState replyState, RemoteJobData *theData)
-{
-    RemoteDataReply * theReply = (RemoteDataReply *)QObject::sender();
-    if (detailQueryList.contains(theReply))
-    {
-        detailQueryList.removeAll(theReply);
-    }
-
-    if (replyState != RequestState::GOOD)
-    {
-        //TODO: some error here
-        return;
-    }
-
-    if (jobData.contains(theData->getID()))
-    {
-        JobListNode * theItem = jobData.value(theData->getID());
-        theItem->setDetails(theData->getInputs(), theData->getParams());
-    }
-    else
-    {
-        JobListNode * theItem = new JobListNode(*theData, &theJobList, this);
-        jobData.insert(theItem->getData().getID(), theItem);
-    }
-}
-
 QMap<QString, RemoteJobData> JobOperator::getRunningJobs()
 {
     QMap<QString, RemoteJobData> ret;
@@ -158,6 +132,11 @@ void JobOperator::requestJobDetails(RemoteJobData *toFetch)
     if (jobReply == NULL) return; //TODO: Consider an error message here
 
     realNode->setDetailTask(jobReply);
+}
+
+void JobOperator::underlyingJobChanged()
+{
+    emit newJobData();
 }
 
 void JobOperator::demandJobDataRefresh()

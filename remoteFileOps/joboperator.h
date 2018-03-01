@@ -61,6 +61,7 @@ public:
     QMap<QString, RemoteJobData> getRunningJobs();
 
     void requestJobDetails(RemoteJobData * toFetch);
+    void underlyingJobChanged();
 
 signals:
     void newJobData();

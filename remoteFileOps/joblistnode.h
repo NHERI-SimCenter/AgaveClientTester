@@ -41,6 +41,7 @@
 
 class LinkedStandardItem;
 class RemoteDataReply;
+class JobOperator;
 enum class RequestState;
 
 #include "../AgaveClientInterface/remotejobdata.h"
@@ -49,7 +50,7 @@ class JobListNode : public QObject
 {
     Q_OBJECT
 public:
-    explicit JobListNode(RemoteJobData newData, QStandardItemModel * theModel, QObject *parent = nullptr);
+    explicit JobListNode(RemoteJobData newData, QStandardItemModel * theModel, JobOperator *parent = nullptr);
     ~JobListNode();
 
     void setData(RemoteJobData newData);
@@ -72,6 +73,7 @@ private:
     RemoteJobData myData;
 
     RemoteDataReply * myDetailTask = NULL;
+    JobOperator * myController = NULL;
 };
 
 #endif // REMOTEJOBENTRY_H
