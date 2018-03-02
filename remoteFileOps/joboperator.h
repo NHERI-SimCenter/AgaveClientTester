@@ -58,10 +58,12 @@ public:
     ~JobOperator();
     void linkToJobLister(RemoteJobLister * newLister);
 
-    QMap<QString, RemoteJobData> getRunningJobs();
+    QMap<QString, const RemoteJobData *> getRunningJobs();
 
-    void requestJobDetails(RemoteJobData * toFetch);
+    void requestJobDetails(const RemoteJobData *toFetch);
     void underlyingJobChanged();
+
+    const RemoteJobData * findJobByID(QString idToFind);
 
 signals:
     void newJobData();

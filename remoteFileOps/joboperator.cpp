@@ -84,7 +84,7 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         else
         {
             JobListNode * theItem = new JobListNode(*itr, &theJobList, this);
-            jobData.insert(theItem->getData().getID(), theItem);
+            jobData.insert(theItem->getData()->getID(), theItem);
         }
         if (!notDone && ((*itr).getState() != "FINISHED") && ((*itr).getState() != "FAILED"))
         {
@@ -100,23 +100,23 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     }
 }
 
-QMap<QString, RemoteJobData> JobOperator::getRunningJobs()
+QMap<QString, const RemoteJobData *> JobOperator::getRunningJobs()
 {
-    QMap<QString, RemoteJobData> ret;
+    QMap<QString, const RemoteJobData *> ret;
 
     for (auto itr = jobData.cbegin(); itr != jobData.cend(); itr++)
     {
-        QString myState = (*itr)->getData().getState();
+        QString myState = (*itr)->getData()->getState();
         if (!myState.isEmpty() && (myState != "FINISHED") && (myState != "FAILED"))
         {
-            ret.insert((*itr)->getData().getID(), (*itr)->getData());
+            ret.insert((*itr)->getData()->getID(), (*itr)->getData());
         }
     }
 
     return ret;
 }
 
-void JobOperator::requestJobDetails(RemoteJobData *toFetch)
+void JobOperator::requestJobDetails(const RemoteJobData *toFetch)
 {
     if (!jobData.contains(toFetch->getID()))
     {
@@ -137,6 +137,16 @@ void JobOperator::requestJobDetails(RemoteJobData *toFetch)
 void JobOperator::underlyingJobChanged()
 {
     emit newJobData();
+}
+
+const RemoteJobData * JobOperator::findJobByID(QString idToFind)
+{
+    if (!jobData.contains(idToFind))
+    {
+        return NULL;
+    }
+
+    return jobData.value(idToFind)->getData();
 }
 
 void JobOperator::demandJobDataRefresh()

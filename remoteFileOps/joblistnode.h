@@ -54,7 +54,7 @@ public:
     ~JobListNode();
 
     void setData(RemoteJobData newData);
-    RemoteJobData getData();
+    const RemoteJobData * getData();
     bool haveDetails();
     void setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params);
 

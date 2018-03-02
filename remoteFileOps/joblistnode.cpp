@@ -134,9 +134,9 @@ void JobListNode::setData(RemoteJobData newData)
     }
 }
 
-RemoteJobData JobListNode::getData()
+const RemoteJobData *JobListNode::getData()
 {
-    return myData;
+    return &myData;
 }
 
 bool JobListNode::haveDetails()
