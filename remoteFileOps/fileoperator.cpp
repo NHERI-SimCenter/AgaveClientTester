@@ -121,6 +121,11 @@ void FileOperator::enactRootRefresh()
 
 void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearData)
 {
+    if (clearData)
+    {
+        selectedNode->deleteFolderContentsData();
+    }
+
     if (selectedNode->haveLStask())
     {
         return;
@@ -136,10 +141,6 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearDat
         return;
     }
 
-    if (clearData)
-    {
-        selectedNode->deleteFolderContentsData();
-    }
     selectedNode->setLStask(theReply);
 }
 
