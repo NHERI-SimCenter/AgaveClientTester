@@ -78,7 +78,11 @@ private slots:
     void moveMenuItem();
     void renameMenuItem();
     void deleteMenuItem();
+
     void uploadMenuItem();
+    void uploadFolderMenuItem();
+    void downloadFolderMenuItem();
+
     void createFolderMenuItem();
     void downloadMenuItem();
     void readMenuItem();
@@ -88,6 +92,8 @@ private slots:
     void refreshMenuItem();
 
     void jobRightClickMenu(QPoint);
+
+    void recursiveProcessPopup(bool success, QString message);
 
 private:
     Ui::ExplorerWindow *ui;

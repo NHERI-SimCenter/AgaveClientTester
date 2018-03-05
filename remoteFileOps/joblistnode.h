@@ -33,57 +33,47 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "remotejobentry.h"
+#ifndef REMOTEJOBENTRY_H
+#define REMOTEJOBENTRY_H
 
-RemoteJobEntry::RemoteJobEntry(RemoteJobData newData, QStandardItem * modelParent, QObject *parent) : QObject(parent)
+#include <QObject>
+#include <QStandardItem>
+
+class LinkedStandardItem;
+class RemoteDataReply;
+class JobOperator;
+enum class RequestState;
+
+#include "../AgaveClientInterface/remotejobdata.h"
+
+class JobListNode : public QObject
 {
-    modelParentNode = modelParent;
-    setData(newData);
-}
+    Q_OBJECT
+public:
+    explicit JobListNode(RemoteJobData newData, QStandardItemModel * theModel, JobOperator *parent = nullptr);
+    ~JobListNode();
 
-void RemoteJobEntry::setData(RemoteJobData newData)
-{
-    bool signalChange = false;
-    if ((newData.getState() != myData.getState()) && (myData.getState() != "APP_INIT"))
-    {
-        signalChange = true;
-    }
-    myData = newData;
+    void setData(RemoteJobData newData);
+    const RemoteJobData * getData();
+    bool haveDetails();
+    void setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params);
 
-    if (myModelNode == NULL)
-    {
-        QList<QStandardItem *> newRow;
-        myModelNode = new QStandardItem(myData.getName());
-        newRow.append(myModelNode);
-        newRow.append(new QStandardItem(myData.getState()));
-        newRow.append(new QStandardItem(myData.getApp()));
-        newRow.append(new QStandardItem(myData.getTimeCreated().toString()));
-        newRow.append(new QStandardItem(myData.getID()));
-        modelParentNode->insertRow(0,newRow);
-    }
-    else
-    {
-        int rowNum = myModelNode->row();
+    bool haveDetailTask();
+    void setDetailTask(RemoteDataReply * newTask);
 
-        modelParentNode->child(rowNum,0)->setText(myData.getName());
-        modelParentNode->child(rowNum,1)->setText(myData.getState());
-        modelParentNode->child(rowNum,2)->setText(myData.getApp());
-        modelParentNode->child(rowNum,3)->setText(myData.getTimeCreated().toString());
-        modelParentNode->child(rowNum,4)->setText(myData.getID());
-    }
+signals:
+    void jobDataChanged(JobListNode * theNode);
 
-    if (signalChange)
-    {
-        emit jobStateChanged(&myData);
-    }
-}
+private slots:
+    void deliverJobDetails(RequestState taskState, RemoteJobData * fullJobData);
 
-RemoteJobData RemoteJobEntry::getData()
-{
-    return myData;
-}
+private:
+    QStandardItemModel * myModel = NULL;
+    LinkedStandardItem * myModelItem = NULL;
+    RemoteJobData myData;
 
-void RemoteJobEntry::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
-{
-    myData.setDetails(inputs, params);
-}
+    RemoteDataReply * myDetailTask = NULL;
+    JobOperator * myController = NULL;
+};
+
+#endif // REMOTEJOBENTRY_H

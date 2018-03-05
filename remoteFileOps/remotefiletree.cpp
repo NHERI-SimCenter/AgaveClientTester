@@ -35,6 +35,7 @@
 
 #include "remotefiletree.h"
 
+#include "../utilFuncs/linkedstandarditem.h"
 #include "fileoperator.h"
 #include "filetreenode.h"
 
@@ -62,8 +63,12 @@ FileTreeNode * RemoteFileTree::getSelectedNode()
     QModelIndexList indexList = this->selectedIndexes();
 
     if (indexList.isEmpty()) return NULL;
+    QStandardItemModel * theModel = qobject_cast<QStandardItemModel *>(this->model());
+    if (theModel == NULL) return NULL;
 
-    return myFileOperator->getNodeFromIndex(indexList.at(0));
+    LinkedStandardItem * theLinkedItem = (LinkedStandardItem *)theModel->itemFromIndex(indexList.at(0));
+
+    return qobject_cast<FileTreeNode *>(theLinkedItem->getLinkedObject());
 }
 
 void RemoteFileTree::setupFileView()
@@ -82,7 +87,7 @@ void RemoteFileTree::folderExpanded(QModelIndex fileIndex)
     fileEntryTouched(fileIndex);
     FileTreeNode * selectedItem = getSelectedNode();
     if (selectedItem == NULL) return;
-    if (!selectedItem->childIsUnloaded()) return;
+    if (selectedItem->getNodeState() == NodeState::FOLDER_CONTENTS_LOADED) return;
 
     myFileOperator->enactFolderRefresh(selectedItem);
 }
@@ -96,15 +101,34 @@ void RemoteFileTree::fileEntryTouched(QModelIndex itemTouched)
     {
         return;
     }
-    QStandardItem * parentNode = selectedItem->parent();
-    int rowNum = selectedItem->row();
-    if (parentNode == NULL)
+
+    LinkedStandardItem * linkedItem = (LinkedStandardItem *)(selectedItem);
+
+    FileTreeNode * clickedNode = qobject_cast<FileTreeNode *>(linkedItem->getLinkedObject());
+    if (clickedNode == NULL)
     {
-        parentNode = dataStore->invisibleRootItem();
+        return;
     }
 
-    this->selectionModel()->select(QItemSelection(parentNode->child(rowNum, 0)->index(),
-                                                  parentNode->child(rowNum, parentNode->columnCount() - 1)->index()),
+    if (!clickedNode->nodeIsDisplayed())
+    {
+        return;
+    }
+
+    QStandardItem * parentNode;
+    if (clickedNode->isRootNode())
+    {
+        parentNode = selectedItem->model()->invisibleRootItem();
+    }
+    else
+    {
+        parentNode = clickedNode->getParentNode()->getFirstDataNode();
+    }
+
+    int rowNum = clickedNode->getFirstDataNode()->row();
+
+    this->selectionModel()->select(QItemSelection(parentNode->child(rowNum,0)->index(),
+                                                  parentNode->child(rowNum,parentNode->columnCount()-1)->index()),
                                    QItemSelectionModel::Select);
     emit newFileSelected(getSelectedNode());
 }

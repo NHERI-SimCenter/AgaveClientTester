@@ -63,8 +63,9 @@ SOURCES += main.cpp \
     utilFuncs/authform.cpp \
     utilFuncs/copyrightdialog.cpp \
     utilFuncs/singlelinedialog.cpp \
-    remoteFileOps/remotejobentry.cpp \
-    remoteFileOps/selectedfilelabel.cpp
+    remoteFileOps/selectedfilelabel.cpp \
+    utilFuncs/linkedstandarditem.cpp \
+    remoteFileOps/joblistnode.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -98,9 +99,10 @@ HEADERS += \
     utilFuncs/authform.h \
     utilFuncs/copyrightdialog.h \
     utilFuncs/singlelinedialog.h \
-    remoteFileOps/remotejobentry.h \
     remoteFileOps/selectedfilelabel.h \
-    ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.h
+    ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.h \
+    utilFuncs/linkedstandarditem.h \
+    remoteFileOps/joblistnode.h
 
 FORMS += \
     instances/explorerwindow.ui \

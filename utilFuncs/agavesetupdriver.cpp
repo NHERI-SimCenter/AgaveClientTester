@@ -130,5 +130,6 @@ void AgaveSetupDriver::shutdown()
 
 void AgaveSetupDriver::shutdownCallback()
 {
+    qDebug("Invoking final exit");
     QCoreApplication::instance()->exit(0);
 }
