@@ -890,9 +890,9 @@ bool FileOperator::recursiveDownloadFolderEmitHelper(QDir currentLocalDir, FileT
     {
         if (aChild->getFileData().getFileType() == FileType::DIR)
         {
-            if (!currentLocalDir.mkdir(nodeToGet->getFileData().getFileName())) return false;
+            if (!currentLocalDir.mkdir(aChild->getFileData().getFileName())) return false;
             QDir newFolder = currentLocalDir;
-            newFolder.cd(nodeToGet->getFileData().getFileName());
+            newFolder.cd(aChild->getFileData().getFileName());
             if (!newFolder.exists()) return false;
             if (!recursiveDownloadFolderEmitHelper(newFolder, aChild, errNum)) return false;
         }
