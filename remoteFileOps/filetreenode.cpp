@@ -215,7 +215,7 @@ NodeState FileTreeNode::getNodeState()
             return NodeState::FOLDER_CONTENTS_LOADED;
         }
     }
-    else
+    else if (isFile())
     {
         if (!nodeIsDisplayed())
         {
@@ -248,7 +248,7 @@ NodeState FileTreeNode::getNodeState()
             return NodeState::FILE_BUFF_LOADED;
         }
     }
-    return NodeState::ERROR;
+    return NodeState::OTHER_TYPE;
 }
 
 FileMetaData FileTreeNode::getFileData()
@@ -399,6 +399,19 @@ bool FileTreeNode::isFolder()
         return false;
     }
     if (fileData->getFileType() == FileType::DIR)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool FileTreeNode::isFile()
+{
+    if (fileData == NULL)
+    {
+        return false;
+    }
+    if (fileData->getFileType() == FileType::FILE)
     {
         return true;
     }

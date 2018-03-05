@@ -40,6 +40,9 @@
 #include <QStandardItemModel>
 #include <QMessageBox>
 
+#include <QFile>
+#include <QDir>
+
 class RemoteFileTree;
 class FileMetaData;
 class RemoteDataInterface;
@@ -48,6 +51,8 @@ class EasyBoolLock;
 class AgaveSetupDriver;
 
 enum class RequestState;
+enum class FileOp_RecursiveTask {NONE, DOWNLOAD, UPLOAD};
+enum class RecursiveErrorCodes {NONE, MKDIR_FAIL, UPLOAD_FAIL, TYPE_MISSMATCH, LOST_FILE};
 
 class FileOperator : public QObject
 {
@@ -86,6 +91,12 @@ public:
     void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
     void sendDownloadBuffReq(FileTreeNode * targetFile);
 
+    bool performingRecursiveDownload();
+    void enactRecursiveDownload(FileTreeNode * targetFolder, QString containingDestFolder);
+    bool performingRecursiveUpload();
+    void enactRecursiveUpload(FileTreeNode *containingDestFolder, QString localFolderToCopy);
+    void abortRecursiveProcess();
+
     void sendCompressReq(FileTreeNode * selectedFolder);
     void sendDecompressReq(FileTreeNode * selectedFolder);
 
@@ -95,6 +106,7 @@ public:
 signals:
     void fileOpDone(RequestState opState);
     void fileSystemChange();
+    bool recursiveProcessFinished(bool success, QString message);
 
 private slots:
     void getDeleteReply(RequestState replyState);
@@ -112,8 +124,22 @@ private slots:
 
     void fileNodesChange();
 
+    void getRecursiveUploadReply(RequestState replyState, FileMetaData * newFileData);
+    void getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData);
+
 private:
     QString getStringFromInitParams(QString stringKey);
+
+    void recursiveDownloadProcessRetry();
+    bool recursiveDownloadRetrivalHelper(FileTreeNode * nodeToCheck); //Return true if have all data
+    bool recursiveDownloadFolderEmitHelper(QDir currentLocalDir, FileTreeNode * nodeToGet, RecursiveErrorCodes &errNum); //Return true if successful file output data
+    bool emitBufferToFile(QDir containingDir, FileTreeNode * nodeToGet, RecursiveErrorCodes &errNum); //Return true if successful file output data
+
+    void recursiveUploadProcessRetry();
+    bool recursiveUploadHelper(FileTreeNode * nodeToSend, QDir localPath, RecursiveErrorCodes &errNum); //Return true if all data sent and ls verified
+
+    bool sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QString newName);
+    bool sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString localFile);
 
     AgaveSetupDriver * myParent;
     RemoteDataInterface * dataLink;
@@ -128,6 +154,11 @@ private:
                                    "Format","mimeType","Permissions"};
     const QStringList hiddenHeaderLabelList = {"name","type","length","lastModified",
                                    "format","mimeType","permissions"};
+
+    EasyBoolLock * recursivefileOpPending;
+    QDir recursiveLocalHead;
+    FileTreeNode * recursiveRemoteHead;
+    FileOp_RecursiveTask currentRecursiveTask = FileOp_RecursiveTask::NONE;
 };
 
 #endif // FILEOPERATOR_H

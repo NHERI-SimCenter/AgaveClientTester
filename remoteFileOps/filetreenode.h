@@ -43,7 +43,7 @@ enum class NodeState {FILE_BUFF_LOADED, FILE_BUFF_RELOADING, FILE_BUFF_LOADING, 
                       FILE_SPECULATE_IDLE, FILE_SPECULATE_LOADING,
                       FOLDER_CONTENTS_LOADED, FOLDER_CONTENTS_RELOADING, FOLDER_CONTENTS_LOADING, FOLDER_KNOWN_CONTENTS_NOT,
                       FOLDER_SPECULATE_IDLE, FOLDER_SPECULATE_LOADING,
-                     ERROR};
+                      OTHER_TYPE, ERROR};
 enum class SpaceHolderState {LOADING, EMPTY, NONE};
 
 enum class RequestState;
@@ -87,6 +87,7 @@ public:
 
     bool fileNameMatches(QString folderToMatch);
     bool isFolder();
+    bool isFile();
 
 signals:
     void fileDataChanged();
