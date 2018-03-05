@@ -66,6 +66,7 @@ public:
     bool isRootNode();
     bool nodeIsDisplayed();
     void updateNodeDisplay();
+    void updateFileSize(int newSize);
     NodeState getNodeState();
     FileMetaData getFileData();
     QByteArray * getFileBuffer();

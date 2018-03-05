@@ -181,6 +181,11 @@ void FileTreeNode::updateNodeDisplay()
     }
 }
 
+void FileTreeNode::updateFileSize(int newSize)
+{
+    fileData->setSize(newSize);
+}
+
 NodeState FileTreeNode::getNodeState()
 {
     if (isFolder())
@@ -293,6 +298,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         if (newFileBuffer != NULL)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
+            updateFileSize(fileDataBuffer->length());
             underlyingFilesChanged();
         }
         return;
@@ -657,6 +663,7 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
         FileMetaData toCheck = aNode->getFileData();
 
         bool matchFound = false;
+        FileMetaData matchedData;
 
         for (auto itr = newChildList->begin(); itr != newChildList->end() && (matchFound == false); ++itr)
         {
@@ -665,11 +672,16 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
             if ((*itr) == toCheck)
             {
                 matchFound = true;
+                matchedData = *itr;
             }
         }
 
         if (matchFound)
         {
+            if (aNode->isFile())
+            {
+                aNode->updateFileSize(matchedData.getSize());
+            }
             altList.append(aNode);
         }
         else

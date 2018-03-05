@@ -69,7 +69,7 @@ void JobListNode::setData(RemoteJobData newData)
     {
         signalChange = true;
     }
-    myData = newData;
+    myData.updateData(newData);
 
     QList<QStandardItem *> myModelRow;
 
