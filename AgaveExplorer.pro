@@ -65,7 +65,8 @@ SOURCES += main.cpp \
     utilFuncs/singlelinedialog.cpp \
     remoteFileOps/selectedfilelabel.cpp \
     utilFuncs/linkedstandarditem.cpp \
-    remoteFileOps/joblistnode.cpp
+    remoteFileOps/joblistnode.cpp \
+    ae_globals.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -102,7 +103,8 @@ HEADERS += \
     remoteFileOps/selectedfilelabel.h \
     ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.h \
     utilFuncs/linkedstandarditem.h \
-    remoteFileOps/joblistnode.h
+    remoteFileOps/joblistnode.h \
+    ae_globals.h
 
 FORMS += \
     instances/explorerwindow.ui \

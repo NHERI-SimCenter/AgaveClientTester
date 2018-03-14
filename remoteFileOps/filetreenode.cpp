@@ -286,6 +286,12 @@ FileTreeNode * FileTreeNode::getParentNode()
     return myParent;
 }
 
+FileTreeNode * FileTreeNode::getNodeReletiveToNodeWithName(QString searchPath)
+{
+    QStringList filePathParts = FileMetaData::getPathNameList(searchPath);
+    return pathSearchHelperFromAnyNode(filePathParts, false);
+}
+
 void FileTreeNode::deleteFolderContentsData()
 {
     clearAllChildren(SpaceHolderState::LOADING);
@@ -513,6 +519,13 @@ FileTreeNode * FileTreeNode::pathSearchHelper(QString filename, bool stopEarly)
     {
         return NULL;
     }
+
+    return searchNode->pathSearchHelperFromAnyNode(filePathParts, stopEarly);
+}
+
+FileTreeNode * FileTreeNode::pathSearchHelperFromAnyNode(QStringList filePathParts, bool stopEarly)
+{
+    FileTreeNode * searchNode = this;
 
     for (auto itr = filePathParts.cbegin(); itr != filePathParts.cend(); itr++)
     {
