@@ -73,7 +73,6 @@ private:
     RemoteJobData myData;
 
     RemoteDataReply * myDetailTask = NULL;
-    JobOperator * myController = NULL;
 };
 
 #endif // REMOTEJOBENTRY_H

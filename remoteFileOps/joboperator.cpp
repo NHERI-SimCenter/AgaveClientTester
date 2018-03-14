@@ -35,14 +35,16 @@
 
 #include "joboperator.h"
 
+#include "../ae_globals.h"
+
 #include "remotejoblister.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../AgaveClientInterface/remotejobdata.h"
 #include "joblistnode.h"
 
-JobOperator::JobOperator(RemoteDataInterface * newDataLink, QObject * parent) : QObject((QObject *)parent)
+JobOperator::JobOperator(QObject * parent) : QObject((QObject *)parent)
 {
-    dataLink = newDataLink;
+    theJobList.setHorizontalHeaderLabels({"Task Name", "State", "Agave App", "Time Created", "Agave ID"});
 }
 
 JobOperator::~JobOperator()
@@ -56,7 +58,6 @@ JobOperator::~JobOperator()
 void JobOperator::linkToJobLister(RemoteJobLister * newLister)
 {
     newLister->setModel(&theJobList);
-    theJobList.setHorizontalHeaderLabels({"Task Name", "State", "Agave App", "Time Created", "Agave ID"});
 }
 
 void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> * theData)
@@ -127,7 +128,7 @@ void JobOperator::requestJobDetails(const RemoteJobData *toFetch)
     if (realNode->haveDetails()) return;
     if (realNode->haveDetailTask()) return;
 
-    RemoteDataReply * jobReply = dataLink->getJobDetails(toFetch->getID());
+    RemoteDataReply * jobReply = ae_globals::get_connection()->getJobDetails(toFetch->getID());
 
     if (jobReply == NULL) return; //TODO: Consider an error message here
 
@@ -155,7 +156,7 @@ void JobOperator::demandJobDataRefresh()
     {
         return;
     }
-    currentJobReply = dataLink->getListOfJobs();
+    currentJobReply = ae_globals::get_connection()->getListOfJobs();
     QObject::connect(currentJobReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>*)),
                      this, SLOT(refreshRunningJobList(RequestState,QList<RemoteJobData>*)));
 }

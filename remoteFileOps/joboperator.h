@@ -54,7 +54,7 @@ class JobOperator : public QObject
 {
     Q_OBJECT
 public:
-    explicit JobOperator(RemoteDataInterface * newDataLink, QObject * parent);
+    explicit JobOperator(QObject * parent);
     ~JobOperator();
     void linkToJobLister(RemoteJobLister * newLister);
 
@@ -76,7 +76,6 @@ private slots:
 
 private:
     QMap<QString, JobListNode *> jobData;
-    RemoteDataInterface * dataLink;
     RemoteDataReply * currentJobReply = NULL;
 
     QStandardItemModel theJobList;

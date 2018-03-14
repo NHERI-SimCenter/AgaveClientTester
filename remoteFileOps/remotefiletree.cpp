@@ -38,24 +38,17 @@
 #include "../utilFuncs/linkedstandarditem.h"
 #include "fileoperator.h"
 #include "filetreenode.h"
+#include "../ae_globals.h"
+#include "../utilFuncs/agavesetupdriver.h"
 
 RemoteFileTree::RemoteFileTree(QWidget *parent) :
     QTreeView(parent)
 {
+    ae_globals::get_file_handle()->linkToFileTree(this);
+
     QObject::connect(this, SIGNAL(expanded(QModelIndex)), this, SLOT(folderExpanded(QModelIndex)));
     QObject::connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(fileEntryTouched(QModelIndex)));
     this->setEditTriggers(QTreeView::NoEditTriggers);
-}
-
-void RemoteFileTree::setFileOperator(FileOperator * theOperator)
-{
-    myFileOperator = theOperator;
-    myFileOperator->linkToFileTree(this);
-}
-
-FileOperator * RemoteFileTree::getFileOperator()
-{
-    return myFileOperator;
 }
 
 FileTreeNode * RemoteFileTree::getSelectedNode()
@@ -89,7 +82,7 @@ void RemoteFileTree::folderExpanded(QModelIndex fileIndex)
     if (selectedItem == NULL) return;
     if (selectedItem->getNodeState() == NodeState::FOLDER_CONTENTS_LOADED) return;
 
-    myFileOperator->enactFolderRefresh(selectedItem);
+    ae_globals::get_file_handle()->enactFolderRefresh(selectedItem);
 }
 
 void RemoteFileTree::fileEntryTouched(QModelIndex itemTouched)

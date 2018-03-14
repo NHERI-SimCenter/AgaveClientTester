@@ -35,13 +35,11 @@
 
 #include "remotejoblister.h"
 
+#include "../ae_globals.h"
+#include "../utilFuncs/agavesetupdriver.h"
 #include "joboperator.h"
 
 RemoteJobLister::RemoteJobLister(QWidget *parent) : QTableView(parent)
-{}
-
-void RemoteJobLister::setJobHandle(JobOperator * theJobHandle)
 {
-    myJobHandle = theJobHandle;
-    myJobHandle->linkToJobLister(this);
+    ae_globals::get_job_handle()->linkToJobLister(this);
 }

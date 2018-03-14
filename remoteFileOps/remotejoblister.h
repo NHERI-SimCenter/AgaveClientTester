@@ -45,10 +45,6 @@ class RemoteJobLister : public QTableView
     Q_OBJECT
 public:
     explicit RemoteJobLister(QWidget *parent = nullptr);
-    void setJobHandle(JobOperator * theJobHandle);
-
-private:
-    JobOperator * myJobHandle = NULL;
 };
 
 #endif // REMOTEJOBLISTER_H

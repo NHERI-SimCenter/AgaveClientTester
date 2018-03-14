@@ -38,13 +38,21 @@
 
 #include <QString>
 #include <QMessageBox>
+#include <QCoreApplication>
 
 class AgaveSetupDriver;
+class RemoteDataInterface;
+class FileOperator;
+class JobOperator;
 
 class ae_globals
 {
 public:
     ae_globals();
+
+    static void displayFatalPopup(QString message, QString header);
+    static void displayFatalPopup(QString message);
+
     static void displayPopup(QString message, QString header);
     static void displayPopup(QString message);
 
@@ -53,6 +61,10 @@ public:
 
     static AgaveSetupDriver * get_Driver();
     static void set_Driver(AgaveSetupDriver * newDriver);
+
+    static RemoteDataInterface * get_connection();
+    static JobOperator * get_job_handle();
+    static FileOperator * get_file_handle();
 
 private:    
     static AgaveSetupDriver * theDriver;

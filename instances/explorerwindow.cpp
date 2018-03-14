@@ -46,6 +46,7 @@
 #include "../utilFuncs/singlelinedialog.h"
 
 #include "explorerdriver.h"
+#include "../ae_globals.h"
 
 ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
     QMainWindow(parent),
@@ -77,7 +78,6 @@ ExplorerWindow::~ExplorerWindow()
 void ExplorerWindow::startAndShow()
 {
     theFileOperator = programDriver->getFileHandler();
-    ui->remoteFileView->setFileOperator(theFileOperator);
     ui->remoteFileView->setupFileView();
     QObject::connect(ui->remoteFileView, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(customFileMenu(QPoint)));
@@ -85,8 +85,6 @@ void ExplorerWindow::startAndShow()
                      this, SLOT(recursiveProcessPopup(bool,QString)));
 
     ui->agaveAppList->setModel(&taskListModel);
-
-    ui->jobTable->setJobHandle(programDriver->getJobHandler());
     QObject::connect(ui->jobTable, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(jobRightClickMenu(QPoint)));
 
@@ -200,7 +198,7 @@ void ExplorerWindow::finishedAppInvoke(RequestState, QJsonDocument *)
 void ExplorerWindow::customFileMenu(QPoint pos)
 {
     QMenu fileMenu;
-    if (ui->remoteFileView->getFileOperator()->operationIsPending())
+    if (ae_globals::get_Driver()->getFileHandler()->operationIsPending())
     {
         fileMenu.addAction("File Operation In Progress . . .");
         fileMenu.exec(QCursor::pos());
@@ -275,7 +273,7 @@ void ExplorerWindow::copyMenuItem()
         return;
     }
 
-    ui->remoteFileView->getFileOperator()->sendCopyReq(targetNode, newNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendCopyReq(targetNode, newNamePopup.getInputText());
 }
 
 void ExplorerWindow::moveMenuItem()
@@ -287,7 +285,7 @@ void ExplorerWindow::moveMenuItem()
         return;
     }
 
-    ui->remoteFileView->getFileOperator()->sendMoveReq(targetNode,newNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendMoveReq(targetNode,newNamePopup.getInputText());
 }
 
 void ExplorerWindow::renameMenuItem()
@@ -299,14 +297,14 @@ void ExplorerWindow::renameMenuItem()
         return;
     }
 
-    ui->remoteFileView->getFileOperator()->sendRenameReq(targetNode, newNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendRenameReq(targetNode, newNamePopup.getInputText());
 }
 
 void ExplorerWindow::deleteMenuItem()
 {
-    if (ui->remoteFileView->getFileOperator()->deletePopup(targetNode))
+    if (ae_globals::get_Driver()->getFileHandler()->deletePopup(targetNode))
     {
-        ui->remoteFileView->getFileOperator()->sendDeleteReq(targetNode);
+        ae_globals::get_Driver()->getFileHandler()->sendDeleteReq(targetNode);
     }
 }
 
@@ -318,7 +316,7 @@ void ExplorerWindow::uploadMenuItem()
     {
         return;
     }
-    ui->remoteFileView->getFileOperator()->sendUploadReq(targetNode, uploadNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendUploadReq(targetNode, uploadNamePopup.getInputText());
 }
 
 void ExplorerWindow::uploadFolderMenuItem()
@@ -329,7 +327,7 @@ void ExplorerWindow::uploadFolderMenuItem()
     {
         return;
     }
-    ui->remoteFileView->getFileOperator()->enactRecursiveUpload(targetNode, uploadNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->enactRecursiveUpload(targetNode, uploadNamePopup.getInputText());
 }
 
 void ExplorerWindow::downloadFolderMenuItem()
@@ -340,7 +338,7 @@ void ExplorerWindow::downloadFolderMenuItem()
     {
         return;
     }
-    ui->remoteFileView->getFileOperator()->enactRecursiveDownload(targetNode, downloadNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->enactRecursiveDownload(targetNode, downloadNamePopup.getInputText());
 }
 
 void ExplorerWindow::createFolderMenuItem()
@@ -351,7 +349,7 @@ void ExplorerWindow::createFolderMenuItem()
     {
         return;
     }
-    ui->remoteFileView->getFileOperator()->sendCreateFolderReq(targetNode, newFolderNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendCreateFolderReq(targetNode, newFolderNamePopup.getInputText());
 }
 
 void ExplorerWindow::downloadMenuItem()
@@ -362,7 +360,7 @@ void ExplorerWindow::downloadMenuItem()
     {
         return;
     }
-    ui->remoteFileView->getFileOperator()->sendDownloadReq(targetNode, downloadNamePopup.getInputText());
+    ae_globals::get_Driver()->getFileHandler()->sendDownloadReq(targetNode, downloadNamePopup.getInputText());
 }
 
 void ExplorerWindow::readMenuItem()
@@ -374,22 +372,22 @@ void ExplorerWindow::readMenuItem()
 
 void ExplorerWindow::retriveMenuItem()
 {
-    ui->remoteFileView->getFileOperator()->sendDownloadBuffReq(targetNode);
+    ae_globals::get_Driver()->getFileHandler()->sendDownloadBuffReq(targetNode);
 }
 
 void ExplorerWindow::compressMenuItem()
 {
-    ui->remoteFileView->getFileOperator()->sendCompressReq(targetNode);
+    ae_globals::get_Driver()->getFileHandler()->sendCompressReq(targetNode);
 }
 
 void ExplorerWindow::decompressMenuItem()
 {
-    ui->remoteFileView->getFileOperator()->sendDecompressReq(targetNode);
+    ae_globals::get_Driver()->getFileHandler()->sendDecompressReq(targetNode);
 }
 
 void ExplorerWindow::refreshMenuItem()
 {
-    ui->remoteFileView->getFileOperator()->enactFolderRefresh(targetNode);
+    ae_globals::get_Driver()->getFileHandler()->enactFolderRefresh(targetNode);
 }
 
 void ExplorerWindow::jobRightClickMenu(QPoint)

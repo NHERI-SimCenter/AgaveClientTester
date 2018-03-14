@@ -59,7 +59,7 @@ class FileOperator : public QObject
     Q_OBJECT
 
 public:
-    FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver * parent);
+    FileOperator(AgaveSetupDriver * parent);
     ~FileOperator();
     void linkToFileTree(RemoteFileTree * newTreeLink);
 
@@ -141,8 +141,6 @@ private:
     bool sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QString newName);
     bool sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString localFile);
 
-    AgaveSetupDriver * myParent;
-    RemoteDataInterface * dataLink;
     FileTreeNode * rootFileNode = NULL;
     QStandardItemModel dataStore;
 
