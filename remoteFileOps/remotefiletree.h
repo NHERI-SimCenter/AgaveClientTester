@@ -60,10 +60,6 @@ class RemoteFileTree : public QTreeView
 public:
     explicit RemoteFileTree(QWidget *parent = 0);
 
-    void setFileOperator(FileOperator * theOperator);
-    FileOperator * getFileOperator();
-
-    void refreshSelection();
     FileTreeNode * getSelectedNode();
     void setupFileView();
 
@@ -76,9 +72,6 @@ public slots:
 
 private slots:
     void folderExpanded(QModelIndex itemOpened);
-
-private:
-    FileOperator * myFileOperator;
 };
 
 #endif // REMOTEFILEWINDOW_H

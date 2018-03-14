@@ -43,6 +43,8 @@
 #include "../AgaveClientInterface/agaveInterfaces/agavehandler.h"
 #include "../AgaveClientInterface/agaveInterfaces/agavetaskreply.h"
 
+#include "../ae_globals.h"
+
 ExplorerDriver::ExplorerDriver(QObject *parent, bool debug) : AgaveSetupDriver(parent, debug)
 {
     AgaveHandler * tmpHandle = new AgaveHandler(this);
@@ -63,7 +65,10 @@ ExplorerDriver::~ExplorerDriver()
 
 void ExplorerDriver::startup()
 {
+    myJobHandle = new JobOperator(this);
+    myFileHandle = new FileOperator(this);
     authWindow = new AuthForm(this);
+
     authWindow->show();
     QObject::connect(authWindow->windowHandle(),SIGNAL(visibleChanged(bool)),this, SLOT(subWindowHidden(bool)));
 
@@ -78,11 +83,8 @@ void ExplorerDriver::closeAuthScreen()
         return;
     }
 
-    myJobHandle = new JobOperator(theConnector,this);
     myJobHandle->demandJobDataRefresh();
-    myFileHandle = new FileOperator(theConnector,this);
     myFileHandle->resetFileData();
-
     mainWindow->startAndShow();
 
     //The dynamics of this may be different in windows. TODO: Find a more cross-platform solution

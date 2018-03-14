@@ -43,12 +43,10 @@
 #include "../AgaveClientInterface/remotedatainterface.h"
 
 #include "../utilFuncs/agavesetupdriver.h"
+#include "../ae_globals.h"
 
-FileOperator::FileOperator(RemoteDataInterface * newDataLink, AgaveSetupDriver *parent) : QObject( (QObject *)parent)
+FileOperator::FileOperator(AgaveSetupDriver *parent) : QObject( (QObject *)parent)
 {
-    dataLink = newDataLink;
-    myParent = parent;
-
     //Note: will be deconstructed with parent
     fileOpPending = new EasyBoolLock(this);
 }
@@ -73,7 +71,7 @@ void FileOperator::resetFileData()
     {
         rootFileNode->deleteLater();
     }
-    rootFileNode = new FileTreeNode(&dataStore, dataLink->getUserName(), this);
+    rootFileNode = new FileTreeNode(&dataStore, ae_globals::get_connection()->getUserName(), this);
 
     QObject::connect(rootFileNode, SIGNAL(fileDataChanged()),
                      this, SLOT(fileNodesChange()));
@@ -84,7 +82,7 @@ void FileOperator::resetFileData()
 void FileOperator::totalResetErrorProcedure()
 {
     //TODO: Try to recover once by resetting all data on remote files
-    myParent->fatalInterfaceError("Critical Remote file parseing error. Unable to Recover");
+    ae_globals::displayFatalPopup("Critical Remote file parseing error. Unable to Recover");
 }
 
 QString FileOperator::getStringFromInitParams(QString stringKey)
@@ -93,13 +91,13 @@ QString FileOperator::getStringFromInitParams(QString stringKey)
     RemoteDataReply * theReply = qobject_cast<RemoteDataReply *> (QObject::sender());
     if (theReply == NULL)
     {
-        myParent->fatalInterfaceError("Unable to get sender object of reply signal");
+        ae_globals::displayFatalPopup("Unable to get sender object of reply signal");
         return ret;
     }
     ret = theReply->getTaskParamList()->value(stringKey);
     if (ret.isEmpty())
     {
-        myParent->fatalInterfaceError("Missing init param");
+        ae_globals::displayFatalPopup("Missing init param");
         return ret;
     }
     return ret;
@@ -108,7 +106,7 @@ QString FileOperator::getStringFromInitParams(QString stringKey)
 void FileOperator::enactRootRefresh()
 {
     qDebug("Enacting refresh of root.");
-    RemoteDataReply * theReply = dataLink->remoteLS("/");
+    RemoteDataReply * theReply = ae_globals::get_connection()->remoteLS("/");
     if (theReply == NULL)
     {
         //TODO: consider a more fatal error here
@@ -133,7 +131,7 @@ void FileOperator::enactFolderRefresh(FileTreeNode * selectedNode, bool clearDat
     QString fullFilePath = selectedNode->getFileData().getFullPath();
 
     qDebug("File Path Needs refresh: %s", qPrintable(fullFilePath));
-    RemoteDataReply * theReply = dataLink->remoteLS(fullFilePath);
+    RemoteDataReply * theReply = ae_globals::get_connection()->remoteLS(fullFilePath);
     if (theReply == NULL)
     {
         //TODO: consider a more fatal error here
@@ -155,7 +153,7 @@ void FileOperator::sendDeleteReq(FileTreeNode * selectedNode)
 
     QString targetFile = selectedNode->getFileData().getFullPath();
     qDebug("Starting delete procedure: %s",qPrintable(targetFile));
-    RemoteDataReply * theReply = dataLink->deleteFile(targetFile);
+    RemoteDataReply * theReply = ae_globals::get_connection()->deleteFile(targetFile);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -177,12 +175,12 @@ void FileOperator::getDeleteReply(RequestState replyState)
 void FileOperator::sendMoveReq(FileTreeNode * moveFrom, QString newName)
 {
     if (!fileOpPending->checkAndClaim()) return;
-    dataLink->setCurrentRemoteWorkingDirectory(moveFrom->getFileData().getContainingPath());
+    ae_globals::get_connection()->setCurrentRemoteWorkingDirectory(moveFrom->getFileData().getContainingPath());
 
     qDebug("Starting move procedure: %s to %s",
            qPrintable(moveFrom->getFileData().getFullPath()),
            qPrintable(newName));
-    RemoteDataReply * theReply = dataLink->moveFile(moveFrom->getFileData().getFullPath(), newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->moveFile(moveFrom->getFileData().getFullPath(), newName);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -208,12 +206,12 @@ void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedF
 void FileOperator::sendCopyReq(FileTreeNode * copyFrom, QString newName)
 {
     if (!fileOpPending->checkAndClaim()) return;
-    dataLink->setCurrentRemoteWorkingDirectory(copyFrom->getFileData().getContainingPath());
+    ae_globals::get_connection()->setCurrentRemoteWorkingDirectory(copyFrom->getFileData().getContainingPath());
 
     qDebug("Starting copy procedure: %s to %s",
            qPrintable(copyFrom->getFileData().getFullPath()),
            qPrintable(newName));
-    RemoteDataReply * theReply = dataLink->copyFile(copyFrom->getFileData().getFullPath(), newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->copyFile(copyFrom->getFileData().getFullPath(), newName);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -242,7 +240,7 @@ void FileOperator::sendRenameReq(FileTreeNode * selectedNode, QString newName)
     qDebug("Starting rename procedure: %s to %s",
            qPrintable(selectedNode->getFileData().getFullPath()),
            qPrintable(newName));
-    RemoteDataReply * theReply = dataLink->renameFile(selectedNode->getFileData().getFullPath(), newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->renameFile(selectedNode->getFileData().getFullPath(), newName);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -272,7 +270,7 @@ void FileOperator::sendCreateFolderReq(FileTreeNode * selectedNode, QString newN
     qDebug("Starting create folder procedure: %s at %s",
            qPrintable(selectedNode->getFileData().getFullPath()),
            qPrintable(newName));
-    RemoteDataReply * theReply = dataLink->mkRemoteDir(selectedNode->getFileData().getFullPath(), newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->mkRemoteDir(selectedNode->getFileData().getFullPath(), newName);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -300,7 +298,7 @@ void FileOperator::sendUploadReq(FileTreeNode * uploadTarget, QString localFile)
     if (!fileOpPending->checkAndClaim()) return;
     qDebug("Starting upload procedure: %s to %s", qPrintable(localFile),
            qPrintable(uploadTarget->getFileData().getFullPath()));
-    RemoteDataReply * theReply = dataLink->uploadFile(uploadTarget->getFileData().getFullPath(), localFile);
+    RemoteDataReply * theReply = ae_globals::get_connection()->uploadFile(uploadTarget->getFileData().getFullPath(), localFile);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -314,7 +312,7 @@ void FileOperator::sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fil
 {
     if (!fileOpPending->checkAndClaim()) return;
     qDebug("Starting upload procedure: to %s", qPrintable(uploadTarget->getFileData().getFullPath()));
-    RemoteDataReply * theReply = dataLink->uploadBuffer(uploadTarget->getFileData().getFullPath(), fileBuff, newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->uploadBuffer(uploadTarget->getFileData().getFullPath(), fileBuff, newName);
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -341,7 +339,7 @@ void FileOperator::sendDownloadReq(FileTreeNode * targetFile, QString localDest)
     if (!fileOpPending->checkAndClaim()) return;
     qDebug("Starting download procedure: %s to %s", qPrintable(targetFile->getFileData().getFullPath()),
            qPrintable(localDest));
-    RemoteDataReply * theReply = dataLink->downloadFile(localDest, targetFile->getFileData().getFullPath());
+    RemoteDataReply * theReply = ae_globals::get_connection()->downloadFile(localDest, targetFile->getFileData().getFullPath());
     if (theReply == NULL)
     {
         fileOpPending->release();
@@ -374,7 +372,7 @@ void FileOperator::sendDownloadBuffReq(FileTreeNode * targetFile)
         return;
     }
     qDebug("Starting download buffer procedure: %s", qPrintable(targetFile->getFileData().getFullPath()));
-    RemoteDataReply * theReply = dataLink->downloadBuffer(targetFile->getFileData().getFullPath());
+    RemoteDataReply * theReply = ae_globals::get_connection()->downloadBuffer(targetFile->getFileData().getFullPath());
     if (theReply == NULL)
     {
         return;
@@ -541,7 +539,7 @@ void FileOperator::sendCompressReq(FileTreeNode * selectedFolder)
         //TODO: give reasonable error
         return;
     }
-    RemoteDataReply * compressTask = dataLink->runRemoteJob("compress",oneInput,fileData.getFullPath());
+    RemoteDataReply * compressTask = ae_globals::get_connection()->runRemoteJob("compress",oneInput,fileData.getFullPath());
     if (compressTask == NULL)
     {
         fileOpPending->release();
@@ -579,7 +577,7 @@ void FileOperator::sendDecompressReq(FileTreeNode * selectedFolder)
     }
     oneInput.insert("inputFile",fileData.getFullPath());
 
-    RemoteDataReply * decompressTask = dataLink->runRemoteJob("extract",oneInput,"");
+    RemoteDataReply * decompressTask = ae_globals::get_connection()->runRemoteJob("extract",oneInput,"");
     if (decompressTask == NULL)
     {
         fileOpPending->release();
@@ -1029,7 +1027,7 @@ bool FileOperator::sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QSt
     qDebug("Starting Recursive mkdir procedure: %s at %s",
            qPrintable(selectedNode->getFileData().getFullPath()),
            qPrintable(newName));
-    RemoteDataReply * theReply = dataLink->mkRemoteDir(selectedNode->getFileData().getFullPath(), newName);
+    RemoteDataReply * theReply = ae_globals::get_connection()->mkRemoteDir(selectedNode->getFileData().getFullPath(), newName);
     if (theReply == NULL)
     {
         recursivefileOpPending->release();
@@ -1045,7 +1043,7 @@ bool FileOperator::sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString l
     if (!recursivefileOpPending->checkAndClaim()) return false;
     qDebug("Starting recursively enacted upload procedure: %s to %s", qPrintable(localFile),
            qPrintable(uploadTarget->getFileData().getFullPath()));
-    RemoteDataReply * theReply = dataLink->uploadFile(uploadTarget->getFileData().getFullPath(), localFile);
+    RemoteDataReply * theReply = ae_globals::get_connection()->uploadFile(uploadTarget->getFileData().getFullPath(), localFile);
     if (theReply == NULL)
     {
         recursivefileOpPending->release();

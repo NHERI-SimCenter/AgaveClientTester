@@ -35,9 +35,28 @@
 
 #include "ae_globals.h"
 
+#include "utilFuncs/agavesetupdriver.h"
+
 AgaveSetupDriver * ae_globals::theDriver = NULL;
 
 ae_globals::ae_globals() {}
+
+void ae_globals::displayFatalPopup(QString message, QString header)
+{
+    QMessageBox errorMessage;
+    errorMessage.setWindowTitle(header);
+    errorMessage.setText(message);
+    errorMessage.setStandardButtons(QMessageBox::Close);
+    errorMessage.setDefaultButton(QMessageBox::Close);
+    errorMessage.setIcon(QMessageBox::Critical);
+    errorMessage.exec();
+    QCoreApplication::instance()->exit(-1);
+}
+
+void ae_globals::displayFatalPopup(QString message)
+{
+    displayFatalPopup(message, "Critical Error");
+}
 
 void ae_globals::displayPopup(QString message, QString header)
 {
@@ -82,8 +101,26 @@ void ae_globals::set_Driver(AgaveSetupDriver * newDriver)
 {
     if (theDriver != NULL)
     {
-        displayPopup("Program Driver object has multiple definitions. Please note the circumstances of this error and report it to the developers.", "Internal Error");
+        displayFatalPopup("Program Driver object has multiple definitions. Please note the circumstances of this error and report it to the developers.", "Internal Error");
         return;
     }
     theDriver = newDriver;
+}
+
+RemoteDataInterface * ae_globals::get_connection()
+{
+    if (theDriver == NULL) return NULL;
+    return theDriver->getDataConnection();
+}
+
+JobOperator * ae_globals::get_job_handle()
+{
+    if (theDriver == NULL) return NULL;
+    return theDriver->getJobHandler();
+}
+
+FileOperator * ae_globals::get_file_handle()
+{
+    if (theDriver == NULL) return NULL;
+    return theDriver->getFileHandler();
 }

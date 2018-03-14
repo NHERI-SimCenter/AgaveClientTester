@@ -38,8 +38,6 @@
 
 #include <QObject>
 
-#include <QCoreApplication>
-
 enum class RequestState;
 
 class RemoteDataInterface;
