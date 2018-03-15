@@ -105,7 +105,7 @@ public:
 
 signals:
     void fileOpDone(RequestState opState);
-    void fileSystemChange();
+    void fileSystemChange(FileTreeNode * changedFile);
     bool recursiveProcessFinished(bool success, QString message);
 
 private slots:
@@ -122,7 +122,7 @@ private slots:
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
 
-    void fileNodesChange();
+    void fileNodesChange(FileTreeNode * changedFile);
 
     void getRecursiveUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData);

@@ -46,7 +46,7 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     myParent = parent;
     parent->childList.append(this);
 
-    QObject::connect(this, SIGNAL(fileDataChanged()), myParent, SLOT(underlyingFilesChanged()));
+    QObject::connect(this, SIGNAL(fileDataChanged(FileTreeNode *)), myParent, SLOT(underlyingFilesChanged(FileTreeNode *)));
 
     getModelLink();
 
@@ -305,7 +305,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
             updateFileSize(fileDataBuffer->length());
-            underlyingFilesChanged();
+            underlyingFilesChanged(this);
         }
         return;
     }
@@ -314,7 +314,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        underlyingFilesChanged();
+        underlyingFilesChanged(this);
         return;
     }
 
@@ -325,7 +325,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 
     delete fileDataBuffer;
     fileDataBuffer = new QByteArray(*newFileBuffer);
-    underlyingFilesChanged();
+    underlyingFilesChanged(this);
 }
 
 bool FileTreeNode::haveLStask()
@@ -489,9 +489,10 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     setFileBuffer(bufferData);
 }
 
-void FileTreeNode::underlyingFilesChanged()
+void FileTreeNode::underlyingFilesChanged(FileTreeNode *changedFile)
 {
-    emit fileDataChanged();
+    if (changedFile == NULL) return;
+    emit fileDataChanged(changedFile);
 }
 
 void FileTreeNode::getModelLink()
@@ -579,7 +580,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         clearAllChildren(SpaceHolderState::EMPTY);
         updateNodeDisplay();
-        underlyingFilesChanged();
+        underlyingFilesChanged(this);
         return;
     }
 
@@ -598,7 +599,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         (*itr)->updateNodeDisplay();
     }
 
-    underlyingFilesChanged();
+    underlyingFilesChanged(this);
 }
 
 void FileTreeNode::clearAllChildren(SpaceHolderState spaceholderVal)

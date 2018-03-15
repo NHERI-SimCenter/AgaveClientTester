@@ -64,6 +64,8 @@ private:
     Ui::AuthForm *ui;
     RemoteDataInterface * theConnection;
     AgaveSetupDriver * myDriver;
+
+    bool authInProgress = false;
 };
 
 #endif // AUTHFORM_H

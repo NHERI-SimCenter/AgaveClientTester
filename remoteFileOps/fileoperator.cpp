@@ -73,8 +73,8 @@ void FileOperator::resetFileData()
     }
     rootFileNode = new FileTreeNode(&dataStore, ae_globals::get_connection()->getUserName(), this);
 
-    QObject::connect(rootFileNode, SIGNAL(fileDataChanged()),
-                     this, SLOT(fileNodesChange()));
+    QObject::connect(rootFileNode, SIGNAL(fileDataChanged(FileTreeNode *)),
+                     this, SLOT(fileNodesChange(FileTreeNode *)));
 
     enactRootRefresh();
 }
@@ -601,9 +601,9 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
     }
 }
 
-void FileOperator::fileNodesChange()
+void FileOperator::fileNodesChange(FileTreeNode *changedFile)
 {
-    emit fileSystemChange();
+    emit fileSystemChange(changedFile);
 
     if (performingRecursiveDownload())
     {
