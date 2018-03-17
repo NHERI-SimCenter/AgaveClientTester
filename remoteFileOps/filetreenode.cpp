@@ -700,7 +700,7 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
         }
         else
         {
-            delete aNode;
+            aNode->deleteLater();
         }
     }
 
