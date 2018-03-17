@@ -760,20 +760,19 @@ FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QStr
         }
         newFolderData.setSize(0);
         nextNode = new FileTreeNode(newFolderData, searchNode);
-        if ((searchNode->getNodeState() == NodeState::FOLDER_KNOWN_CONTENTS_NOT) ||
-               (searchNode->getNodeState() == NodeState::FOLDER_SPECULATE_IDLE))
-        {
-            enactFolderRefresh(searchNode);
-        }
+        enactFolderRefresh(searchNode);
 
         searchNode = nextNode;
     }
 
     if (folder)
     {
-        enactFolderRefresh(searchNode);
+        if (searchNode->getNodeState() != NodeState::FOLDER_CONTENTS_LOADED)
+        {
+            enactFolderRefresh(searchNode);
+        }
     }
-    else
+    else if (searchNode->getFileBuffer() == NULL)
     {
         sendDownloadBuffReq(searchNode);
     }
