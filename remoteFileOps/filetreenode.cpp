@@ -39,6 +39,7 @@
 
 #include "../AgaveClientInterface/filemetadata.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
+#include "../ae_globals.h"
 
 FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject((QObject *)parent)
 {
@@ -432,10 +433,16 @@ bool FileTreeNode::isFile()
 
 void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList)
 {
-    if (lsTask == QObject::sender())
+    if (lsTask == sender())
     {
         lsTask = NULL;
     }
+    if (taskState == RequestState::NO_CONNECT)
+    {
+        ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
+        return;
+    }
+
     if (taskState == RequestState::FAIL)
     {
         if ((getNodeState() == NodeState::FOLDER_SPECULATE_IDLE) ||
@@ -444,10 +451,6 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
             this->deleteLater();
         }
 
-        return;
-    }
-    if (taskState == RequestState::NO_CONNECT)
-    {
         return;
     }
 
@@ -476,6 +479,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     }
     if (taskState == RequestState::NO_CONNECT)
     {
+        ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
         return;
     }
 
