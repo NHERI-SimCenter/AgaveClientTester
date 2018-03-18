@@ -92,14 +92,14 @@ public:
     bool isFile();
 
 signals:
-    void fileDataChanged();
+    void fileDataChanged(FileTreeNode * changedFile);
 
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
 private slots:
-    void underlyingFilesChanged();
+    void underlyingFilesChanged(FileTreeNode * changedFile);
 
 private:
     void getModelLink();

@@ -50,10 +50,12 @@ AgaveSetupDriver::AgaveSetupDriver(QObject *parent, bool debug) : QObject(parent
 
 AgaveSetupDriver::~AgaveSetupDriver()
 {
-    if (theConnector != NULL) theConnector->deleteLater();
-    if (authWindow != NULL) authWindow->deleteLater();
-    if (myJobHandle != NULL) myJobHandle->deleteLater();
-    if (myFileHandle != NULL) myFileHandle->deleteLater();
+    if (authWindow != NULL) delete authWindow;
+
+    if (myJobHandle != NULL) delete myJobHandle;
+    if (myFileHandle != NULL) delete myFileHandle;
+
+    if (theConnector != NULL) delete theConnector;
 }
 
 RemoteDataInterface * AgaveSetupDriver::getDataConnection()

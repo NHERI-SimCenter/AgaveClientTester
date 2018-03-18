@@ -49,6 +49,7 @@ FileOperator::FileOperator(AgaveSetupDriver *parent) : QObject( (QObject *)paren
 {
     //Note: will be deconstructed with parent
     fileOpPending = new EasyBoolLock(this);
+    recursivefileOpPending = new EasyBoolLock(this);
 }
 
 FileOperator::~FileOperator()
@@ -73,8 +74,8 @@ void FileOperator::resetFileData()
     }
     rootFileNode = new FileTreeNode(&dataStore, ae_globals::get_connection()->getUserName(), this);
 
-    QObject::connect(rootFileNode, SIGNAL(fileDataChanged()),
-                     this, SLOT(fileNodesChange()));
+    QObject::connect(rootFileNode, SIGNAL(fileDataChanged(FileTreeNode *)),
+                     this, SLOT(fileNodesChange(FileTreeNode *)));
 
     enactRootRefresh();
 }
@@ -387,8 +388,8 @@ bool FileOperator::performingRecursiveDownload()
 
 void FileOperator::enactRecursiveDownload(FileTreeNode * targetFolder, QString containingDestFolder)
 {
-    if (!fileOpPending->checkAndClaim()) return;
     if (currentRecursiveTask != FileOp_RecursiveTask::NONE) return;
+    if (!fileOpPending->checkAndClaim()) return;
 
     if (!targetFolder->isFolder())
     {
@@ -439,8 +440,8 @@ bool FileOperator::performingRecursiveUpload()
 
 void FileOperator::enactRecursiveUpload(FileTreeNode * containingDestFolder, QString localFolderToCopy)
 {
-    if (!fileOpPending->checkAndClaim()) return;
     if (currentRecursiveTask != FileOp_RecursiveTask::NONE) return;
+    if (!fileOpPending->checkAndClaim()) return;
 
     if (recursivefileOpPending->lockClosed())
     {
@@ -492,15 +493,7 @@ void FileOperator::enactRecursiveUpload(FileTreeNode * containingDestFolder, QSt
         return;
     }
 
-    speculateNodeWithName(recursiveRemoteHead, recursiveLocalHead.dirName(), true);
-
-    recursiveRemoteHead = containingDestFolder->getChildNodeWithName(recursiveLocalHead.dirName());
-    if (recursiveRemoteHead == NULL)
-    {
-        fileOpPending->release();
-        emit recursiveProcessFinished(false, "ERROR: Internal Error, please consult developers to fix this.");
-        return;
-    }
+    recursiveRemoteHead = containingDestFolder;
 
     currentRecursiveTask = FileOp_RecursiveTask::UPLOAD;
     recursiveUploadProcessRetry();
@@ -601,9 +594,9 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
     }
 }
 
-void FileOperator::fileNodesChange()
+void FileOperator::fileNodesChange(FileTreeNode *changedFile)
 {
-    emit fileSystemChange();
+    emit fileSystemChange(changedFile);
 
     if (performingRecursiveDownload())
     {
@@ -760,20 +753,19 @@ FileTreeNode * FileOperator::speculateNodeWithName(FileTreeNode * baseNode, QStr
         }
         newFolderData.setSize(0);
         nextNode = new FileTreeNode(newFolderData, searchNode);
-        if ((searchNode->getNodeState() == NodeState::FOLDER_KNOWN_CONTENTS_NOT) ||
-               (searchNode->getNodeState() == NodeState::FOLDER_SPECULATE_IDLE))
-        {
-            enactFolderRefresh(searchNode);
-        }
+        enactFolderRefresh(searchNode);
 
         searchNode = nextNode;
     }
 
     if (folder)
     {
-        enactFolderRefresh(searchNode);
+        if (searchNode->getNodeState() != NodeState::FOLDER_CONTENTS_LOADED)
+        {
+            enactFolderRefresh(searchNode);
+        }
     }
-    else
+    else if (searchNode->getFileBuffer() == NULL)
     {
         sendDownloadBuffReq(searchNode);
     }
@@ -933,8 +925,14 @@ void FileOperator::recursiveUploadProcessRetry()
     if (recursivefileOpPending->lockClosed()) return;
 
     RecursiveErrorCodes theError = RecursiveErrorCodes::NONE;
+    FileTreeNode * trueRemoteHead = recursiveRemoteHead->getChildNodeWithName(recursiveLocalHead.dirName());
+    if (trueRemoteHead == NULL)
+    {
+        sendRecursiveCreateFolderReq(recursiveRemoteHead, recursiveLocalHead.dirName());
+        return;
+    }
 
-    if (recursiveUploadHelper(recursiveRemoteHead, recursiveLocalHead, theError))
+    if (recursiveUploadHelper(trueRemoteHead, recursiveLocalHead, theError))
     {
         currentRecursiveTask = FileOp_RecursiveTask::NONE;
         fileOpPending->release();
@@ -982,11 +980,12 @@ bool FileOperator::recursiveUploadHelper(FileTreeNode * nodeToSend, QDir localPa
         return false;
     }
 
-    for (QFileInfo anEntry : localPath.entryInfoList())
+    for (QFileInfo anEntry : localPath.entryInfoList(QDir::Dirs	| QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot))
     {
         if (anEntry.isDir())
         {
             QDir childDir = anEntry.dir();
+            childDir.cd(anEntry.fileName());
             FileTreeNode * childNode = nodeToSend->getChildNodeWithName(childDir.dirName());
             if (childNode == NULL)
             {
