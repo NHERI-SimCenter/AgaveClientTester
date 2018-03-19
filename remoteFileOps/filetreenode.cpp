@@ -35,6 +35,8 @@
 
 #include "filetreenode.h"
 
+#include "fileoperator.h"
+
 #include "../utilFuncs/linkedstandarditem.h"
 
 #include "../AgaveClientInterface/filemetadata.h"
@@ -46,8 +48,7 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     fileData = new FileMetaData(contents);
     myParent = parent;
     parent->childList.append(this);
-
-    QObject::connect(this, SIGNAL(fileDataChanged(FileTreeNode *)), myParent, SLOT(underlyingFilesChanged(FileTreeNode *)));
+    myParent->underlyingFilesChanged(this,FileSystemChange::FILE_ADD);
 
     getModelLink();
 
@@ -71,6 +72,7 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
 
     setSpaceholderNode(SpaceHolderState::LOADING);
     updateNodeDisplay();
+    ae_globals::get_file_handle()->fileNodesChange(this,FileSystemChange::FILE_ADD);
 }
 
 FileTreeNode::~FileTreeNode()
@@ -116,6 +118,11 @@ FileTreeNode::~FileTreeNode()
         {
             myParent->childList.removeAll(this);
         }
+        myParent->underlyingFilesChanged(this,FileSystemChange::FILE_DELETE);
+    }
+    else
+    {
+        ae_globals::get_file_handle()->fileNodesChange(this,FileSystemChange::FILE_DELETE);
     }
 }
 
@@ -306,7 +313,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
             updateFileSize(fileDataBuffer->length());
-            underlyingFilesChanged(this);
+            underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
         }
         return;
     }
@@ -315,7 +322,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        underlyingFilesChanged(this);
+        underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
         return;
     }
 
@@ -326,7 +333,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 
     delete fileDataBuffer;
     fileDataBuffer = new QByteArray(*newFileBuffer);
-    underlyingFilesChanged(this);
+    underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
 }
 
 bool FileTreeNode::haveLStask()
@@ -431,6 +438,22 @@ bool FileTreeNode::isFile()
     return false;
 }
 
+bool FileTreeNode::isChildOf(FileTreeNode * possibleParent)
+{
+    //Note: In this method, a node is considered a child of itself
+    FileTreeNode * nodeToCheck = this;
+
+    if (possibleParent == NULL) return false;
+
+    while (nodeToCheck != NULL)
+    {
+        if (nodeToCheck == possibleParent) return true;
+        if (nodeToCheck->isRootNode()) return false;
+        nodeToCheck = nodeToCheck->getParentNode();
+    }
+    return false;
+}
+
 void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList)
 {
     if (lsTask == sender())
@@ -493,10 +516,16 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     setFileBuffer(bufferData);
 }
 
-void FileTreeNode::underlyingFilesChanged(FileTreeNode *changedFile)
+void FileTreeNode::underlyingFilesChanged(FileTreeNode *changedFile, FileSystemChange theChange)
 {
     if (changedFile == NULL) return;
-    emit fileDataChanged(changedFile);
+    if (myParent == NULL)
+    {
+        ae_globals::get_file_handle()->fileNodesChange(changedFile, theChange);
+        return;
+    }
+
+    myParent->underlyingFilesChanged(changedFile, theChange);
 }
 
 void FileTreeNode::getModelLink()
@@ -584,7 +613,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         clearAllChildren(SpaceHolderState::EMPTY);
         updateNodeDisplay();
-        underlyingFilesChanged(this);
+        underlyingFilesChanged(this, FileSystemChange::FOLDER_LOAD);
         return;
     }
 
@@ -603,7 +632,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         (*itr)->updateNodeDisplay();
     }
 
-    underlyingFilesChanged(this);
+    underlyingFilesChanged(this, FileSystemChange::FOLDER_LOAD);
 }
 
 void FileTreeNode::clearAllChildren(SpaceHolderState spaceholderVal)

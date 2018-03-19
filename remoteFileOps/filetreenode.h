@@ -47,6 +47,7 @@ enum class NodeState {FILE_BUFF_LOADED, FILE_BUFF_RELOADING, FILE_BUFF_LOADING, 
 enum class SpaceHolderState {LOADING, EMPTY, NONE};
 
 enum class RequestState;
+enum class FileSystemChange;
 class FileMetaData;
 class RemoteDataInterface;
 class RemoteDataReply;
@@ -91,17 +92,18 @@ public:
     bool isFolder();
     bool isFile();
 
+    bool isChildOf(FileTreeNode * possibleParent);
+
 signals:
-    void fileDataChanged(FileTreeNode * changedFile);
+    void fileDataChanged(FileTreeNode * changedFile, FileSystemChange theChange);
 
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
-private slots:
-    void underlyingFilesChanged(FileTreeNode * changedFile);
-
 private:
+    void underlyingFilesChanged(FileTreeNode * changedFile, FileSystemChange theChange);
+
     void getModelLink();
     FileTreeNode * pathSearchHelper(QString filename, bool stopEarly);
     FileTreeNode * pathSearchHelperFromAnyNode(QStringList filename, bool stopEarly);

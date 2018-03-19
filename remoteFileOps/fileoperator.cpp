@@ -48,6 +48,7 @@
 FileOperator::FileOperator(AgaveSetupDriver *parent) : QObject( (QObject *)parent)
 {
     //Note: will be deconstructed with parent
+    //TODO: Replace these with mutexes when implementing threading
     fileOpPending = new EasyBoolLock(this);
     recursivefileOpPending = new EasyBoolLock(this);
 }
@@ -73,9 +74,6 @@ void FileOperator::resetFileData()
         rootFileNode->deleteLater();
     }
     rootFileNode = new FileTreeNode(&dataStore, ae_globals::get_connection()->getUserName(), this);
-
-    QObject::connect(rootFileNode, SIGNAL(fileDataChanged(FileTreeNode *)),
-                     this, SLOT(fileNodesChange(FileTreeNode *)));
 
     enactRootRefresh();
 }
@@ -594,9 +592,9 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
     }
 }
 
-void FileOperator::fileNodesChange(FileTreeNode *changedFile)
+void FileOperator::fileNodesChange(FileTreeNode *changedFile, FileSystemChange theChange)
 {
-    emit fileSystemChange(changedFile);
+    emit fileSystemChange(changedFile, theChange);
 
     if (performingRecursiveDownload())
     {
