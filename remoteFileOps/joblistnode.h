@@ -50,7 +50,7 @@ class JobListNode : public QObject
 {
     Q_OBJECT
 public:
-    explicit JobListNode(RemoteJobData newData, QStandardItemModel * theModel, JobOperator *parent = nullptr);
+    explicit JobListNode(RemoteJobData newData, QStandardItemModel * theModel);
     ~JobListNode();
 
     void setData(RemoteJobData newData);
@@ -60,9 +60,6 @@ public:
 
     bool haveDetailTask();
     void setDetailTask(RemoteDataReply * newTask);
-
-signals:
-    void jobDataChanged(JobListNode * theNode);
 
 private slots:
     void deliverJobDetails(RequestState taskState, RemoteJobData * fullJobData);

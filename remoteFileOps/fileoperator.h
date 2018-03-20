@@ -108,9 +108,8 @@ public:
     void fileNodesChange(FileTreeNode * changedFile, FileSystemChange theChange);
 
 signals:
-    void fileOpDone(RequestState opState);
+    void fileOpDone(RequestState opState, QString message);
     void fileSystemChange(FileTreeNode * changedFile, FileSystemChange theChange);
-    bool recursiveProcessFinished(bool success, QString message);
 
 private slots:
     void getDeleteReply(RequestState replyState);

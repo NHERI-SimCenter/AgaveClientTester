@@ -52,6 +52,7 @@ class FileMetaData;
 class RemoteDataInterface;
 class RemoteDataReply;
 class LinkedStandardItem;
+class FileOperator;
 
 //Note: Quite a bit of this object is less well written than I would like
 //Need to make data movements cleaner
@@ -94,16 +95,11 @@ public:
 
     bool isChildOf(FileTreeNode * possibleParent);
 
-signals:
-    void fileDataChanged(FileTreeNode * changedFile, FileSystemChange theChange);
-
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
 
 private:
-    void underlyingFilesChanged(FileTreeNode * changedFile, FileSystemChange theChange);
-
     void getModelLink();
     FileTreeNode * pathSearchHelper(QString filename, bool stopEarly);
     FileTreeNode * pathSearchHelperFromAnyNode(QStringList filename, bool stopEarly);
@@ -119,6 +115,7 @@ private:
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
 
     QStandardItemModel * myModel = NULL;
+    FileOperator * myOperator = NULL;
     FileTreeNode * myParent = NULL;
     LinkedStandardItem * firstDataNode = NULL;
     LinkedStandardItem * mySpaceHolderNode = NULL;

@@ -48,7 +48,9 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     fileData = new FileMetaData(contents);
     myParent = parent;
     parent->childList.append(this);
-    myParent->underlyingFilesChanged(this,FileSystemChange::FILE_ADD);
+
+    myOperator = ae_globals::get_file_handle();
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_ADD);
 
     getModelLink();
 
@@ -72,7 +74,8 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
 
     setSpaceholderNode(SpaceHolderState::LOADING);
     updateNodeDisplay();
-    ae_globals::get_file_handle()->fileNodesChange(this,FileSystemChange::FILE_ADD);
+    myOperator = ae_globals::get_file_handle();
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_ADD);
 }
 
 FileTreeNode::~FileTreeNode()
@@ -118,12 +121,8 @@ FileTreeNode::~FileTreeNode()
         {
             myParent->childList.removeAll(this);
         }
-        myParent->underlyingFilesChanged(this,FileSystemChange::FILE_DELETE);
     }
-    else
-    {
-        ae_globals::get_file_handle()->fileNodesChange(this,FileSystemChange::FILE_DELETE);
-    }
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_DELETE);
 }
 
 bool FileTreeNode::isRootNode()
@@ -313,7 +312,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
             updateFileSize(fileDataBuffer->length());
-            underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
+            myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
         }
         return;
     }
@@ -322,7 +321,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
+        myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
         return;
     }
 
@@ -333,7 +332,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 
     delete fileDataBuffer;
     fileDataBuffer = new QByteArray(*newFileBuffer);
-    underlyingFilesChanged(this, FileSystemChange::BUFFER_UPDATE);
+    myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
 }
 
 bool FileTreeNode::haveLStask()
@@ -516,18 +515,6 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     setFileBuffer(bufferData);
 }
 
-void FileTreeNode::underlyingFilesChanged(FileTreeNode *changedFile, FileSystemChange theChange)
-{
-    if (changedFile == NULL) return;
-    if (myParent == NULL)
-    {
-        ae_globals::get_file_handle()->fileNodesChange(changedFile, theChange);
-        return;
-    }
-
-    myParent->underlyingFilesChanged(changedFile, theChange);
-}
-
 void FileTreeNode::getModelLink()
 {
     if (myModel == NULL)
@@ -613,7 +600,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         clearAllChildren(SpaceHolderState::EMPTY);
         updateNodeDisplay();
-        underlyingFilesChanged(this, FileSystemChange::FOLDER_LOAD);
+        myOperator->fileNodesChange(this, FileSystemChange::FOLDER_LOAD);
         return;
     }
 
@@ -632,7 +619,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         (*itr)->updateNodeDisplay();
     }
 
-    underlyingFilesChanged(this, FileSystemChange::FOLDER_LOAD);
+    myOperator->fileNodesChange(this, FileSystemChange::FOLDER_LOAD);
 }
 
 void FileTreeNode::clearAllChildren(SpaceHolderState spaceholderVal)

@@ -41,7 +41,7 @@
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../ae_globals.h"
 
-JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel, JobOperator *parent) : QObject(parent)
+JobListNode::JobListNode(RemoteJobData newData, QStandardItemModel * theModel) : QObject(ae_globals::get_job_handle())
 {
     myModel = theModel;
     if (myModel == NULL)
@@ -77,10 +77,19 @@ void JobListNode::setData(RemoteJobData newData)
     {
         for (int i = 0; i < myModel->columnCount(); i++)
         {
-            myModelRow.append(new LinkedStandardItem(this));
+            if (i == 0)
+            {
+                myModelItem = new LinkedStandardItem(this);
+                myModelRow.append(myModelItem);
+            }
+            else
+            {
+                myModelRow.append(new LinkedStandardItem(this));
+            }
         }
 
         myModel->insertRow(0, myModelRow);
+
     }
     else
     {
@@ -129,7 +138,6 @@ void JobListNode::setData(RemoteJobData newData)
 
     if (signalChange)
     {
-        emit jobDataChanged(this);
         ae_globals::get_job_handle()->underlyingJobChanged();
     }
 }
@@ -147,7 +155,6 @@ bool JobListNode::haveDetails()
 void JobListNode::setDetails(QMap<QString, QString> inputs, QMap<QString, QString> params)
 {
     myData.setDetails(inputs, params);
-    emit jobDataChanged(this);
     ae_globals::get_job_handle()->underlyingJobChanged();
 }
 

@@ -69,7 +69,8 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
     }
     if (replyState != RequestState::GOOD)
     {
-        //TODO: some error here
+        ae_globals::displayPopup("Error: unable to list jobs. Please check your network connection and try again.", "Network Error:");
+        QTimer::singleShot(5000, this, SLOT(demandJobDataRefresh()));
         return;
     }
 
@@ -84,7 +85,7 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
         }
         else
         {
-            JobListNode * theItem = new JobListNode(*itr, &theJobList, this);
+            JobListNode * theItem = new JobListNode(*itr, &theJobList);
             jobData.insert(theItem->getData()->getID(), theItem);
         }
         if (!notDone && ((*itr).getState() != "FINISHED") && ((*itr).getState() != "FAILED"))
