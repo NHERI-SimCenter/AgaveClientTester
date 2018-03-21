@@ -161,6 +161,7 @@ void FileOperator::sendDeleteReq(FileTreeNode * selectedNode)
     }
     QObject::connect(theReply, SIGNAL(haveDeleteReply(RequestState)),
                      this, SLOT(getDeleteReply(RequestState)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getDeleteReply(RequestState replyState)
@@ -186,7 +187,9 @@ void FileOperator::sendMoveReq(FileTreeNode * moveFrom, QString newName)
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData*)), this, SLOT(getMoveReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData*)),
+                     this, SLOT(getMoveReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedFileData)
@@ -217,7 +220,9 @@ void FileOperator::sendCopyReq(FileTreeNode * copyFrom, QString newName)
         //TODO: Better error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveCopyReply(RequestState,FileMetaData*)), this, SLOT(getCopyReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveCopyReply(RequestState,FileMetaData*)),
+                     this, SLOT(getCopyReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getCopyReply(RequestState replyState, FileMetaData * newFileData)
@@ -246,7 +251,9 @@ void FileOperator::sendRenameReq(FileTreeNode * selectedNode, QString newName)
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData*)), this, SLOT(getRenameReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData*)),
+                     this, SLOT(getRenameReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getRenameReply(RequestState replyState, FileMetaData * newFileData)
@@ -278,6 +285,7 @@ void FileOperator::sendCreateFolderReq(FileTreeNode * selectedNode, QString newN
     }
     QObject::connect(theReply, SIGNAL(haveMkdirReply(RequestState,FileMetaData*)),
                      this, SLOT(getMkdirReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getMkdirReply(RequestState replyState, FileMetaData * newFolderData)
@@ -305,6 +313,7 @@ void FileOperator::sendUploadReq(FileTreeNode * uploadTarget, QString localFile)
     }
     QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
                      this, SLOT(getUploadReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fileBuff, QString newName)
@@ -319,6 +328,7 @@ void FileOperator::sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fil
     }
     QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
                      this, SLOT(getUploadReply(RequestState,FileMetaData*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFileData)
@@ -346,6 +356,7 @@ void FileOperator::sendDownloadReq(FileTreeNode * targetFile, QString localDest)
     }
     QObject::connect(theReply, SIGNAL(haveDownloadReply(RequestState)),
                      this, SLOT(getDownloadReply(RequestState)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getDownloadReply(RequestState replyState)
@@ -377,6 +388,7 @@ void FileOperator::sendDownloadBuffReq(FileTreeNode * targetFile)
         return;
     }
     targetFile->setBuffTask(theReply);
+    emit fileOpStarted();
 }
 
 bool FileOperator::performingRecursiveDownload()
@@ -428,6 +440,7 @@ void FileOperator::enactRecursiveDownload(FileTreeNode * targetFolder, QString c
 
     recursiveRemoteHead = targetFolder;
     currentRecursiveTask = FileOp_RecursiveTask::DOWNLOAD;
+    emit fileOpStarted();
     recursiveDownloadProcessRetry();
 }
 
@@ -494,6 +507,7 @@ void FileOperator::enactRecursiveUpload(FileTreeNode * containingDestFolder, QSt
     recursiveRemoteHead = containingDestFolder;
 
     currentRecursiveTask = FileOp_RecursiveTask::UPLOAD;
+    emit fileOpStarted();
     recursiveUploadProcessRetry();
 }
 
@@ -539,6 +553,7 @@ void FileOperator::sendCompressReq(FileTreeNode * selectedFolder)
     }
     QObject::connect(compressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument*)),
                      this, SLOT(getCompressReply(RequestState,QJsonDocument*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getCompressReply(RequestState finalState, QJsonDocument *)
@@ -577,6 +592,7 @@ void FileOperator::sendDecompressReq(FileTreeNode * selectedFolder)
     }
     QObject::connect(decompressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument*)),
                      this, SLOT(getDecompressReply(RequestState,QJsonDocument*)));
+    emit fileOpStarted();
 }
 
 void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)

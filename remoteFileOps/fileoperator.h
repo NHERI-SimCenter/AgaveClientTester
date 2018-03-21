@@ -108,6 +108,7 @@ public:
     void fileNodesChange(FileTreeNode * changedFile, FileSystemChange theChange);
 
 signals:
+    void fileOpStarted();
     void fileOpDone(RequestState opState, QString message);
     void fileSystemChange(FileTreeNode * changedFile, FileSystemChange theChange);
 
