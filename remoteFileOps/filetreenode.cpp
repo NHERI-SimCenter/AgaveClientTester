@@ -122,7 +122,6 @@ FileTreeNode::~FileTreeNode()
             myParent->childList.removeAll(this);
         }
     }
-    myOperator->fileNodesChange(this,FileSystemChange::FILE_DELETE);
 }
 
 bool FileTreeNode::isRootNode()
@@ -470,7 +469,7 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
         if ((getNodeState() == NodeState::FOLDER_SPECULATE_IDLE) ||
                 (getNodeState() == NodeState::FOLDER_SPECULATE_LOADING))
         {
-            this->deleteLater();
+            this->eliminateNode();
         }
 
         return;
@@ -495,7 +494,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
         if ((getNodeState() == NodeState::FILE_SPECULATE_IDLE) ||
                 (getNodeState() == NodeState::FILE_SPECULATE_LOADING))
         {
-            this->deleteLater();
+            this->eliminateNode();
         }
         return;
     }
@@ -720,7 +719,7 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
         }
         else
         {
-            aNode->deleteLater();
+            aNode->eliminateNode();
         }
     }
 
@@ -756,4 +755,10 @@ QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
         return QString::number(fileData->getSize());
     }
     return "";
+}
+
+void FileTreeNode::eliminateNode()
+{
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_DELETE);
+    this->deleteLater();
 }

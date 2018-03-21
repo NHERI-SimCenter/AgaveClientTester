@@ -114,6 +114,8 @@ private:
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
 
+    void eliminateNode();
+
     QStandardItemModel * myModel = NULL;
     FileOperator * myOperator = NULL;
     FileTreeNode * myParent = NULL;
