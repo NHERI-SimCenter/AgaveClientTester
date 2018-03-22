@@ -47,10 +47,12 @@ enum class NodeState {FILE_BUFF_LOADED, FILE_BUFF_RELOADING, FILE_BUFF_LOADING, 
 enum class SpaceHolderState {LOADING, EMPTY, NONE};
 
 enum class RequestState;
+enum class FileSystemChange;
 class FileMetaData;
 class RemoteDataInterface;
 class RemoteDataReply;
 class LinkedStandardItem;
+class FileOperator;
 
 //Note: Quite a bit of this object is less well written than I would like
 //Need to make data movements cleaner
@@ -91,15 +93,11 @@ public:
     bool isFolder();
     bool isFile();
 
-signals:
-    void fileDataChanged(FileTreeNode * changedFile);
+    bool isChildOf(FileTreeNode * possibleParent);
 
 public slots:
     void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
     void deliverBuffData(RequestState taskState, QByteArray * bufferData);
-
-private slots:
-    void underlyingFilesChanged(FileTreeNode * changedFile);
 
 private:
     void getModelLink();
@@ -116,7 +114,10 @@ private:
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
     QString getRawColumnData(int i, QStandardItemModel * fullModel);
 
+    void eliminateNode();
+
     QStandardItemModel * myModel = NULL;
+    FileOperator * myOperator = NULL;
     FileTreeNode * myParent = NULL;
     LinkedStandardItem * firstDataNode = NULL;
     LinkedStandardItem * mySpaceHolderNode = NULL;

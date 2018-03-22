@@ -35,6 +35,8 @@
 
 #include "filetreenode.h"
 
+#include "fileoperator.h"
+
 #include "../utilFuncs/linkedstandarditem.h"
 
 #include "../AgaveClientInterface/filemetadata.h"
@@ -47,7 +49,8 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     myParent = parent;
     parent->childList.append(this);
 
-    QObject::connect(this, SIGNAL(fileDataChanged(FileTreeNode *)), myParent, SLOT(underlyingFilesChanged(FileTreeNode *)));
+    myOperator = ae_globals::get_file_handle();
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_ADD);
 
     getModelLink();
 
@@ -71,6 +74,8 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
 
     setSpaceholderNode(SpaceHolderState::LOADING);
     updateNodeDisplay();
+    myOperator = ae_globals::get_file_handle();
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_ADD);
 }
 
 FileTreeNode::~FileTreeNode()
@@ -306,7 +311,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
             updateFileSize(fileDataBuffer->length());
-            underlyingFilesChanged(this);
+            myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
         }
         return;
     }
@@ -315,7 +320,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        underlyingFilesChanged(this);
+        myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
         return;
     }
 
@@ -326,7 +331,7 @@ void FileTreeNode::setFileBuffer(QByteArray * newFileBuffer)
 
     delete fileDataBuffer;
     fileDataBuffer = new QByteArray(*newFileBuffer);
-    underlyingFilesChanged(this);
+    myOperator->fileNodesChange(this, FileSystemChange::BUFFER_UPDATE);
 }
 
 bool FileTreeNode::haveLStask()
@@ -431,6 +436,22 @@ bool FileTreeNode::isFile()
     return false;
 }
 
+bool FileTreeNode::isChildOf(FileTreeNode * possibleParent)
+{
+    //Note: In this method, a node is considered a child of itself
+    FileTreeNode * nodeToCheck = this;
+
+    if (possibleParent == NULL) return false;
+
+    while (nodeToCheck != NULL)
+    {
+        if (nodeToCheck == possibleParent) return true;
+        if (nodeToCheck->isRootNode()) return false;
+        nodeToCheck = nodeToCheck->getParentNode();
+    }
+    return false;
+}
+
 void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList)
 {
     if (lsTask == sender())
@@ -448,7 +469,7 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
         if ((getNodeState() == NodeState::FOLDER_SPECULATE_IDLE) ||
                 (getNodeState() == NodeState::FOLDER_SPECULATE_LOADING))
         {
-            this->deleteLater();
+            this->eliminateNode();
         }
 
         return;
@@ -473,7 +494,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
         if ((getNodeState() == NodeState::FILE_SPECULATE_IDLE) ||
                 (getNodeState() == NodeState::FILE_SPECULATE_LOADING))
         {
-            this->deleteLater();
+            this->eliminateNode();
         }
         return;
     }
@@ -491,12 +512,6 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     }
 
     setFileBuffer(bufferData);
-}
-
-void FileTreeNode::underlyingFilesChanged(FileTreeNode *changedFile)
-{
-    if (changedFile == NULL) return;
-    emit fileDataChanged(changedFile);
 }
 
 void FileTreeNode::getModelLink()
@@ -584,7 +599,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
     {
         clearAllChildren(SpaceHolderState::EMPTY);
         updateNodeDisplay();
-        underlyingFilesChanged(this);
+        myOperator->fileNodesChange(this, FileSystemChange::FOLDER_LOAD);
         return;
     }
 
@@ -603,7 +618,7 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         (*itr)->updateNodeDisplay();
     }
 
-    underlyingFilesChanged(this);
+    myOperator->fileNodesChange(this, FileSystemChange::FOLDER_LOAD);
 }
 
 void FileTreeNode::clearAllChildren(SpaceHolderState spaceholderVal)
@@ -704,7 +719,7 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
         }
         else
         {
-            aNode->deleteLater();
+            aNode->eliminateNode();
         }
     }
 
@@ -740,4 +755,10 @@ QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
         return QString::number(fileData->getSize());
     }
     return "";
+}
+
+void FileTreeNode::eliminateNode()
+{
+    myOperator->fileNodesChange(this,FileSystemChange::FILE_DELETE);
+    this->deleteLater();
 }

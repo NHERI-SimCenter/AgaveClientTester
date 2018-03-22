@@ -53,6 +53,7 @@ class AgaveSetupDriver;
 enum class RequestState;
 enum class FileOp_RecursiveTask {NONE, DOWNLOAD, UPLOAD};
 enum class RecursiveErrorCodes {NONE, MKDIR_FAIL, UPLOAD_FAIL, TYPE_MISSMATCH, LOST_FILE};
+enum class FileSystemChange {FILE_ADD, FILE_MODIFY, FILE_DELETE, FOLDER_LOAD, BUFFER_UPDATE};
 
 class FileOperator : public QObject
 {
@@ -103,10 +104,13 @@ public:
     void quickInfoPopup(QString infoText);
     bool deletePopup(FileTreeNode * toDelete);
 
+    //Consider making this protected:
+    void fileNodesChange(FileTreeNode * changedFile, FileSystemChange theChange);
+
 signals:
-    void fileOpDone(RequestState opState);
-    void fileSystemChange(FileTreeNode * changedFile);
-    bool recursiveProcessFinished(bool success, QString message);
+    void fileOpStarted();
+    void fileOpDone(RequestState opState, QString message);
+    void fileSystemChange(FileTreeNode * changedFile, FileSystemChange theChange);
 
 private slots:
     void getDeleteReply(RequestState replyState);
@@ -121,8 +125,6 @@ private slots:
 
     void getCompressReply(RequestState finalState, QJsonDocument * rawData);
     void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
-
-    void fileNodesChange(FileTreeNode * changedFile);
 
     void getRecursiveUploadReply(RequestState replyState, FileMetaData * newFileData);
     void getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData);
