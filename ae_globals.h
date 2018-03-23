@@ -58,6 +58,7 @@ public:
 
     static bool isValidFolderName(QString folderName);
     static bool isValidLocalFolder(QString folderName);
+    static bool folderNamesMatch(QString folder1, QString folder2);
 
     static AgaveSetupDriver * get_Driver();
     static void set_Driver(AgaveSetupDriver * newDriver);
