@@ -43,14 +43,17 @@
 #include <QFile>
 #include <QDir>
 
+#include "../AgaveExplorer/remoteFileOps/filenoderef.h"
+
+class FileTreeNode;
 class RemoteFileTree;
 class FileMetaData;
 class RemoteDataInterface;
-class FileTreeNode;
 class EasyBoolLock;
 class AgaveSetupDriver;
 
 enum class RequestState;
+enum class NodeState;
 enum class FileOp_RecursiveTask {NONE, DOWNLOAD, UPLOAD};
 enum class RecursiveErrorCodes {NONE, MKDIR_FAIL, UPLOAD_FAIL, TYPE_MISSMATCH, LOST_FILE};
 enum class FileSystemChange {FILE_ADD, FILE_MODIFY, FILE_DELETE, FOLDER_LOAD, BUFFER_UPDATE};
@@ -59,6 +62,9 @@ class FileOperator : public QObject
 {
     Q_OBJECT
 
+    friend class FileTreeNode;
+    friend class FileNodeRef;
+
 public:
     FileOperator(AgaveSetupDriver * parent);
     ~FileOperator();
@@ -66,51 +72,61 @@ public:
 
     void resetFileData();
 
+    const FileNodeRef speculateFileWithName(QString fullPath, bool folder);
+    const FileNodeRef speculateFileWithName(const FileNodeRef &baseNode, QString addedPath, bool folder);
+
     void totalResetErrorProcedure();
     bool operationIsPending();
-
-    FileTreeNode * getNodeFromName(QString fullPath);
-    FileTreeNode * getClosestNodeFromName(QString fullPath);
-    FileTreeNode * speculateNodeWithName(QString fullPath, bool folder);
-    FileTreeNode * speculateNodeWithName(FileTreeNode * baseNode, QString addedPath, bool folder);
 
     void lsClosestNode(QString fullPath, bool clearData = false);
     void lsClosestNodeToParent(QString fullPath, bool clearData = false);
 
     void enactRootRefresh();
-    void enactFolderRefresh(FileTreeNode * selectedNode, bool clearData = false);
 
-    void sendDeleteReq(FileTreeNode * selectedNode);
-    void sendMoveReq(FileTreeNode * moveFrom, QString newName);
-    void sendCopyReq(FileTreeNode * copyFrom, QString newName);
-    void sendRenameReq(FileTreeNode * selectedNode, QString newName);
+    void sendDeleteReq(const FileNodeRef &selectedNode);
+    void sendMoveReq(const FileNodeRef &moveFrom, QString newName);
+    void sendCopyReq(const FileNodeRef &copyFrom, QString newName);
+    void sendRenameReq(const FileNodeRef &selectedNode, QString newName);
 
-    void sendCreateFolderReq(FileTreeNode * selectedNode, QString newName);
+    void sendCreateFolderReq(const FileNodeRef &selectedNode, QString newName);
 
-    void sendUploadReq(FileTreeNode * uploadTarget, QString localFile);
-    void sendUploadBuffReq(FileTreeNode * uploadTarget, QByteArray fileBuff, QString newName);
-    void sendDownloadReq(FileTreeNode * targetFile, QString localDest);
-    void sendDownloadBuffReq(FileTreeNode * targetFile);
+    void sendUploadReq(const FileNodeRef &uploadTarget, QString localFile);
+    void sendUploadBuffReq(const FileNodeRef &uploadTarget, QByteArray fileBuff, QString newName);
+    void sendDownloadReq(const FileNodeRef &targetFile, QString localDest);
+    void sendDownloadBuffReq(const FileNodeRef &targetFile);
 
     bool performingRecursiveDownload();
-    void enactRecursiveDownload(FileTreeNode * targetFolder, QString containingDestFolder);
+    void enactRecursiveDownload(const FileNodeRef &targetFolder, QString containingDestFolder);
     bool performingRecursiveUpload();
-    void enactRecursiveUpload(FileTreeNode *containingDestFolder, QString localFolderToCopy);
+    void enactRecursiveUpload(const FileNodeRef &containingDestFolder, QString localFolderToCopy);
     void abortRecursiveProcess();
 
-    void sendCompressReq(FileTreeNode * selectedFolder);
-    void sendDecompressReq(FileTreeNode * selectedFolder);
+    void sendCompressReq(const FileNodeRef &selectedFolder);
+    void sendDecompressReq(const FileNodeRef &selectedFolder);
 
     void quickInfoPopup(QString infoText);
-    bool deletePopup(FileTreeNode * toDelete);
-
-    //Consider making this protected:
-    void fileNodesChange(FileTreeNode * changedFile, FileSystemChange theChange);
+    bool deletePopup(const FileNodeRef &toDelete);
 
 signals:
+    //Note: it is very important that connections for these signals be queued
     void fileOpStarted();
     void fileOpDone(RequestState opState, QString message);
-    void fileSystemChange(FileTreeNode * changedFile, FileSystemChange theChange);
+    void fileSystemChange(FileNodeRef changedFile, FileSystemChange theChange);
+
+protected:
+    void fileNodesChange(FileNodeRef changedFile, FileSystemChange theChange);
+
+    bool fileStillExtant(const FileNodeRef &theFile);
+    NodeState getFileNodeState(const FileNodeRef &theFile);
+    bool isAncestorOf(const FileNodeRef &parent, const FileNodeRef &child);
+    const FileNodeRef getChildWithName(const FileNodeRef &baseFile, QString childName);
+    const QByteArray getFileBuffer(const FileNodeRef &baseFile);
+    void setFileBuffer(const FileNodeRef &theFile, const QByteArray * toSet);
+    FileNodeRef getParent(const FileNodeRef &theFile);
+    QList<FileNodeRef> getChildList(const FileNodeRef &theFile);
+    bool nodeIsRoot(const FileNodeRef &theFile);
+
+    void enactFolderRefresh(const FileNodeRef &selectedNode, bool clearData = false);
 
 private slots:
     void getDeleteReply(RequestState replyState);
@@ -130,6 +146,8 @@ private slots:
     void getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData);
 
 private:
+    FileTreeNode * getFileNodeFromNodeRef(const FileNodeRef &thedata, bool verifyTimestamp = true);
+
     QString getStringFromInitParams(QString stringKey);
 
     void recursiveDownloadProcessRetry();

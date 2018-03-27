@@ -38,6 +38,8 @@
 
 #include <QTreeView>
 
+#include "../AgaveExplorer/remoteFileOps/filenoderef.h"
+
 //NOTE: FILENAME MUST == 0 for these functions to work.
 //The other columns can be changed
 enum class FileColumn : int {FILENAME = 0,
@@ -48,9 +50,7 @@ enum class FileColumn : int {FILENAME = 0,
                              MIME_TYPE = 5,
                              PERMISSIONS = 6};
 
-class FileMetaData;
-class FileTreeNode;
-class FileOperator;
+class LinkedStandardItem;
 enum class RequestState;
 
 class RemoteFileTree : public QTreeView
@@ -60,11 +60,11 @@ class RemoteFileTree : public QTreeView
 public:
     explicit RemoteFileTree(QWidget *parent = 0);
 
-    FileTreeNode * getSelectedNode();
+    FileNodeRef getSelectedFile();
     void setupFileView();
 
 signals:
-    void newFileSelected(FileTreeNode * newFileData);
+    void newFileSelected(FileNodeRef newFileData);
 
 public slots:
     void fileEntryTouched(QModelIndex itemTouched);
@@ -72,6 +72,9 @@ public slots:
 
 private slots:
     void folderExpanded(QModelIndex itemOpened);
+
+private:
+    void selectRowByItem(LinkedStandardItem *linkedItem);
 };
 
 #endif // REMOTEFILEWINDOW_H
