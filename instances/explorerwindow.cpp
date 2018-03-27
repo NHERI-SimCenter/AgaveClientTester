@@ -156,10 +156,7 @@ void ExplorerWindow::agaveCommandInvoked()
     {
         return;
     }
-    qDebug("Selected App: %s", qPrintable(selectedAgaveApp));
-
-    QString workingDir = ui->remoteFileView->getSelectedNode()->getFileData().getFullPath();
-    qDebug("Working Dir: %s", qPrintable(workingDir));
+    QString workingDir = ui->remoteFileView->getSelectedFile().getFullPath();
 
     QStringList inputList = agaveParamLists.value(selectedAgaveApp);
     QMultiMap<QString, QString> allInputs;
@@ -208,16 +205,14 @@ void ExplorerWindow::customFileMenu(QPoint pos)
     QModelIndex targetIndex = ui->remoteFileView->indexAt(pos);
     ui->remoteFileView->fileEntryTouched(targetIndex);
 
-    targetNode = ui->remoteFileView->getSelectedNode();
+    targetNode = ui->remoteFileView->getSelectedFile();
 
     //If we did not click anything, we should return
-    if (targetNode == NULL) return;
-    FileMetaData theFileData = targetNode->getFileData();
-
-    if (theFileData.getFileType() == FileType::INVALID) return;
+    if (targetNode.isNil()) return;
+    if (targetNode.getFileType() == FileType::INVALID) return;
 
     //We don't let the user fiddle with the username folder
-    if (!(targetNode->isRootNode()))
+    if (!(targetNode.isRootNode()))
     {
         fileMenu.addAction("Copy To . . .",this, SLOT(copyMenuItem()));
         fileMenu.addAction("Move To . . .",this, SLOT(moveMenuItem()));
@@ -227,17 +222,17 @@ void ExplorerWindow::customFileMenu(QPoint pos)
         fileMenu.addAction("Delete",this, SLOT(deleteMenuItem()));
         fileMenu.addSeparator();
     }
-    if (theFileData.getFileType() == FileType::DIR)
+    if (targetNode.getFileType() == FileType::DIR)
     {
         fileMenu.addAction("Upload File Here",this, SLOT(uploadMenuItem()));
         fileMenu.addAction("Upload Folder Here",this, SLOT(uploadFolderMenuItem()));
         fileMenu.addAction("Download Folder",this, SLOT(downloadFolderMenuItem()));
         fileMenu.addAction("Create New Folder",this, SLOT(createFolderMenuItem()));
     }
-    if (theFileData.getFileType() == FileType::FILE)
+    if (targetNode.getFileType() == FileType::FILE)
     {
         fileMenu.addAction("Download File",this, SLOT(downloadMenuItem()));
-        if (targetNode->getFileBuffer() != NULL)
+        if (targetNode.fileBufferLoaded())
         {
             fileMenu.addAction("Read File",this, SLOT(readMenuItem()));
         }
@@ -246,16 +241,16 @@ void ExplorerWindow::customFileMenu(QPoint pos)
             fileMenu.addAction("Retrive File",this, SLOT(retriveMenuItem()));
         }
     }
-    if ((theFileData.getFileType() == FileType::DIR) && (!targetNode->isRootNode()))
+    if ((targetNode.getFileType() == FileType::DIR) && (!targetNode.isRootNode()))
     {
         fileMenu.addAction("Compress Folder",this, SLOT(compressMenuItem()));
     }
-    else if (theFileData.getFileType() == FileType::FILE)
+    else if (targetNode.getFileType() == FileType::FILE)
     {
         fileMenu.addAction("De-Compress File",this, SLOT(decompressMenuItem()));
     }
 
-    if ((theFileData.getFileType() == FileType::DIR) || (theFileData.getFileType() == FileType::FILE))
+    if ((targetNode.getFileType() == FileType::DIR) || (targetNode.getFileType() == FileType::FILE))
     {
         fileMenu.addSeparator();
         fileMenu.addAction("Refresh Data",this, SLOT(refreshMenuItem()));
@@ -366,7 +361,7 @@ void ExplorerWindow::downloadMenuItem()
 void ExplorerWindow::readMenuItem()
 {
     QMessageBox dataPopup;
-    dataPopup.setText(QString(*(targetNode->getFileBuffer())));
+    dataPopup.setText(QString(*(targetNode.getFileBuffer())));
     dataPopup.exec();
 }
 
@@ -387,7 +382,7 @@ void ExplorerWindow::decompressMenuItem()
 
 void ExplorerWindow::refreshMenuItem()
 {
-    ae_globals::get_Driver()->getFileHandler()->enactFolderRefresh(targetNode);
+    targetNode.enactFolderRefresh();
 }
 
 void ExplorerWindow::jobRightClickMenu(QPoint)

@@ -41,7 +41,7 @@
 
 SelectedFileLabel::SelectedFileLabel(QWidget *parent) : QLabel(parent)
 {
-    newSelectedItem(NULL);
+    newSelectedItem(FileNodeRef::nil());
 }
 
 void SelectedFileLabel::connectFileTreeWidget(RemoteFileTree * connectedTree)
@@ -53,28 +53,26 @@ void SelectedFileLabel::connectFileTreeWidget(RemoteFileTree * connectedTree)
     myFileTree = connectedTree;
     if (myFileTree == NULL)
     {
-        newSelectedItem(NULL);
+        newSelectedItem(FileNodeRef::nil());
         return;
     }
     QObject::connect(myFileTree, SIGNAL(newFileSelected(FileTreeNode*)),
                      this, SLOT(newSelectedItem(FileTreeNode*)));
-    newSelectedItem(myFileTree->getSelectedNode());
+    newSelectedItem(myFileTree->getSelectedFile());
 }
 
-void SelectedFileLabel::newSelectedItem(FileTreeNode * newFileData)
+void SelectedFileLabel::newSelectedItem(FileNodeRef newFileData)
 {
-    if (newFileData == NULL)
+    if (newFileData.isNil())
     {
         this->setText("No File Selected.");
     }
     else
     {
-        FileMetaData theFileData = newFileData->getFileData();
-
         QString fileString = "Filename: %1\nType: %2\nSize: %3";
-        fileString = fileString.arg(theFileData.getFileName(),
-                                    theFileData.getFileTypeString(),
-                                    QString::number(theFileData.getSize()));
+        fileString = fileString.arg(newFileData.getFileName(),
+                                    newFileData.getFileTypeString(),
+                                    QString::number(newFileData.getSize()));
         this->setText(fileString);
     }
 }

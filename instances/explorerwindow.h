@@ -41,6 +41,8 @@
 #include <QLineEdit>
 #include <QMenu>
 
+#include "../AgaveExplorer/remoteFileOps/filenoderef.h"
+
 class RemoteFileTree;
 class FileMetaData;
 class FileTreeNode;
@@ -98,7 +100,7 @@ private slots:
 private:
     Ui::ExplorerWindow *ui;
 
-    FileTreeNode * targetNode;
+    FileNodeRef targetNode;
     ExplorerDriver * programDriver;
 
     FileOperator * theFileOperator;

@@ -37,6 +37,7 @@
 #define SELECTEDFILELABEL_H
 
 #include <QLabel>
+#include "../AgaveExplorer/remoteFileOps/filenoderef.h"
 
 class FileTreeNode;
 class RemoteFileTree;
@@ -51,7 +52,7 @@ public:
     void connectFileTreeWidget(RemoteFileTree * connectedTree);
 
 private slots:
-    void newSelectedItem(FileTreeNode * newFileData);
+    void newSelectedItem(FileNodeRef newFileData);
 
 private:
     RemoteFileTree * myFileTree = NULL;

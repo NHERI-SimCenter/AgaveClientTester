@@ -119,3 +119,9 @@ void FileNodeRef::enactFolderRefresh(bool clearData) const
 {
     ae_globals::get_file_handle()->enactFolderRefresh(*this, clearData);
 }
+
+FileNodeRef FileNodeRef::nil()
+{
+    FileNodeRef ret;
+    return ret;
+}

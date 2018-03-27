@@ -63,6 +63,8 @@ public:
 
     void enactFolderRefresh(bool clearData = false) const;
 
+    static FileNodeRef nil();
+
 private:
     qint64 timestamp = 0;
 };
