@@ -38,7 +38,7 @@
 #include "fileoperator.h"
 #include "filenoderef.h"
 
-#include "../utilFuncs/linkedstandarditem.h"
+#include "../remoteModelViews/linkedstandarditem.h"
 
 #include "../AgaveClientInterface/filemetadata.h"
 #include "../AgaveClientInterface/remotedatainterface.h"

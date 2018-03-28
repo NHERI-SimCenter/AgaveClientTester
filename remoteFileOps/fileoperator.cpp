@@ -35,7 +35,7 @@
 
 #include "fileoperator.h"
 
-#include "remotefiletree.h"
+#include "../AgaveExplorer/remoteModelViews/remotefiletree.h"
 #include "filetreenode.h"
 #include "easyboollock.h"
 #include "filenoderef.h"

@@ -37,7 +37,7 @@
 
 #include "../ae_globals.h"
 
-#include "remotejoblister.h"
+#include "../AgaveExplorer/remoteModelViews/remotejoblister.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../AgaveClientInterface/remotejobdata.h"
 #include "joblistnode.h"

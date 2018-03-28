@@ -35,10 +35,10 @@
 
 #include "remotefiletree.h"
 
-#include "../utilFuncs/linkedstandarditem.h"
-#include "fileoperator.h"
-#include "filetreenode.h"
-#include "filenoderef.h"
+#include "linkedstandarditem.h"
+#include "../remoteFileOps/fileoperator.h"
+#include "../remoteFileOps/filetreenode.h"
+#include "../remoteFileOps/filenoderef.h"
 #include "../ae_globals.h"
 #include "../utilFuncs/agavesetupdriver.h"
 

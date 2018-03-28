@@ -1,7 +1,7 @@
 /*********************************************************************************
 **
-** Copyright (c) 2017 The University of Notre Dame
-** Copyright (c) 2017 The Regents of the University of California
+** Copyright (c) 2018 The University of Notre Dame
+** Copyright (c) 2018 The Regents of the University of California
 **
 ** Redistribution and use in source and binary forms, with or without modification,
 ** are permitted provided that the following conditions are met:
@@ -33,13 +33,9 @@
 // Contributors:
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
-#include "remotejoblister.h"
+#include "remotefilemodel.h"
 
-#include "../ae_globals.h"
-#include "../utilFuncs/agavesetupdriver.h"
-#include "joboperator.h"
-
-RemoteJobLister::RemoteJobLister(QWidget *parent) : QTableView(parent)
+RemoteFileModel::RemoteFileModel()
 {
-    ae_globals::get_job_handle()->linkToJobLister(this);
+
 }

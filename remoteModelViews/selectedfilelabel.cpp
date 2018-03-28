@@ -35,7 +35,7 @@
 
 #include "selectedfilelabel.h"
 
-#include "filetreenode.h"
+#include "../remoteFileOps/filetreenode.h"
 #include "remotefiletree.h"
 #include "../AgaveClientInterface/filemetadata.h"
 

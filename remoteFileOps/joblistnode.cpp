@@ -36,7 +36,7 @@
 #include "joblistnode.h"
 #include "joboperator.h"
 
-#include "../utilFuncs/linkedstandarditem.h"
+#include "../remoteModelViews/linkedstandarditem.h"
 
 #include "../AgaveClientInterface/remotedatainterface.h"
 #include "../ae_globals.h"

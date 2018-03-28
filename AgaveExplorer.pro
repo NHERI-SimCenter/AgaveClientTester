@@ -53,8 +53,6 @@ SOURCES += main.cpp \
     remoteFileOps/fileoperator.cpp \
     remoteFileOps/filetreenode.cpp \
     remoteFileOps/joboperator.cpp \
-    remoteFileOps/remotefiletree.cpp \
-    remoteFileOps/remotejoblister.cpp \
     instances/explorerdriver.cpp \
     instances/explorerwindow.cpp \
     SimCenterCommon/FooterWidget.cpp \
@@ -63,11 +61,14 @@ SOURCES += main.cpp \
     utilFuncs/authform.cpp \
     utilFuncs/copyrightdialog.cpp \
     utilFuncs/singlelinedialog.cpp \
-    remoteFileOps/selectedfilelabel.cpp \
-    utilFuncs/linkedstandarditem.cpp \
     remoteFileOps/joblistnode.cpp \
     ae_globals.cpp \
-    remoteFileOps/filenoderef.cpp
+    remoteFileOps/filenoderef.cpp \
+    remoteModelViews/linkedstandarditem.cpp \
+    remoteModelViews/remotefilemodel.cpp \
+    remoteModelViews/remotefiletree.cpp \
+    remoteModelViews/remotejoblister.cpp \
+    remoteModelViews/selectedfilelabel.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -91,8 +92,6 @@ HEADERS += \
     remoteFileOps/fileoperator.h \
     remoteFileOps/filetreenode.h \
     remoteFileOps/joboperator.h \
-    remoteFileOps/remotefiletree.h \
-    remoteFileOps/remotejoblister.h \
     instances/explorerdriver.h \
     instances/explorerwindow.h \
     SimCenterCommon/FooterWidget.h \
@@ -101,12 +100,15 @@ HEADERS += \
     utilFuncs/authform.h \
     utilFuncs/copyrightdialog.h \
     utilFuncs/singlelinedialog.h \
-    remoteFileOps/selectedfilelabel.h \
     ../AgaveClientInterface/agaveInterfaces/agavepipebuffer.h \
-    utilFuncs/linkedstandarditem.h \
     remoteFileOps/joblistnode.h \
     ae_globals.h \
-    remoteFileOps/filenoderef.h
+    remoteFileOps/filenoderef.h \
+    remoteModelViews/linkedstandarditem.h \
+    remoteModelViews/remotefilemodel.h \
+    remoteModelViews/remotefiletree.h \
+    remoteModelViews/remotejoblister.h \
+    remoteModelViews/selectedfilelabel.h
 
 FORMS += \
     instances/explorerwindow.ui \
