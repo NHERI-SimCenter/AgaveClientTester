@@ -114,7 +114,6 @@ private:
     void clearAllChildren();
     void insertFile(FileMetaData *newData);
     void purgeUnmatchedChildren(QList<FileMetaData> * newChildList);
-    QString getRawColumnData(int i, QStandardItemModel * fullModel);
 
     FileTreeNode * myParent = NULL;
 

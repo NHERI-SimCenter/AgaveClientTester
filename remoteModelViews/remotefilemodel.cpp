@@ -34,8 +34,11 @@
 // Written by Peter Sempolinski, for the Natural Hazard Modeling Laboratory, director: Ahsan Kareem, at Notre Dame
 
 #include "remotefilemodel.h"
+#include "remotefileitem.h"
 
+#include "../remoteFileOps/filenoderef.h"
 #include "../remoteFileOps/fileoperator.h"
+#include "../remoteFileOps/filetreenode.h"
 #include "ae_globals.h"
 
 RemoteFileModel::RemoteFileModel(QObject * parent) : QStandardItemModel(parent)
@@ -46,70 +49,124 @@ RemoteFileModel::RemoteFileModel(QObject * parent) : QStandardItemModel(parent)
 
 void RemoteFileModel::newFileData(FileNodeRef newFileData)
 {
-/*
- *
-    if (!nodeIsDisplayed())
-    {
+    NodeState theState = newFileData.getNodeState();
 
-
-        QList<QStandardItem *> appendList;
-
-        firstDataNode = new LinkedStandardItem(this);
-        appendList.append(firstDataNode);
-        for (int i = 1; i < myModel->columnCount(); i++)
-        {
-            appendList.append(new LinkedStandardItem(this));
-        }
-
-        if (myParent == NULL)
-        {
-            myModel->appendRow(appendList);
-        }
-        else
-        {
-            myParent->firstDataNode->appendRow(appendList);
-        }
+    switch (theState) {
+    case NodeState::DELETING:
+    case NodeState::ERROR:
+    case NodeState::NON_EXTANT:
+        purgeItem(newFileData);
+        return;
+    case NodeState::FILE_BUFF_LOADED:
+    case NodeState::FILE_BUFF_LOADING:
+    case NodeState::FILE_BUFF_RELOADING:
+    case NodeState::FILE_KNOWN:
+    case NodeState::FOLDER_CONTENTS_LOADING:
+    case NodeState::FOLDER_CONTENTS_RELOADING:
+    case NodeState::FOLDER_KNOWN_CONTENTS_NOT:
+        updateItem(newFileData);
+        return;
+    case NodeState::FOLDER_CONTENTS_LOADED:
+        updateItem(newFileData,true);
+        return;
+    case NodeState::FILE_SPECULATE_IDLE:
+    case NodeState::FILE_SPECULATE_LOADING:
+    case NodeState::FOLDER_SPECULATE_IDLE:
+    case NodeState::FOLDER_SPECULATE_LOADING:
+    case NodeState::INIT:
+    default:
+        return;
     }
-    */
+}
 
-    /*
-     * QStandardItem * parentItem;
-    if (myParent == NULL)
+void RemoteFileModel::purgeItem(FileNodeRef toRemove)
+{
+    RemoteFileItem * targetItem = findItem(toRemove);
+    if (targetItem == NULL) return;
+    QStandardItem * parentNode = targetItem->parent();
+    if (parentNode == NULL)
     {
-        parentItem = myModel->invisibleRootItem();
+        parentNode = this->invisibleRootItem();
+    }
+
+    parentNode->removeRow(targetItem->row());
+    if (parentNode->hasChildren()) return;
+    parentNode->appendRow(RemoteFileItem(true));
+}
+
+void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded)
+{
+    RemoteFileItem * targetItem = findItem(toUpdate);
+    QList<RemoteFileItem *> itemList;
+    if (targetItem == NULL)
+    {
+        RemoteFileItem * parentItem = findParentItem(toUpdate);
+        if (parentItem == NULL) return;
+        if (parentItem->parentOfPlaceholder())
+        {
+            while (parentItem->hasChildren())
+            {
+                parentItem->removeRow(0);
+            }
+        }
+
+        targetItem = new RemoteFileItem(toUpdate);
+        itemList.append(targetItem);
+        while (itemList.size() < columnCount())
+        {
+            itemList.append(new RemoteFileItem(targetItem));
+        }
+
+        parentItem->appendRow(itemList);
     }
     else
     {
-        parentItem = myParent->firstDataNode;
+        itemList = targetItem->getRowList();
     }
-    int rowNum = firstDataNode->row();
 
-    for (int i = 0; i < parentItem->columnCount(); i++)
+    for (int i = 0; i < itemList.size(); i++)
     {
-        QStandardItem * itemToUpdate = parentItem->child(rowNum, i);
-        itemToUpdate->setText(getRawColumnData(i, myModel));
+        QStandardItem * itemToUpdate = itemList.at(i);
+        itemToUpdate->setText(getRawColumnData(itemToUpdate, i));
     }
-    if (mySpaceHolderNode != NULL)
-    {
-        if (mySpaceHolderNode->model() == NULL)
-        {
-            firstDataNode->appendRow(mySpaceHolderNode);
-        }
-    }
-    */
+    if (targetItem->hasChildren() || (toUpdate.getFileType() != FileType::DIR)) return;
+    targetItem->appendRow(RemoteFileItem(!folderContentsLoaded));
+}
 
-    /*
-     * QString spaceholderText = "MAJOR ERROR";
-    switch (mySpaceHolderState)
+RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
+{
+    //TODO: Find item
+}
+
+RemoteFileItem * RemoteFileModel::findParentItem(FileNodeRef toFind)
+{
+    //TODO: Find parent of item, can be root
+}
+
+QString RemoteFileModel::getRawColumnData(FileNodeRef fileData, int i)
+{
+    if (fileData.isNil())
     {
-    case SpaceHolderState::LOADING:
-        spaceholderText = "Loading . . . ";
-        break;
-    case SpaceHolderState::EMPTY:
-        spaceholderText = "Empty Folder";
-        break;
-    default:
-        spaceholderText = "MAJOR ERROR";
+        return "";
     }
-    */
+
+    QStandardItem * headerItem = horizontalHeaderItem(i);
+    if (headerItem == NULL)
+    {
+        return "";
+    }
+    QString headerText = headerItem->text();
+    if (headerText == "File Name")
+    {
+        return fileData.getFileName();
+    }
+    if (headerText == "Type")
+    {
+        return fileData.getFileTypeString();
+    }
+    if (headerText == "Size")
+    {
+        return QString::number(fileData.getSize());
+    }
+    return "";
 }

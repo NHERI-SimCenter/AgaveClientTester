@@ -35,9 +35,17 @@
 
 #include "remotefileitem.h"
 
-RemoteFileItem::RemoteFileItem()
+RemoteFileItem::RemoteFileItem(bool isLoading) : QStandardItem()
 {
     myFile = FileNodeRef::nil();
+    if (isLoading)
+    {
+        setText("Loading . . . ");
+    }
+    else
+    {
+        setText("Empty Folder");
+    }
 }
 
 RemoteFileItem::RemoteFileItem(FileNodeRef fileInfo) : QStandardItem()
@@ -45,7 +53,7 @@ RemoteFileItem::RemoteFileItem(FileNodeRef fileInfo) : QStandardItem()
     myFile = fileInfo;
 }
 
-RemoteFileItem::RemoteFileItem(RemoteFileItem * rowLeader, QString text) : QStandardItem(text)
+RemoteFileItem::RemoteFileItem(RemoteFileItem * rowLeader) : QStandardItem()
 {
     myFile = FileNodeRef::nil();
     if (rowLeader == NULL)
@@ -55,6 +63,12 @@ RemoteFileItem::RemoteFileItem(RemoteFileItem * rowLeader, QString text) : QStan
     }
     myRowLeader = rowLeader;
     myRowLeader->appendToRowList(this);
+}
+
+RemoteFileItem * RemoteFileItem::getRowHeader()
+{
+    if (myRowLeader == NULL) return this;
+    return myRowLeader->getRowHeader();
 }
 
 QList<RemoteFileItem*> RemoteFileItem::getRowList()
@@ -67,6 +81,15 @@ FileNodeRef RemoteFileItem::getFile()
 {
     if (myRowLeader == NULL) return myFile;
     return myRowLeader->getFile();
+}
+
+bool RemoteFileItem::parentOfPlaceholder()
+{
+    if (!getRowHeader()->hasChildren()) return false;
+    RemoteFileItem * nodeToCheck = qobject_cast<RemoteFileItem *>(getRowHeader()->child(0,0));
+    if (nodeToCheck == NULL) return false;
+    if (nodeToCheck->myFile.isNil()) return true;
+    return false;
 }
 
 void RemoteFileItem::appendToRowList(RemoteFileItem * toAdd)

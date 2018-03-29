@@ -52,7 +52,7 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     myParent = parent;
     parent->childList.append(this);
 
-    //TODO: set init node state
+    recomputeNodeState();
 }
 
 FileTreeNode::FileTreeNode(QString rootFolderName, QObject * parent):QObject((QObject *)parent)
@@ -64,7 +64,7 @@ FileTreeNode::FileTreeNode(QString rootFolderName, QObject * parent):QObject((QO
     fileData.setType(FileType::DIR);
     settimestamps();
 
-    //TODO: set init node state
+    recomputeNodeState();
 }
 
 FileTreeNode::~FileTreeNode()
@@ -583,32 +583,4 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
     {
         childList.append(altList.takeLast());
     }
-}
-
-QString FileTreeNode::getRawColumnData(int i, QStandardItemModel * fullModel)
-{
-    if (fileData.isNil())
-    {
-        return "";
-    }
-
-    QStandardItem * headerItem = fullModel->horizontalHeaderItem(i);
-    if (headerItem == NULL)
-    {
-        return "";
-    }
-    QString headerText = headerItem->text();
-    if (headerText == "File Name")
-    {
-        return fileData.getFileName();
-    }
-    if (headerText == "Type")
-    {
-        return fileData.getFileTypeString();
-    }
-    if (headerText == "Size")
-    {
-        return QString::number(fileData.getSize());
-    }
-    return "";
 }

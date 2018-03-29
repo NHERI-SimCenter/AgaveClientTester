@@ -43,12 +43,14 @@
 class RemoteFileItem : public QStandardItem
 {
 public:
-    RemoteFileItem();
+    RemoteFileItem(bool isLoading);
     RemoteFileItem(FileNodeRef fileInfo);
-    RemoteFileItem(RemoteFileItem * rowLeader, QString text);
+    RemoteFileItem(RemoteFileItem * rowLeader);
 
+    RemoteFileItem * getRowHeader();
     QList<RemoteFileItem*> getRowList();
     FileNodeRef getFile();
+    bool parentOfPlaceholder();
 
 private:
     void appendToRowList(RemoteFileItem * toAdd);
