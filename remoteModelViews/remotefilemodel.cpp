@@ -135,12 +135,45 @@ void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded
 
 RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
 {
-    //TODO: Find item
+    QStandardItem * parentItem = findParentItem(toFind);
+    if (parentItem == NULL) return false;
+
+    if (!parentItem->hasChildren()) return NULL;
+    for (int i = 0; i < parentItem->rowCount(); i++)
+    {
+        RemoteFileItem * compareItem = qobject_cast<RemoteFileItem *>(parentItem->child(i,0));
+        if (compareItem == NULL) continue;
+        FileNodeRef toCompare = compareItem->getFile();
+        if (toCompare.isNil()) continue;
+        if (toCompare.getFileType() != toFind.getFileType()) continue;
+        if (toCompare.getFileName() != toFind.getFileName()) continue;
+        return compareItem;
+    }
+    return NULL;
 }
 
-RemoteFileItem * RemoteFileModel::findParentItem(FileNodeRef toFind)
+QStandardItem * RemoteFileModel::findParentItem(FileNodeRef toFind)
 {
-    //TODO: Find parent of item, can be root
+    QStringList fileParts = toFind.getContainingPath().split('/');
+    if (fileParts.size() == 0) return invisibleRootItem();
+
+    QStandardItem * searchItem = invisibleRootItem();
+    for (QString pathPart : fileParts)
+    {
+        bool itemFound = false;
+        for (int i = 0; i < (searchItem->rowCount() && !itemFound); i++)
+        {
+            RemoteFileItem * compareItem = qobject_cast<RemoteFileItem *>(parentItem->child(i,0));
+            if (compareItem == NULL) continue;
+            FileNodeRef toCompare = compareItem->getFile();
+            if (toCompare.getFileType() != FileType::DIR) continue;
+            if (toCompare.getFileName() != pathPart) continue;
+            searchItem = compareItem;
+            itemFound = true;
+        }
+        if (!itemFound) return NULL;
+    }
+    return searchItem;
 }
 
 QString RemoteFileModel::getRawColumnData(FileNodeRef fileData, int i)

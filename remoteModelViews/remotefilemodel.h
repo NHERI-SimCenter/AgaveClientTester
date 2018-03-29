@@ -55,7 +55,7 @@ private:
     void purgeItem(FileNodeRef toRemove);
     void updateItem(FileNodeRef toUpdate, bool folderContentsLoaded = false);
     RemoteFileItem * findItem(FileNodeRef toFind);
-    RemoteFileItem * findParentItem(FileNodeRef toFind);
+    QStandardItem * findParentItem(FileNodeRef toFind);
     QString getRawColumnData(FileNodeRef fileData, int i);
 };
 
