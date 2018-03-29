@@ -36,17 +36,21 @@
 #ifndef REMOTEFILEMODEL_H
 #define REMOTEFILEMODEL_H
 
+#include <QObject>
 #include <QStandardItemModel>
+#include <QStandardItem>
 
 class FileNodeRef;
 class FileOperator;
 class RemoteFileItem;
+class RemoteFileTree;
 
-class RemoteFileModel : public QStandardItemModel
+class RemoteFileModel : public QObject
 {
     Q_OBJECT
 public:
     RemoteFileModel(QObject *parent);
+    void linkRemoteFileTreeToModel(RemoteFileTree * theTree);
 
 private slots:
     void newFileData(FileNodeRef newFileData);
@@ -55,8 +59,10 @@ private:
     void purgeItem(FileNodeRef toRemove);
     void updateItem(FileNodeRef toUpdate, bool folderContentsLoaded = false);
     RemoteFileItem * findItem(FileNodeRef toFind);
-    QStandardItem * findParentItem(FileNodeRef toFind);
+    RemoteFileItem * findParentItem(FileNodeRef toFind);
     QString getRawColumnData(FileNodeRef fileData, int i);
+
+    QStandardItemModel theModel;
 };
 
 #endif // REMOTEFILEMODEL_H

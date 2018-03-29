@@ -35,16 +35,22 @@
 
 #include "remotefilemodel.h"
 #include "remotefileitem.h"
+#include "remotefiletree.h"
 
 #include "../remoteFileOps/filenoderef.h"
 #include "../remoteFileOps/fileoperator.h"
 #include "../remoteFileOps/filetreenode.h"
 #include "ae_globals.h"
 
-RemoteFileModel::RemoteFileModel(QObject * parent) : QStandardItemModel(parent)
+RemoteFileModel::RemoteFileModel(QObject * parent) : QObject(parent)
 {
     QObject::connect(ae_globals::get_file_handle(), SIGNAL(fileSystemChange(FileNodeRef)),
                      this, SLOT(newFileData(FileNodeRef)));
+}
+
+void RemoteFileModel::linkRemoteFileTreeToModel(RemoteFileTree * theTree)
+{
+    theTree->setModel(&theModel);
 }
 
 void RemoteFileModel::newFileData(FileNodeRef newFileData)
@@ -86,12 +92,12 @@ void RemoteFileModel::purgeItem(FileNodeRef toRemove)
     QStandardItem * parentNode = targetItem->parent();
     if (parentNode == NULL)
     {
-        parentNode = this->invisibleRootItem();
+        parentNode = theModel.invisibleRootItem();
     }
 
     parentNode->removeRow(targetItem->row());
     if (parentNode->hasChildren()) return;
-    parentNode->appendRow(RemoteFileItem(true));
+    parentNode->appendRow(new RemoteFileItem(true));
 }
 
 void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded)
@@ -100,6 +106,8 @@ void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded
     QList<RemoteFileItem *> itemList;
     if (targetItem == NULL)
     {
+        if (toUpdate.getContainingPath().split())
+
         RemoteFileItem * parentItem = findParentItem(toUpdate);
         if (parentItem == NULL) return;
         if (parentItem->parentOfPlaceholder())
@@ -112,7 +120,7 @@ void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded
 
         targetItem = new RemoteFileItem(toUpdate);
         itemList.append(targetItem);
-        while (itemList.size() < columnCount())
+        while (itemList.size() < theModel.columnCount())
         {
             itemList.append(new RemoteFileItem(targetItem));
         }
@@ -136,7 +144,7 @@ void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded
 RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
 {
     QStandardItem * parentItem = findParentItem(toFind);
-    if (parentItem == NULL) return false;
+    if (parentItem == NULL) return NULL;
 
     if (!parentItem->hasChildren()) return NULL;
     for (int i = 0; i < parentItem->rowCount(); i++)
@@ -152,7 +160,7 @@ RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
     return NULL;
 }
 
-QStandardItem * RemoteFileModel::findParentItem(FileNodeRef toFind)
+RemoteFileItem *RemoteFileModel::findParentItem(FileNodeRef toFind)
 {
     QStringList fileParts = toFind.getContainingPath().split('/');
     if (fileParts.size() == 0) return invisibleRootItem();
@@ -183,7 +191,7 @@ QString RemoteFileModel::getRawColumnData(FileNodeRef fileData, int i)
         return "";
     }
 
-    QStandardItem * headerItem = horizontalHeaderItem(i);
+    QStandardItem * headerItem = theModel.horizontalHeaderItem(i);
     if (headerItem == NULL)
     {
         return "";
