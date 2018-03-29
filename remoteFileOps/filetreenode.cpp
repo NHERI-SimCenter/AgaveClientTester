@@ -52,22 +52,11 @@ FileTreeNode::FileTreeNode(FileMetaData contents, FileTreeNode * parent):QObject
     myParent = parent;
     parent->childList.append(this);
 
-    myOperator = ae_globals::get_file_handle();
-    myOperator->fileNodesChange(fileData,FileSystemChange::FILE_ADD);
-
-    getModelLink();
-
-    if (isFolder())
-    {
-        setSpaceholderNode(SpaceHolderState::LOADING);
-    } 
+    //TODO: set init node state
 }
 
-FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName, QObject * parent):QObject((QObject *)parent)
+FileTreeNode::FileTreeNode(QString rootFolderName, QObject * parent):QObject((QObject *)parent)
 {
-    //This constructor is only to create the root node
-    myModel = stdModel;
-
     QString fullPath = "/";
     fullPath = fullPath.append(rootFolderName);
 
@@ -75,14 +64,14 @@ FileTreeNode::FileTreeNode(QStandardItemModel * stdModel, QString rootFolderName
     fileData.setType(FileType::DIR);
     settimestamps();
 
-    setSpaceholderNode(SpaceHolderState::LOADING);
-    updateNodeDisplay();
-    myOperator = ae_globals::get_file_handle();
-    myOperator->fileNodesChange(fileData,FileSystemChange::FILE_ADD);
+    //TODO: set init node state
 }
 
 FileTreeNode::~FileTreeNode()
 {
+    //Note: DO NOT call delete directly on a file tree node except when
+    //shutting down or resetting the file tree
+    //Use markForDelete to insure signaling of changes to the file tree
     while (this->childList.size() > 0)
     {
         FileTreeNode * toDelete = this->childList.takeLast();
@@ -93,27 +82,6 @@ FileTreeNode::~FileTreeNode()
         delete this->fileDataBuffer;
     }
 
-    if (mySpaceHolderNode != NULL)
-    {
-        if (mySpaceHolderNode->model() != NULL)
-        {
-            mySpaceHolderNode->parent()->removeRow(mySpaceHolderNode->row());
-        }
-    }
-    if (firstDataNode != NULL)
-    {
-        QStandardItem * parentNode;
-        if (firstDataNode->parent() == NULL)
-        {
-            parentNode = myModel->invisibleRootItem();
-        }
-        else
-        {
-            parentNode = firstDataNode->parent();
-        }
-        parentNode->removeRow(firstDataNode->row());
-        firstDataNode = NULL;
-    }
     if (myParent != NULL)
     {
         if (myParent->childList.contains(this))
@@ -121,8 +89,6 @@ FileTreeNode::~FileTreeNode()
             myParent->childList.removeAll(this);
         }
     }
-    //Since the node is out of the file tree, the reference being sent now is properly disconnected
-    ae_globals::get_file_handle()->fileNodesChange(fileData, FileSystemChange::FILE_DELETE);
 }
 
 bool FileTreeNode::isRootNode()
@@ -130,132 +96,9 @@ bool FileTreeNode::isRootNode()
     return (myParent == NULL);
 }
 
-bool FileTreeNode::nodeIsDisplayed()
-{
-    return (firstDataNode != NULL);
-}
-
-void FileTreeNode::updateNodeDisplay()
-{
-    if (!nodeIsDisplayed())
-    {
-        if ((myParent != NULL) && !myParent->nodeIsDisplayed())
-        {
-            myParent->updateNodeDisplay();
-        }
-
-        QList<QStandardItem *> appendList;
-
-        firstDataNode = new LinkedStandardItem(this);
-        appendList.append(firstDataNode);
-        for (int i = 1; i < myModel->columnCount(); i++)
-        {
-            appendList.append(new LinkedStandardItem(this));
-        }
-
-        if (myParent == NULL)
-        {
-            myModel->appendRow(appendList);
-        }
-        else
-        {
-            myParent->firstDataNode->appendRow(appendList);
-        }
-    }
-
-    QStandardItem * parentItem;
-    if (myParent == NULL)
-    {
-        parentItem = myModel->invisibleRootItem();
-    }
-    else
-    {
-        parentItem = myParent->firstDataNode;
-    }
-    int rowNum = firstDataNode->row();
-
-    for (int i = 0; i < parentItem->columnCount(); i++)
-    {
-        QStandardItem * itemToUpdate = parentItem->child(rowNum, i);
-        itemToUpdate->setText(getRawColumnData(i, myModel));
-    }
-    if (mySpaceHolderNode != NULL)
-    {
-        if (mySpaceHolderNode->model() == NULL)
-        {
-            firstDataNode->appendRow(mySpaceHolderNode);
-        }
-    }
-}
-
 NodeState FileTreeNode::getNodeState()
 {
-    if (isFolder())
-    {
-        if (!nodeIsDisplayed())
-        {
-            if (haveLStask())
-            {
-                return NodeState::FOLDER_SPECULATE_LOADING;
-            }
-            else
-            {
-                return NodeState::FOLDER_SPECULATE_IDLE;
-            }
-        }
-
-        if (haveLStask())
-        {
-            if (!childList.isEmpty())
-            {
-                return NodeState::FOLDER_CONTENTS_RELOADING;
-            }
-
-            return NodeState::FOLDER_CONTENTS_LOADING;
-        }
-        else
-        {
-            if (mySpaceHolderState == SpaceHolderState::LOADING)
-            {
-                return NodeState::FOLDER_KNOWN_CONTENTS_NOT;
-            }
-            return NodeState::FOLDER_CONTENTS_LOADED;
-        }
-    }
-    else if (isFile())
-    {
-        if (!nodeIsDisplayed())
-        {
-            if (haveBuffTask())
-            {
-                return NodeState::FILE_SPECULATE_LOADING;
-            }
-            else
-            {
-                return NodeState::FILE_SPECULATE_IDLE;
-            }
-        }
-
-        if (haveBuffTask())
-        {
-            if (fileDataBuffer != NULL)
-            {
-                return NodeState::FILE_BUFF_RELOADING;
-            }
-
-            return NodeState::FILE_BUFF_LOADING;
-        }
-        else
-        {
-            if (fileDataBuffer == NULL)
-            {
-                return NodeState::FILE_KNOWN;
-            }
-
-            return NodeState::FILE_BUFF_LOADED;
-        }
-    }
-    return NodeState::OTHER_TYPE;
+    return myState;
 }
 
 FileNodeRef FileTreeNode::getFileData()
@@ -266,11 +109,6 @@ FileNodeRef FileTreeNode::getFileData()
 QByteArray * FileTreeNode::getFileBuffer()
 {
     return fileDataBuffer;
-}
-
-LinkedStandardItem * FileTreeNode::getFirstDataNode()
-{
-    return firstDataNode;
 }
 
 FileTreeNode * FileTreeNode::getNodeWithName(QString filename)
@@ -296,7 +134,9 @@ FileTreeNode * FileTreeNode::getNodeReletiveToNodeWithName(QString searchPath)
 
 void FileTreeNode::deleteFolderContentsData()
 {
-    clearAllChildren(SpaceHolderState::LOADING);
+    folderContentsKnown = false;
+    clearAllChildren();
+    recomputeNodeState();
 }
 
 void FileTreeNode::setFileBuffer(const QByteArray * newFileBuffer)
@@ -306,27 +146,21 @@ void FileTreeNode::setFileBuffer(const QByteArray * newFileBuffer)
         if (newFileBuffer != NULL)
         {
             fileDataBuffer = new QByteArray(*newFileBuffer);
-            myOperator->fileNodesChange(fileData, FileSystemChange::BUFFER_UPDATE);
         }
-        return;
     }
-
-    if (newFileBuffer == NULL)
+    else if (newFileBuffer == NULL)
     {
         delete fileDataBuffer;
         fileDataBuffer = NULL;
-        myOperator->fileNodesChange(fileData, FileSystemChange::BUFFER_UPDATE);
-        return;
     }
-
-    if ((fileDataBuffer->length() == newFileBuffer->length()) && (fileDataBuffer->endsWith(*newFileBuffer)))
+    else
     {
-        return;
+        delete fileDataBuffer;
+        fileDataBuffer = new QByteArray(*newFileBuffer);
     }
 
-    delete fileDataBuffer;
-    fileDataBuffer = new QByteArray(*newFileBuffer);
-    myOperator->fileNodesChange(fileData, FileSystemChange::BUFFER_UPDATE);
+    setNodeVisible();
+    recomputeNodeState();
 }
 
 bool FileTreeNode::haveLStask()
@@ -348,6 +182,7 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask)
     lsTask = newTask;
     QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
                      this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
+    recomputeNodeState();
 }
 
 bool FileTreeNode::haveBuffTask()
@@ -369,6 +204,7 @@ void FileTreeNode::setBuffTask(RemoteDataReply * newTask)
     bufferTask = newTask;
     QObject::connect(bufferTask, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray*)),
                      this, SLOT(deliverBuffData(RequestState,QByteArray*)));
+    recomputeNodeState();
 }
 
 QList<FileTreeNode *> FileTreeNode::getChildList()
@@ -387,22 +223,6 @@ FileTreeNode * FileTreeNode::getChildNodeWithName(QString filename)
         }
     }
     return NULL;
-}
-
-bool FileTreeNode::fileNameMatches(QString fileToMatch)
-{
-    FileTreeNode * rootNode = this;
-    while (rootNode->isRootNode() == false)
-    {
-        rootNode = rootNode->getParentNode();
-    }
-
-    FileTreeNode * checkNode = rootNode->getNodeWithName(fileToMatch);
-    if (checkNode == NULL)
-    {
-        return false;
-    }
-    return (checkNode == this);
 }
 
 bool FileTreeNode::isFolder()
@@ -437,29 +257,31 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
     {
         lsTask = NULL;
     }
+    if (taskState == RequestState::GOOD)
+    {
+        if (verifyControlNode(dataList) == false)
+        {
+            qDebug("ERROR: File tree data/node mismatch");
+            recomputeNodeState();
+            return;
+        }
+        this->updateFileNodeData(dataList);
+        return;
+    }
+
     if (taskState == RequestState::NO_CONNECT)
     {
         ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
-        return;
     }
-
-    if (taskState == RequestState::FAIL)
+    else if (taskState == RequestState::FAIL)
     {
-        if ((getNodeState() == NodeState::FOLDER_SPECULATE_IDLE) ||
-                (getNodeState() == NodeState::FOLDER_SPECULATE_LOADING))
+        if (!nodeVisible)
         {
-            delete this;
+            changeNodeState(NodeState::DELETING);
+            return;
         }
-
-        return;
     }
-
-    if (verifyControlNode(dataList) == false)
-    {
-        qDebug("ERROR: File tree data/node mismatch");
-        return;
-    }
-    this->updateFileNodeData(dataList);
+    recomputeNodeState();
 }
 
 void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferData)
@@ -468,47 +290,135 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferDa
     {
         bufferTask = NULL;
     }
+    if (taskState == RequestState::GOOD)
+    {
+        qDebug("Download of buffer complete: %s", qPrintable(fileData.getFullPath()));
+        setFileBuffer(bufferData);
+        return;
+    }
+
     if (taskState == RequestState::FAIL)
     {
-        if ((getNodeState() == NodeState::FILE_SPECULATE_IDLE) ||
-                (getNodeState() == NodeState::FILE_SPECULATE_LOADING))
+        if (!nodeVisible)
         {
-            delete this;
+            changeNodeState(NodeState::DELETING);
+            return;
         }
-        return;
     }
-    if (taskState == RequestState::NO_CONNECT)
+    else if (taskState == RequestState::NO_CONNECT)
     {
         ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
-        return;
     }
+    recomputeNodeState();
+}
 
-    qDebug("Download of buffer complete: %s", qPrintable(fileData.getFullPath()));
+void FileTreeNode::slateNodeForDelete()
+{
+    if (myState == NodeState::DELETING) return;
+    changeNodeState(NodeState::DELETING);
+}
 
-    if (bufferData != NULL)
+void FileTreeNode::setNodeVisible()
+{
+    if (nodeVisible) return;
+    nodeVisible = true;
+
+    FileTreeNode * searchNode = getParentNode();
+    if (searchNode != NULL)
     {
-        updateNodeDisplay();
+        searchNode->setNodeVisible();
+    }
+    recomputeNodeState();
+}
+
+void FileTreeNode::recomputeNodeState()
+{
+    if (myState == NodeState::DELETING) return;
+    if (isFolder())
+    {
+        if (!nodeVisible)
+        {
+            if (haveLStask())
+            {
+                changeNodeState(NodeState::FOLDER_SPECULATE_LOADING); return;
+            }
+            else
+            {
+                changeNodeState(NodeState::FOLDER_SPECULATE_IDLE); return;
+            }
+        }
+
+        if (haveLStask())
+        {
+            if (!childList.isEmpty())
+            {
+                changeNodeState(NodeState::FOLDER_CONTENTS_RELOADING); return;
+            }
+
+            changeNodeState(NodeState::FOLDER_CONTENTS_LOADING); return;
+        }
+        else
+        {
+            if (!folderContentsKnown)
+            {
+                changeNodeState(NodeState::FOLDER_KNOWN_CONTENTS_NOT); return;
+            }
+            changeNodeState(NodeState::FOLDER_CONTENTS_LOADED); return;
+        }
+    }
+    else if (isFile())
+    {
+        if (!nodeVisible)
+        {
+            if (haveBuffTask())
+            {
+                changeNodeState(NodeState::FILE_SPECULATE_LOADING); return;
+            }
+            else
+            {
+                changeNodeState(NodeState::FILE_SPECULATE_IDLE); return;
+            }
+        }
+
+        if (haveBuffTask())
+        {
+            if (fileDataBuffer != NULL)
+            {
+                changeNodeState(NodeState::FILE_BUFF_RELOADING); return;
+            }
+
+            changeNodeState(NodeState::FILE_BUFF_LOADING); return;
+        }
+        else
+        {
+            if (fileDataBuffer == NULL)
+            {
+                changeNodeState(NodeState::FILE_KNOWN); return;
+            }
+
+            changeNodeState(NodeState::FILE_BUFF_LOADED); return;
+        }
+    }
+    changeNodeState(NodeState::ERROR);
+}
+
+void FileTreeNode::changeNodeState(NodeState newState)
+{
+    if (newState == myState) return;
+    myState = newState;
+
+    if (myState == NodeState::DELETING)
+    {
+        this->deleteLater();
     }
 
-    setFileBuffer(bufferData);
+    ae_globals::get_file_handle()->fileNodesChange(fileData);
 }
 
 void FileTreeNode::settimestamps()
 {
     nodeTimestamp = QDateTime::currentMSecsSinceEpoch();
     fileData.setTimestamp(nodeTimestamp);
-}
-
-void FileTreeNode::getModelLink()
-{
-    if (myModel == NULL)
-    {
-        if (myParent == NULL)
-        {
-            return;
-        }
-        myModel = myParent->myModel;
-    }
 }
 
 FileTreeNode * FileTreeNode::pathSearchHelper(QString filename, bool stopEarly)
@@ -579,12 +489,13 @@ QString FileTreeNode::getControlAddress(QList<FileMetaData> * newDataList)
 
 void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
 {
+    folderContentsKnown = true;
+
     //If the incoming list is empty, ie. has one entry (.), place empty file item
     if (newDataList->size() <= 1)
     {
-        clearAllChildren(SpaceHolderState::EMPTY);
-        updateNodeDisplay();
-        myOperator->fileNodesChange(fileData, FileSystemChange::FOLDER_LOAD);
+        clearAllChildren();
+        recomputeNodeState();
         return;
     }
 
@@ -595,62 +506,20 @@ void FileTreeNode::updateFileNodeData(QList<FileMetaData> * newDataList)
         insertFile(&(*itr));
     }
 
-    setSpaceholderNode(SpaceHolderState::NONE);
-    updateNodeDisplay();
-
     for (auto itr = childList.begin(); itr != childList.end(); itr++)
     {
-        (*itr)->updateNodeDisplay();
+        (*itr)->setNodeVisible();
     }
 
-    myOperator->fileNodesChange(fileData, FileSystemChange::FOLDER_LOAD);
+    recomputeNodeState();
 }
 
-void FileTreeNode::clearAllChildren(SpaceHolderState spaceholderVal)
+void FileTreeNode::clearAllChildren()
 {
     while (!childList.isEmpty())
     {
         FileTreeNode * aChild = childList.takeLast();
-        delete aChild;
-    }
-    setSpaceholderNode(spaceholderVal);
-    updateNodeDisplay();
-}
-
-void FileTreeNode::setSpaceholderNode(SpaceHolderState spaceholderVal)
-{
-    mySpaceHolderState = spaceholderVal;
-    if (mySpaceHolderNode != NULL)
-    {
-        if (mySpaceHolderNode->model() != NULL)
-        {
-            mySpaceHolderNode->parent()->removeRow(mySpaceHolderNode->row());
-        }
-        mySpaceHolderNode = NULL;
-    }
-
-    if (mySpaceHolderState == SpaceHolderState::NONE)
-    {
-        return;
-    }
-
-    QString spaceholderText = "MAJOR ERROR";
-    switch (mySpaceHolderState)
-    {
-    case SpaceHolderState::LOADING:
-        spaceholderText = "Loading . . . ";
-        break;
-    case SpaceHolderState::EMPTY:
-        spaceholderText = "Empty Folder";
-        break;
-    default:
-        spaceholderText = "MAJOR ERROR";
-    }
-
-    mySpaceHolderNode = new LinkedStandardItem(this, spaceholderText);
-    if (nodeIsDisplayed())
-    {
-        firstDataNode->appendRow(mySpaceHolderNode);
+        aChild->changeNodeState(NodeState::DELETING);
     }
 }
 
@@ -706,7 +575,7 @@ void FileTreeNode::purgeUnmatchedChildren(QList<FileMetaData> * newChildList)
         }
         else
         {
-            delete aNode;
+            aNode->changeNodeState(NodeState::DELETING);
         }
     }
 

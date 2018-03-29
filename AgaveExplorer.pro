@@ -68,7 +68,8 @@ SOURCES += main.cpp \
     remoteModelViews/remotefilemodel.cpp \
     remoteModelViews/remotefiletree.cpp \
     remoteModelViews/remotejoblister.cpp \
-    remoteModelViews/selectedfilelabel.cpp
+    remoteModelViews/selectedfilelabel.cpp \
+    remoteModelViews/remotefileitem.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -108,7 +109,8 @@ HEADERS += \
     remoteModelViews/remotefilemodel.h \
     remoteModelViews/remotefiletree.h \
     remoteModelViews/remotejoblister.h \
-    remoteModelViews/selectedfilelabel.h
+    remoteModelViews/selectedfilelabel.h \
+    remoteModelViews/remotefileitem.h
 
 FORMS += \
     instances/explorerwindow.ui \

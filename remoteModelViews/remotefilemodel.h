@@ -36,12 +36,19 @@
 #ifndef REMOTEFILEMODEL_H
 #define REMOTEFILEMODEL_H
 
-#include <QObject>
+#include <QStandardItemModel>
 
-class RemoteFileModel
+class FileNodeRef;
+class FileOperator;
+
+class RemoteFileModel : public QStandardItemModel
 {
+    Q_OBJECT
 public:
-    RemoteFileModel();
+    RemoteFileModel(QObject *parent);
+
+private slots:
+    void newFileData(FileNodeRef newFileData);
 };
 
 #endif // REMOTEFILEMODEL_H

@@ -35,7 +35,81 @@
 
 #include "remotefilemodel.h"
 
-RemoteFileModel::RemoteFileModel()
-{
+#include "../remoteFileOps/fileoperator.h"
+#include "ae_globals.h"
 
+RemoteFileModel::RemoteFileModel(QObject * parent) : QStandardItemModel(parent)
+{
+    QObject::connect(ae_globals::get_file_handle(), SIGNAL(fileSystemChange(FileNodeRef)),
+                     this, SLOT(newFileData(FileNodeRef)));
+}
+
+void RemoteFileModel::newFileData(FileNodeRef newFileData)
+{
+/*
+ *
+    if (!nodeIsDisplayed())
+    {
+
+
+        QList<QStandardItem *> appendList;
+
+        firstDataNode = new LinkedStandardItem(this);
+        appendList.append(firstDataNode);
+        for (int i = 1; i < myModel->columnCount(); i++)
+        {
+            appendList.append(new LinkedStandardItem(this));
+        }
+
+        if (myParent == NULL)
+        {
+            myModel->appendRow(appendList);
+        }
+        else
+        {
+            myParent->firstDataNode->appendRow(appendList);
+        }
+    }
+    */
+
+    /*
+     * QStandardItem * parentItem;
+    if (myParent == NULL)
+    {
+        parentItem = myModel->invisibleRootItem();
+    }
+    else
+    {
+        parentItem = myParent->firstDataNode;
+    }
+    int rowNum = firstDataNode->row();
+
+    for (int i = 0; i < parentItem->columnCount(); i++)
+    {
+        QStandardItem * itemToUpdate = parentItem->child(rowNum, i);
+        itemToUpdate->setText(getRawColumnData(i, myModel));
+    }
+    if (mySpaceHolderNode != NULL)
+    {
+        if (mySpaceHolderNode->model() == NULL)
+        {
+            firstDataNode->appendRow(mySpaceHolderNode);
+        }
+    }
+    */
+
+    /*
+     * QString spaceholderText = "MAJOR ERROR";
+    switch (mySpaceHolderState)
+    {
+    case SpaceHolderState::LOADING:
+        spaceholderText = "Loading . . . ";
+        break;
+    case SpaceHolderState::EMPTY:
+        spaceholderText = "Empty Folder";
+        break;
+    default:
+        spaceholderText = "MAJOR ERROR";
+    }
+    */
 }

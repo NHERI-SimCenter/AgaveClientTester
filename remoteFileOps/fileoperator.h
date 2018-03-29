@@ -56,7 +56,6 @@ enum class RequestState;
 enum class NodeState;
 enum class FileOp_RecursiveTask {NONE, DOWNLOAD, UPLOAD};
 enum class RecursiveErrorCodes {NONE, MKDIR_FAIL, UPLOAD_FAIL, TYPE_MISSMATCH, LOST_FILE};
-enum class FileSystemChange {FILE_ADD, FILE_MODIFY, FILE_DELETE, FOLDER_LOAD, BUFFER_UPDATE};
 
 class FileOperator : public QObject
 {
@@ -111,10 +110,10 @@ signals:
     //Note: it is very important that connections for these signals be queued
     void fileOpStarted();
     void fileOpDone(RequestState opState, QString message);
-    void fileSystemChange(FileNodeRef changedFile, FileSystemChange theChange);
+    void fileSystemChange(FileNodeRef changedFile);
 
 protected:
-    void fileNodesChange(FileNodeRef changedFile, FileSystemChange theChange);
+    void fileNodesChange(FileNodeRef changedFile);
 
     bool fileStillExtant(const FileNodeRef &theFile);
     NodeState getFileNodeState(const FileNodeRef &theFile);

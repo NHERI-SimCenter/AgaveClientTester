@@ -74,7 +74,7 @@ void FileOperator::resetFileData()
     {
         rootFileNode->deleteLater();
     }
-    rootFileNode = new FileTreeNode(&dataStore, ae_globals::get_connection()->getUserName(), this);
+    rootFileNode = new FileTreeNode(ae_globals::get_connection()->getUserName(), this);
 
     enactRootRefresh();
 }
@@ -639,9 +639,9 @@ void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
     }
 }
 
-void FileOperator::fileNodesChange(FileNodeRef changedFile, FileSystemChange theChange)
+void FileOperator::fileNodesChange(FileNodeRef changedFile)
 {
-    emit fileSystemChange(changedFile, theChange);
+    emit fileSystemChange(changedFile);
 
     if (performingRecursiveDownload())
     {
