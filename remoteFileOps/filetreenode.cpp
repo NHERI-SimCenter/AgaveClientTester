@@ -63,6 +63,7 @@ FileTreeNode::FileTreeNode(QString rootFolderName, QObject * parent):QObject((QO
     fileData.setFullFilePath(fullPath);
     fileData.setType(FileType::DIR);
     settimestamps();
+    nodeVisible = true;
 
     recomputeNodeState();
 }

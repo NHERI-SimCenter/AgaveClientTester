@@ -59,17 +59,8 @@ FileOperator::~FileOperator()
     delete rootFileNode;
 }
 
-void FileOperator::linkToFileTree(RemoteFileTree * newTreeLink)
-{
-    newTreeLink->setModel(&dataStore);
-}
-
 void FileOperator::resetFileData()
 {
-    dataStore.clear();
-    dataStore.setColumnCount(tableNumCols);
-    dataStore.setHorizontalHeaderLabels(shownHeaderLabelList);
-
     if (rootFileNode != NULL)
     {
         rootFileNode->deleteLater();

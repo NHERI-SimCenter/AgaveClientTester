@@ -35,7 +35,7 @@
 
 #include "remotefiletree.h"
 
-#include "linkedstandarditem.h"
+#include "remotefileitem.h"
 #include "../remoteFileOps/fileoperator.h"
 #include "../remoteFileOps/filetreenode.h"
 #include "../remoteFileOps/filenoderef.h"
@@ -45,8 +45,6 @@
 RemoteFileTree::RemoteFileTree(QWidget *parent) :
     QTreeView(parent)
 {
-    ae_globals::get_file_handle()->linkToFileTree(this);
-
     QObject::connect(this, SIGNAL(expanded(QModelIndex)), this, SLOT(folderExpanded(QModelIndex)));
     QObject::connect(this, SIGNAL(clicked(QModelIndex)), this, SLOT(fileEntryTouched(QModelIndex)));
     this->setEditTriggers(QTreeView::NoEditTriggers);
@@ -61,11 +59,11 @@ FileNodeRef RemoteFileTree::getSelectedFile()
     QStandardItemModel * theModel = qobject_cast<QStandardItemModel *>(this->model());
     if (theModel == NULL) return fail;
 
-    LinkedStandardItem * theLinkedItem = (LinkedStandardItem *)theModel->itemFromIndex(indexList.at(0));
+    QStandardItem * theItem = theModel->itemFromIndex(indexList.at(0));
 
-    FileTreeNode * retNode = qobject_cast<FileTreeNode *>(theLinkedItem->getLinkedObject());
+    RemoteFileItem * retNode = (RemoteFileItem *)(theItem);
     if (retNode == NULL) return fail;
-    return retNode->getFileData();
+    return retNode->getFile();
 }
 
 void RemoteFileTree::setupFileView()
@@ -100,9 +98,7 @@ void RemoteFileTree::fileEntryTouched(QModelIndex itemTouched)
         return;
     }
 
-    LinkedStandardItem * linkedItem = (LinkedStandardItem *)(selectedItem);
-
-    selectRowByItem(linkedItem);
+    selectRowByItem(selectedItem);
 }
 
 void RemoteFileTree::forceSelectionRefresh()
@@ -110,30 +106,15 @@ void RemoteFileTree::forceSelectionRefresh()
     emit newFileSelected(getSelectedFile());
 }
 
-void RemoteFileTree::selectRowByItem(LinkedStandardItem * linkedItem)
+void RemoteFileTree::selectRowByItem(QStandardItem *clickedNode)
 {
-    FileTreeNode * clickedNode = qobject_cast<FileTreeNode *>(linkedItem->getLinkedObject());
-    if (clickedNode == NULL)
+    QStandardItem * parentNode = clickedNode->parent();
+    if (parentNode == NULL)
     {
-        return;
+        parentNode = clickedNode->model()->invisibleRootItem();
     }
 
-    if (!clickedNode->nodeIsDisplayed())
-    {
-        return;
-    }
-
-    QStandardItem * parentNode;
-    if (clickedNode->isRootNode())
-    {
-        parentNode = linkedItem->model()->invisibleRootItem();
-    }
-    else
-    {
-        parentNode = clickedNode->getParentNode()->getFirstDataNode();
-    }
-
-    int rowNum = clickedNode->getFirstDataNode()->row();
+    int rowNum = clickedNode->row();
 
     this->selectionModel()->select(QItemSelection(parentNode->child(rowNum,0)->index(),
                                                   parentNode->child(rowNum,parentNode->columnCount()-1)->index()),

@@ -42,10 +42,13 @@
 #include "../remoteFileOps/filetreenode.h"
 #include "ae_globals.h"
 
-RemoteFileModel::RemoteFileModel(QObject * parent) : QObject(parent)
+RemoteFileModel::RemoteFileModel() : QObject()
 {
+    theModel.setColumnCount(tableNumCols);
+    theModel.setHorizontalHeaderLabels(shownHeaderLabelList);
+
     QObject::connect(ae_globals::get_file_handle(), SIGNAL(fileSystemChange(FileNodeRef)),
-                     this, SLOT(newFileData(FileNodeRef)));
+                     this, SLOT(newFileData(FileNodeRef)), Qt::QueuedConnection);
 }
 
 void RemoteFileModel::linkRemoteFileTreeToModel(RemoteFileTree * theTree)
@@ -55,6 +58,20 @@ void RemoteFileModel::linkRemoteFileTreeToModel(RemoteFileTree * theTree)
 
 void RemoteFileModel::newFileData(FileNodeRef newFileData)
 {
+    if (newFileData.isRootNode())
+    {
+        if (userRoot == NULL)
+        {
+            setRootItem(newFileData);
+        }
+        else
+        {
+            updateItemList(userRoot->getRowList(),newFileData);
+        }
+        return;
+    }
+    if (userRoot == NULL) return;
+
     NodeState theState = newFileData.getNodeState();
 
     switch (theState) {
@@ -85,31 +102,37 @@ void RemoteFileModel::newFileData(FileNodeRef newFileData)
     }
 }
 
+void RemoteFileModel::setRootItem(FileNodeRef rootFile)
+{
+    if (userRoot != NULL) return;
+    QList<RemoteFileItem *> userRootList = createItemList(rootFile);
+    userRoot = userRootList.first();
+    updateItemList(userRootList, rootFile);
+
+    theModel.invisibleRootItem()->appendRow(demoteList(userRootList));
+}
+
 void RemoteFileModel::purgeItem(FileNodeRef toRemove)
 {
-    RemoteFileItem * targetItem = findItem(toRemove);
+    RemoteFileItem * parentItem = findParentItem(toRemove);
+    if (parentItem == NULL) return;
+    RemoteFileItem * targetItem = findTargetItem(parentItem, toRemove);
     if (targetItem == NULL) return;
-    QStandardItem * parentNode = targetItem->parent();
-    if (parentNode == NULL)
-    {
-        parentNode = theModel.invisibleRootItem();
-    }
 
-    parentNode->removeRow(targetItem->row());
-    if (parentNode->hasChildren()) return;
-    parentNode->appendRow(new RemoteFileItem(true));
+    parentItem->removeRow(targetItem->row());
+    if (parentItem->hasChildren()) return;
+    parentItem->appendRow(new RemoteFileItem(true));
 }
 
 void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded)
 {
-    RemoteFileItem * targetItem = findItem(toUpdate);
+    RemoteFileItem * parentItem = findParentItem(toUpdate);
+    if (parentItem == NULL) return;
+    RemoteFileItem * targetItem = findTargetItem(parentItem, toUpdate);
+
     QList<RemoteFileItem *> itemList;
     if (targetItem == NULL)
     {
-        if (toUpdate.getContainingPath().split())
-
-        RemoteFileItem * parentItem = findParentItem(toUpdate);
-        if (parentItem == NULL) return;
         if (parentItem->parentOfPlaceholder())
         {
             while (parentItem->hasChildren())
@@ -118,41 +141,46 @@ void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded
             }
         }
 
-        targetItem = new RemoteFileItem(toUpdate);
-        itemList.append(targetItem);
-        while (itemList.size() < theModel.columnCount())
-        {
-            itemList.append(new RemoteFileItem(targetItem));
-        }
-
-        parentItem->appendRow(itemList);
+        itemList = createItemList(toUpdate);
+        targetItem = itemList.at(0);
+        parentItem->appendRow(demoteList(itemList));
     }
     else
     {
         itemList = targetItem->getRowList();
     }
 
-    for (int i = 0; i < itemList.size(); i++)
+    updateItemList(itemList, toUpdate);
+    if (targetItem->parentOfPlaceholder())
     {
-        QStandardItem * itemToUpdate = itemList.at(i);
-        itemToUpdate->setText(getRawColumnData(itemToUpdate, i));
+        while (targetItem->hasChildren()) targetItem->removeRow(0);
+        targetItem->appendRow(new RemoteFileItem(!folderContentsLoaded));
+        return;
     }
+
     if (targetItem->hasChildren() || (toUpdate.getFileType() != FileType::DIR)) return;
-    targetItem->appendRow(RemoteFileItem(!folderContentsLoaded));
+    targetItem->appendRow(new RemoteFileItem(!folderContentsLoaded));
 }
 
-RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
+QList<RemoteFileItem *> RemoteFileModel::createItemList(FileNodeRef theFileNode)
 {
-    QStandardItem * parentItem = findParentItem(toFind);
-    if (parentItem == NULL) return NULL;
+    QList<RemoteFileItem *> ret;
+    RemoteFileItem * firstItem = new RemoteFileItem(theFileNode);
+    ret.append(firstItem);
+    while (ret.size() < theModel.columnCount())
+    {
+        ret.append(new RemoteFileItem(firstItem));
+    }
+    return ret;
+}
 
-    if (!parentItem->hasChildren()) return NULL;
+RemoteFileItem * RemoteFileModel::findTargetItem(RemoteFileItem * parentItem, FileNodeRef toFind)
+{
     for (int i = 0; i < parentItem->rowCount(); i++)
     {
-        RemoteFileItem * compareItem = qobject_cast<RemoteFileItem *>(parentItem->child(i,0));
+        RemoteFileItem * compareItem = (RemoteFileItem *)(parentItem->child(i,0));
         if (compareItem == NULL) continue;
         FileNodeRef toCompare = compareItem->getFile();
-        if (toCompare.isNil()) continue;
         if (toCompare.getFileType() != toFind.getFileType()) continue;
         if (toCompare.getFileName() != toFind.getFileName()) continue;
         return compareItem;
@@ -160,18 +188,26 @@ RemoteFileItem * RemoteFileModel::findItem(FileNodeRef toFind)
     return NULL;
 }
 
-RemoteFileItem *RemoteFileModel::findParentItem(FileNodeRef toFind)
+RemoteFileItem * RemoteFileModel::findParentItem(FileNodeRef toFind)
 {
-    QStringList fileParts = toFind.getContainingPath().split('/');
-    if (fileParts.size() == 0) return invisibleRootItem();
+    if (userRoot == NULL) return NULL;
 
-    QStandardItem * searchItem = invisibleRootItem();
+    QStringList fileParts = separateFilePathParts(toFind.getContainingPath());
+    if (fileParts.size() <= 1) return userRoot;
+    QString firstPath = fileParts.takeFirst();
+    if (userRoot->getFile().getFileName() != firstPath)
+    {
+        ae_globals::displayFatalPopup("ERROR: files given to remote file model from a different user folder.","Internal Error");
+        return NULL;
+    }
+
+    RemoteFileItem * searchItem = userRoot;
     for (QString pathPart : fileParts)
     {
         bool itemFound = false;
-        for (int i = 0; i < (searchItem->rowCount() && !itemFound); i++)
+        for (int i = 0; (i < searchItem->rowCount()) && !itemFound; i++)
         {
-            RemoteFileItem * compareItem = qobject_cast<RemoteFileItem *>(parentItem->child(i,0));
+            RemoteFileItem * compareItem = (RemoteFileItem *)(searchItem->child(i,0));
             if (compareItem == NULL) continue;
             FileNodeRef toCompare = compareItem->getFile();
             if (toCompare.getFileType() != FileType::DIR) continue;
@@ -210,4 +246,35 @@ QString RemoteFileModel::getRawColumnData(FileNodeRef fileData, int i)
         return QString::number(fileData.getSize());
     }
     return "";
+}
+
+QList<QStandardItem *> RemoteFileModel::demoteList(QList<RemoteFileItem *> inputList)
+{
+    QList<QStandardItem *> ret;
+    for (RemoteFileItem * anItem : inputList)
+    {
+        ret.append(anItem);
+    }
+    return ret;
+}
+
+QStringList RemoteFileModel::separateFilePathParts(QString thePath)
+{
+    QStringList allParts = thePath.split('/');
+    QStringList ret;
+    for (QString dirName : allParts)
+    {
+        if (dirName.isEmpty()) continue;
+        ret.append(dirName);
+    }
+    return ret;
+}
+
+void RemoteFileModel::updateItemList(QList<RemoteFileItem *> theList, FileNodeRef newFileInfo)
+{
+    for (int i = 0; i < theList.size(); i++)
+    {
+        RemoteFileItem * itemToUpdate = theList.at(i);
+        itemToUpdate->setText(getRawColumnData(newFileInfo, i));
+    }
 }

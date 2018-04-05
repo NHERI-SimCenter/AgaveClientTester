@@ -40,6 +40,8 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 
+#include "../AgaveExplorer/remoteFileOps/filenoderef.h"
+
 class FileNodeRef;
 class FileOperator;
 class RemoteFileItem;
@@ -49,20 +51,33 @@ class RemoteFileModel : public QObject
 {
     Q_OBJECT
 public:
-    RemoteFileModel(QObject *parent);
+    RemoteFileModel();
     void linkRemoteFileTreeToModel(RemoteFileTree * theTree);
 
 private slots:
     void newFileData(FileNodeRef newFileData);
 
 private:
+    void setRootItem(FileNodeRef rootFile);
     void purgeItem(FileNodeRef toRemove);
     void updateItem(FileNodeRef toUpdate, bool folderContentsLoaded = false);
-    RemoteFileItem * findItem(FileNodeRef toFind);
+    QList<RemoteFileItem *> createItemList(FileNodeRef theFileNode);
+
+    RemoteFileItem * findTargetItem(RemoteFileItem * parentItem, FileNodeRef toFind);
     RemoteFileItem * findParentItem(FileNodeRef toFind);
     QString getRawColumnData(FileNodeRef fileData, int i);
+    static QList<QStandardItem *> demoteList(QList<RemoteFileItem *> inputList);
+    static QStringList separateFilePathParts(QString thePath);
+    void updateItemList(QList<RemoteFileItem *> theList, FileNodeRef newFileInfo);
 
     QStandardItemModel theModel;
+    RemoteFileItem * userRoot = NULL;
+
+    //const int tableNumCols = 7;
+    //const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed",
+    //                               "Format","mimeType","Permissions"};
+    const int tableNumCols = 4;
+    const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed"};
 };
 
 #endif // REMOTEFILEMODEL_H

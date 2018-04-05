@@ -51,6 +51,7 @@ RemoteFileItem::RemoteFileItem(bool isLoading) : QStandardItem()
 RemoteFileItem::RemoteFileItem(FileNodeRef fileInfo) : QStandardItem()
 {
     myFile = fileInfo;
+    appendToRowList(this);
 }
 
 RemoteFileItem::RemoteFileItem(RemoteFileItem * rowLeader) : QStandardItem()
@@ -86,7 +87,7 @@ FileNodeRef RemoteFileItem::getFile()
 bool RemoteFileItem::parentOfPlaceholder()
 {
     if (!getRowHeader()->hasChildren()) return false;
-    RemoteFileItem * nodeToCheck = qobject_cast<RemoteFileItem *>(getRowHeader()->child(0,0));
+    RemoteFileItem * nodeToCheck = (RemoteFileItem *)(getRowHeader()->child(0,0));
     if (nodeToCheck == NULL) return false;
     if (nodeToCheck->myFile.isNil()) return true;
     return false;

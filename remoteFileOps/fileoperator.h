@@ -67,7 +67,6 @@ class FileOperator : public QObject
 public:
     FileOperator(AgaveSetupDriver * parent);
     ~FileOperator();
-    void linkToFileTree(RemoteFileTree * newTreeLink);
 
     void resetFileData();
 
@@ -161,16 +160,9 @@ private:
     bool sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString localFile);
 
     FileTreeNode * rootFileNode = NULL;
-    QStandardItemModel dataStore;
 
     EasyBoolLock * fileOpPending;
     FileTreeNode * rememberTargetFile;
-
-    const int tableNumCols = 7;
-    const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed",
-                                   "Format","mimeType","Permissions"};
-    const QStringList hiddenHeaderLabelList = {"name","type","length","lastModified",
-                                   "format","mimeType","permissions"};
 
     EasyBoolLock * recursivefileOpPending;
     QDir recursiveLocalHead;

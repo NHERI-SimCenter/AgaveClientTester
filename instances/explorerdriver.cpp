@@ -72,7 +72,7 @@ void ExplorerDriver::startup()
     authWindow->show();
     QObject::connect(authWindow->windowHandle(),SIGNAL(visibleChanged(bool)),this, SLOT(subWindowHidden(bool)));
 
-    mainWindow = new ExplorerWindow(this);
+    mainWindow = new ExplorerWindow();
 }
 
 void ExplorerDriver::closeAuthScreen()

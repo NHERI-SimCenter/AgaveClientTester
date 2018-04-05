@@ -43,19 +43,18 @@
 #include "remoteFileOps/fileoperator.h"
 #include "remoteFileOps/joboperator.h"
 
+#include "../remoteModelViews/remotefilemodel.h"
+
 #include "../utilFuncs/singlelinedialog.h"
 
 #include "explorerdriver.h"
 #include "../ae_globals.h"
 
-ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
+ExplorerWindow::ExplorerWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ExplorerWindow)
 {
     ui->setupUi(this);
-
-    programDriver = theDriver;
-    dataLink = programDriver->getDataConnection();
 
     agaveParamLists.insert("compress",{"compression_type"});
     agaveParamLists.insert("extract", {});
@@ -65,6 +64,9 @@ ExplorerWindow::ExplorerWindow(ExplorerDriver *theDriver, QWidget *parent) :
         taskListModel.appendRow(new QStandardItem(*itr));
     }
     ui->agaveAppList->setModel(&taskListModel);
+
+    theFileModel.linkRemoteFileTreeToModel(ui->remoteFileView);
+    ui->remoteFileView->setupFileView();
 
     ui->selectedFileLabel->connectFileTreeWidget(ui->remoteFileView);
     ui->selectedFileInfo->connectFileTreeWidget(ui->remoteFileView);
@@ -77,23 +79,20 @@ ExplorerWindow::~ExplorerWindow()
 
 void ExplorerWindow::startAndShow()
 {
-    theFileOperator = programDriver->getFileHandler();
     ui->remoteFileView->setupFileView();
     QObject::connect(ui->remoteFileView, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(customFileMenu(QPoint)));
-    QObject::connect(programDriver->getFileHandler(), SIGNAL(recursiveProcessFinished(bool,QString)),
-                     this, SLOT(recursiveProcessPopup(bool,QString)));
 
     ui->agaveAppList->setModel(&taskListModel);
     QObject::connect(ui->jobTable, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(jobRightClickMenu(QPoint)));
 
     //Note: Adding widget to header will re-parent them
-    QLabel * username = new QLabel(programDriver->getDataConnection()->getUserName());
+    QLabel * username = new QLabel(ae_globals::get_connection()->getUserName());
     ui->header->appendWidget(username);
 
     QPushButton * logoutButton = new QPushButton("Logout");
-    QObject::connect(logoutButton, SIGNAL(clicked(bool)), programDriver, SLOT(shutdown()));
+    QObject::connect(logoutButton, SIGNAL(clicked(bool)), ae_globals::get_Driver(), SLOT(shutdown()));
     ui->header->appendWidget(logoutButton);
     this->show();
 }
@@ -175,7 +174,7 @@ void ExplorerWindow::agaveCommandInvoked()
         }
     }
 
-    RemoteDataReply * theTask = dataLink->runRemoteJob(selectedAgaveApp,allInputs,workingDir);
+    RemoteDataReply * theTask = ae_globals::get_connection()->runRemoteJob(selectedAgaveApp,allInputs,workingDir);
     if (theTask == NULL)
     {
         qDebug("Unable to invoke task");
@@ -189,7 +188,7 @@ void ExplorerWindow::agaveCommandInvoked()
 void ExplorerWindow::finishedAppInvoke(RequestState, QJsonDocument *)
 {
     waitingOnCommand = false;
-    programDriver->getJobHandler()->demandJobDataRefresh();
+    ae_globals::get_job_handle()->demandJobDataRefresh();
 }
 
 void ExplorerWindow::customFileMenu(QPoint pos)
@@ -387,27 +386,12 @@ void ExplorerWindow::refreshMenuItem()
 
 void ExplorerWindow::jobRightClickMenu(QPoint)
 {
-    if (programDriver->getJobHandler() == NULL)
+    if (ae_globals::get_job_handle() == NULL)
     {
         return;
     }
     QMenu jobMenu;
 
-    jobMenu.addAction("Refresh Job Info", programDriver->getJobHandler(), SLOT(demandJobDataRefresh()));
+    jobMenu.addAction("Refresh Job Info", ae_globals::get_job_handle(), SLOT(demandJobDataRefresh()));
     jobMenu.exec(QCursor::pos());
-}
-
-void ExplorerWindow::recursiveProcessPopup(bool success, QString message)
-{
-    QMessageBox dataPopup;
-    if (success)
-    {
-        dataPopup.setIcon(QMessageBox::Information);
-    }
-    else
-    {
-        dataPopup.setIcon(QMessageBox::Critical);
-    }
-    dataPopup.setText(message);
-    dataPopup.exec();
 }
