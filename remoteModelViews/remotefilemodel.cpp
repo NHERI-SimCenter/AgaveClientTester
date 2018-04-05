@@ -40,7 +40,7 @@
 #include "../remoteFileOps/filenoderef.h"
 #include "../remoteFileOps/fileoperator.h"
 #include "../remoteFileOps/filetreenode.h"
-#include "ae_globals.h"
+#include "../ae_globals.h"
 
 RemoteFileModel::RemoteFileModel() : QObject()
 {
@@ -121,7 +121,14 @@ void RemoteFileModel::purgeItem(FileNodeRef toRemove)
 
     parentItem->removeRow(targetItem->row());
     if (parentItem->hasChildren()) return;
-    parentItem->appendRow(new RemoteFileItem(true));
+    if (parentItem->getFile().getNodeState() == NodeState::FOLDER_CONTENTS_LOADED)
+    {
+        parentItem->appendRow(new RemoteFileItem(false));
+    }
+    else
+    {
+        parentItem->appendRow(new RemoteFileItem(true));
+    }
 }
 
 void RemoteFileModel::updateItem(FileNodeRef toUpdate, bool folderContentsLoaded)
