@@ -54,6 +54,8 @@ RemoteFileModel::RemoteFileModel() : QObject()
 void RemoteFileModel::linkRemoteFileTreeToModel(RemoteFileTree * theTree)
 {
     theTree->setModel(&theModel);
+    theTree->header()->resizeSection(0,350);
+    theTree->header()->resizeSection(1,40);
 }
 
 void RemoteFileModel::newFileData(FileNodeRef newFileData)

@@ -39,6 +39,7 @@
 #include <QObject>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QHeaderView>
 
 #include "../AgaveExplorer/remoteFileOps/filenoderef.h"
 
@@ -76,8 +77,8 @@ private:
     //const int tableNumCols = 7;
     //const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed",
     //                               "Format","mimeType","Permissions"};
-    const int tableNumCols = 4;
-    const QStringList shownHeaderLabelList = {"File Name","Type","Size","Last Changed"};
+    const int tableNumCols = 3;
+    const QStringList shownHeaderLabelList = {"File Name","Type","Size"};
 };
 
 #endif // REMOTEFILEMODEL_H

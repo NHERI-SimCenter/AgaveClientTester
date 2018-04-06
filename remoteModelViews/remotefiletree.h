@@ -62,7 +62,6 @@ public:
     explicit RemoteFileTree(QWidget *parent = 0);
 
     FileNodeRef getSelectedFile();
-    void setupFileView();
 
 signals:
     void newFileSelected(FileNodeRef newFileData);

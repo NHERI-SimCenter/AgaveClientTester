@@ -66,18 +66,6 @@ FileNodeRef RemoteFileTree::getSelectedFile()
     return retNode->getFile();
 }
 
-void RemoteFileTree::setupFileView()
-{
-    FileNodeRef fail;
-    emit newFileSelected(fail);
-    //TODO: reconsider needed columns
-    this->hideColumn((int)FileColumn::MIME_TYPE);
-    this->hideColumn((int)FileColumn::PERMISSIONS);
-    this->hideColumn((int)FileColumn::FORMAT);
-    this->hideColumn((int)FileColumn::LAST_CHANGED);
-    //TODO: Adjust column size defaults;
-}
-
 void RemoteFileTree::folderExpanded(QModelIndex fileIndex)
 {
     fileEntryTouched(fileIndex);
