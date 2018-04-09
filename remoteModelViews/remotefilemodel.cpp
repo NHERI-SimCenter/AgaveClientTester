@@ -54,8 +54,17 @@ RemoteFileModel::RemoteFileModel() : QObject()
 void RemoteFileModel::linkRemoteFileTreeToModel(RemoteFileTree * theTree)
 {
     theTree->setModel(&theModel);
+    theTree->setModelLink(this);
     theTree->header()->resizeSection(0,350);
     theTree->header()->resizeSection(1,40);
+}
+
+RemoteFileItem * RemoteFileModel::getItemByFile(FileNodeRef toFind)
+{
+    RemoteFileItem * parentNode = findParentItem(toFind);
+    if (parentNode == NULL) return NULL;
+    RemoteFileItem * nodeToFind = findTargetItem(parentNode, toFind);
+    return nodeToFind;
 }
 
 void RemoteFileModel::newFileData(FileNodeRef newFileData)

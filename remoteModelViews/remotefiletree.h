@@ -52,6 +52,7 @@ enum class FileColumn : int {FILENAME = 0,
                              PERMISSIONS = 6};
 
 class RemoteFileItem;
+class RemoteFileModel;
 enum class RequestState;
 
 class RemoteFileTree : public QTreeView
@@ -62,6 +63,8 @@ public:
     explicit RemoteFileTree(QWidget *parent = 0);
 
     FileNodeRef getSelectedFile();
+    void selectRowByFile(FileNodeRef toSelect);
+    void setModelLink(RemoteFileModel * theModel);
 
 signals:
     void newFileSelected(FileNodeRef newFileData);
@@ -75,6 +78,8 @@ private slots:
 
 private:
     void selectRowByItem(QStandardItem *linkedItem);
+
+    RemoteFileModel * myModel = NULL;
 };
 
 #endif // REMOTEFILEWINDOW_H

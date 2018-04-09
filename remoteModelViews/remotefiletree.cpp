@@ -36,6 +36,7 @@
 #include "remotefiletree.h"
 
 #include "remotefileitem.h"
+#include "remotefilemodel.h"
 #include "../remoteFileOps/fileoperator.h"
 #include "../remoteFileOps/filetreenode.h"
 #include "../remoteFileOps/filenoderef.h"
@@ -64,6 +65,25 @@ FileNodeRef RemoteFileTree::getSelectedFile()
     RemoteFileItem * retNode = (RemoteFileItem *)(theItem);
     if (retNode == NULL) return fail;
     return retNode->getFile();
+}
+
+void RemoteFileTree::selectRowByFile(FileNodeRef toSelect)
+{
+    if (toSelect.getFullPath() == getSelectedFile().getFullPath()) return;
+
+    RemoteFileItem * nodeToFind = myModel->getItemByFile(toSelect);
+    if (nodeToFind == NULL)
+    {
+        clearSelection();
+        return;
+    }
+
+    selectRowByItem(nodeToFind);
+}
+
+void RemoteFileTree::setModelLink(RemoteFileModel * theModel)
+{
+    myModel = theModel;
 }
 
 void RemoteFileTree::folderExpanded(QModelIndex fileIndex)

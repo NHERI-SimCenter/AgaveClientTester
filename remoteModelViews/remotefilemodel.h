@@ -51,9 +51,15 @@ class RemoteFileTree;
 class RemoteFileModel : public QObject
 {
     Q_OBJECT
+
+    friend class RemoteFileTree;
+
 public:
     RemoteFileModel();
     void linkRemoteFileTreeToModel(RemoteFileTree * theTree);
+
+protected:
+    RemoteFileItem * getItemByFile(FileNodeRef toFind);
 
 private slots:
     void newFileData(FileNodeRef newFileData);
