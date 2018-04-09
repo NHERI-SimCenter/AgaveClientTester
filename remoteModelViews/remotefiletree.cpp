@@ -84,6 +84,9 @@ void RemoteFileTree::selectRowByFile(FileNodeRef toSelect)
 void RemoteFileTree::setModelLink(RemoteFileModel * theModel)
 {
     myModel = theModel;
+    setModel(theModel->getRawModel());
+    header()->resizeSection(0,350);
+    header()->resizeSection(1,40);
 }
 
 void RemoteFileTree::folderExpanded(QModelIndex fileIndex)

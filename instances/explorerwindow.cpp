@@ -65,8 +65,7 @@ ExplorerWindow::ExplorerWindow(QWidget *parent) :
     }
     ui->agaveAppList->setModel(&taskListModel);
 
-    theFileModel.linkRemoteFileTreeToModel(ui->remoteFileView);
-    ui->remoteFileView->setupFileView();
+    ui->remoteFileView->setModelLink(&theFileModel);
 
     ui->selectedFileLabel->connectFileTreeWidget(ui->remoteFileView);
     ui->selectedFileInfo->connectFileTreeWidget(ui->remoteFileView);
@@ -79,7 +78,6 @@ ExplorerWindow::~ExplorerWindow()
 
 void ExplorerWindow::startAndShow()
 {
-    ui->remoteFileView->setupFileView();
     QObject::connect(ui->remoteFileView, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(customFileMenu(QPoint)));
 

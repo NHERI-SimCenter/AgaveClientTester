@@ -56,10 +56,10 @@ class RemoteFileModel : public QObject
 
 public:
     RemoteFileModel();
-    void linkRemoteFileTreeToModel(RemoteFileTree * theTree);
 
 protected:
     RemoteFileItem * getItemByFile(FileNodeRef toFind);
+    QStandardItemModel * getRawModel();
 
 private slots:
     void newFileData(FileNodeRef newFileData);
