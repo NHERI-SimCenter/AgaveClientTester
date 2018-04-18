@@ -179,11 +179,11 @@ void ExplorerWindow::agaveCommandInvoked()
         return;
     }
     waitingOnCommand = true;
-    QObject::connect(theTask, SIGNAL(haveJobReply(RequestState,QJsonDocument*)),
-                     this, SLOT(finishedAppInvoke(RequestState,QJsonDocument*)));
+    QObject::connect(theTask, SIGNAL(haveJobReply(RequestState,QJsonDocument)),
+                     this, SLOT(finishedAppInvoke(RequestState,QJsonDocument)));
 }
 
-void ExplorerWindow::finishedAppInvoke(RequestState, QJsonDocument *)
+void ExplorerWindow::finishedAppInvoke(RequestState, QJsonDocument)
 {
     waitingOnCommand = false;
     ae_globals::get_job_handle()->demandJobDataRefresh();

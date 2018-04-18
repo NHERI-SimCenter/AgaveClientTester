@@ -39,6 +39,7 @@
 #include <QObject>
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QJsonDocument>
 
 #include <QFile>
 #include <QDir>
@@ -128,20 +129,20 @@ protected:
 
 private slots:
     void getDeleteReply(RequestState replyState);
-    void getMoveReply(RequestState replyState, FileMetaData * revisedFileData);
-    void getCopyReply(RequestState replyState, FileMetaData * newFileData);
-    void getRenameReply(RequestState replyState, FileMetaData * newFileData);
+    void getMoveReply(RequestState replyState, FileMetaData revisedFileData);
+    void getCopyReply(RequestState replyState, FileMetaData newFileData);
+    void getRenameReply(RequestState replyState, FileMetaData newFileData);
 
-    void getMkdirReply(RequestState replyState, FileMetaData * newFolderData);
+    void getMkdirReply(RequestState replyState, FileMetaData newFolderData);
 
-    void getUploadReply(RequestState replyState, FileMetaData * newFileData);
+    void getUploadReply(RequestState replyState, FileMetaData newFileData);
     void getDownloadReply(RequestState replyState);
 
-    void getCompressReply(RequestState finalState, QJsonDocument * rawData);
-    void getDecompressReply(RequestState finalState, QJsonDocument * rawData);
+    void getCompressReply(RequestState finalState, QJsonDocument rawData);
+    void getDecompressReply(RequestState finalState, QJsonDocument rawData);
 
-    void getRecursiveUploadReply(RequestState replyState, FileMetaData * newFileData);
-    void getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData);
+    void getRecursiveUploadReply(RequestState replyState, FileMetaData newFileData);
+    void getRecursiveMkdirReply(RequestState replyState, FileMetaData newFolderData);
 
 private:
     FileTreeNode * getFileNodeFromNodeRef(const FileNodeRef &thedata, bool verifyTimestamp = true);

@@ -127,7 +127,7 @@ void ae_globals::set_Driver(AgaveSetupDriver * newDriver)
     theDriver = newDriver;
 }
 
-RemoteDataInterface * ae_globals::get_connection()
+RemoteDataThread * ae_globals::get_connection()
 {
     if (theDriver == NULL) return NULL;
     return theDriver->getDataConnection();

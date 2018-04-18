@@ -40,6 +40,7 @@
 #include <QStandardItemModel>
 #include <QLineEdit>
 #include <QMenu>
+#include <QJsonDocument>
 
 #include "../AgaveExplorer/remoteFileOps/filenoderef.h"
 #include "../AgaveExplorer/remoteModelViews/remotefilemodel.h"
@@ -73,7 +74,7 @@ private slots:
     void agaveAppSelected(QModelIndex clickedItem);
 
     void agaveCommandInvoked();
-    void finishedAppInvoke(RequestState finalState, QJsonDocument * rawReply);
+    void finishedAppInvoke(RequestState finalState, QJsonDocument rawReply);
 
     void customFileMenu(QPoint pos);
 

@@ -195,19 +195,19 @@ void FileOperator::sendMoveReq(const FileNodeRef &moveFrom, QString newName)
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData*)),
-                     this, SLOT(getMoveReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData)),
+                     this, SLOT(getMoveReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
-void FileOperator::getMoveReply(RequestState replyState, FileMetaData * revisedFileData)
+void FileOperator::getMoveReply(RequestState replyState, FileMetaData revisedFileData)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
         lsClosestNodeToParent(getStringFromInitParams("from"));
-        lsClosestNode(revisedFileData->getFullPath());
+        lsClosestNode(revisedFileData.getFullPath());
     }
 
     emit fileOpDone(replyState, "Move Enacted");
@@ -230,18 +230,18 @@ void FileOperator::sendCopyReq(const FileNodeRef &copyFrom, QString newName)
         //TODO: Better error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveCopyReply(RequestState,FileMetaData*)),
-                     this, SLOT(getCopyReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveCopyReply(RequestState,FileMetaData)),
+                     this, SLOT(getCopyReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
-void FileOperator::getCopyReply(RequestState replyState, FileMetaData * newFileData)
+void FileOperator::getCopyReply(RequestState replyState, FileMetaData newFileData)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
-        lsClosestNode(newFileData->getFullPath());
+        lsClosestNode(newFileData.getFullPath());
     }
 
     emit fileOpDone(replyState, "Copy Enacted");
@@ -262,19 +262,19 @@ void FileOperator::sendRenameReq(const FileNodeRef &selectedNode, QString newNam
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData*)),
-                     this, SLOT(getRenameReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData)),
+                     this, SLOT(getRenameReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
-void FileOperator::getRenameReply(RequestState replyState, FileMetaData * newFileData)
+void FileOperator::getRenameReply(RequestState replyState, FileMetaData newFileData)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
         lsClosestNodeToParent(getStringFromInitParams("fullName"));
-        lsClosestNodeToParent(newFileData->getFullPath());
+        lsClosestNodeToParent(newFileData.getFullPath());
     }
 
     emit fileOpDone(replyState, "Rename enacted");
@@ -295,18 +295,18 @@ void FileOperator::sendCreateFolderReq(const FileNodeRef &selectedNode, QString 
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveMkdirReply(RequestState,FileMetaData*)),
-                     this, SLOT(getMkdirReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveMkdirReply(RequestState,FileMetaData)),
+                     this, SLOT(getMkdirReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
-void FileOperator::getMkdirReply(RequestState replyState, FileMetaData * newFolderData)
+void FileOperator::getMkdirReply(RequestState replyState, FileMetaData newFolderData)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
-        lsClosestNode(newFolderData->getContainingPath());
+        lsClosestNode(newFolderData.getContainingPath());
     }
 
     emit fileOpDone(replyState, "mkdir enacted");
@@ -325,8 +325,8 @@ void FileOperator::sendUploadReq(const FileNodeRef &uploadTarget, QString localF
         fileOpPending->release();
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
-                     this, SLOT(getUploadReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData)),
+                     this, SLOT(getUploadReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
@@ -341,18 +341,18 @@ void FileOperator::sendUploadBuffReq(const FileNodeRef &uploadTarget, QByteArray
         fileOpPending->release();
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
-                     this, SLOT(getUploadReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData)),
+                     this, SLOT(getUploadReply(RequestState,FileMetaData)));
     emit fileOpStarted();
 }
 
-void FileOperator::getUploadReply(RequestState replyState, FileMetaData * newFileData)
+void FileOperator::getUploadReply(RequestState replyState, FileMetaData newFileData)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
-        lsClosestNodeToParent(newFileData->getFullPath());
+        lsClosestNodeToParent(newFileData.getFullPath());
     }
 
     emit fileOpDone(replyState, "upload enacted");
@@ -572,12 +572,12 @@ void FileOperator::sendCompressReq(const FileNodeRef &selectedFolder)
         //TODO: give reasonable error
         return;
     }
-    QObject::connect(compressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument*)),
-                     this, SLOT(getCompressReply(RequestState,QJsonDocument*)));
+    QObject::connect(compressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument)),
+                     this, SLOT(getCompressReply(RequestState,QJsonDocument)));
     emit fileOpStarted();
 }
 
-void FileOperator::getCompressReply(RequestState finalState, QJsonDocument *)
+void FileOperator::getCompressReply(RequestState finalState, QJsonDocument)
 {
     fileOpPending->release();
 
@@ -612,12 +612,12 @@ void FileOperator::sendDecompressReq(const FileNodeRef &selectedFolder)
         //TODO: give reasonable error
         return;
     }
-    QObject::connect(decompressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument*)),
-                     this, SLOT(getDecompressReply(RequestState,QJsonDocument*)));
+    QObject::connect(decompressTask, SIGNAL(haveJobReply(RequestState,QJsonDocument)),
+                     this, SLOT(getDecompressReply(RequestState,QJsonDocument)));
     emit fileOpStarted();
 }
 
-void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument *)
+void FileOperator::getDecompressReply(RequestState finalState, QJsonDocument)
 {
     fileOpPending->release();
 
@@ -644,7 +644,7 @@ void FileOperator::fileNodesChange(FileNodeRef changedFile)
     }
 }
 
-void FileOperator::getRecursiveUploadReply(RequestState replyState, FileMetaData * newFileData)
+void FileOperator::getRecursiveUploadReply(RequestState replyState, FileMetaData newFileData)
 {
     recursivefileOpPending->release();
 
@@ -663,10 +663,10 @@ void FileOperator::getRecursiveUploadReply(RequestState replyState, FileMetaData
         fileOpDone(RequestState::FAIL, "ERROR: Folder upload failed to upload file.");
         return;
     }
-    lsClosestNodeToParent(newFileData->getFullPath());
+    lsClosestNodeToParent(newFileData.getFullPath());
 }
 
-void FileOperator::getRecursiveMkdirReply(RequestState replyState, FileMetaData * newFolderData)
+void FileOperator::getRecursiveMkdirReply(RequestState replyState, FileMetaData newFolderData)
 {
     recursivefileOpPending->release();
 
@@ -685,7 +685,7 @@ void FileOperator::getRecursiveMkdirReply(RequestState replyState, FileMetaData 
         fileOpDone(RequestState::FAIL, "ERROR: Folder upload failed to create new remote folder.");
         return;
     }
-    lsClosestNode(newFolderData->getContainingPath());
+    lsClosestNode(newFolderData.getContainingPath());
 }
 
 void FileOperator::lsClosestNode(QString fullPath, bool clearData)
@@ -1143,8 +1143,8 @@ bool FileOperator::sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QSt
         recursivefileOpPending->release();
         return false;
     }
-    QObject::connect(theReply, SIGNAL(haveMkdirReply(RequestState,FileMetaData*)),
-                     this, SLOT(getRecursiveMkdirReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveMkdirReply(RequestState,FileMetaData)),
+                     this, SLOT(getRecursiveMkdirReply(RequestState,FileMetaData)));
     return true;
 }
 
@@ -1159,7 +1159,7 @@ bool FileOperator::sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString l
         recursivefileOpPending->release();
         return false;
     }
-    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData*)),
-                     this, SLOT(getRecursiveUploadReply(RequestState,FileMetaData*)));
+    QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData)),
+                     this, SLOT(getRecursiveUploadReply(RequestState,FileMetaData)));
     return true;
 }

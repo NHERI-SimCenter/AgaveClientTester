@@ -181,8 +181,8 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask)
         QObject::disconnect(lsTask, 0, this, 0);
     }
     lsTask = newTask;
-    QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>*)),
-                     this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>*)));
+    QObject::connect(lsTask, SIGNAL(haveLSReply(RequestState,QList<FileMetaData>)),
+                     this, SLOT(deliverLSdata(RequestState,QList<FileMetaData>)));
     recomputeNodeState();
 }
 
@@ -203,8 +203,8 @@ void FileTreeNode::setBuffTask(RemoteDataReply * newTask)
         QObject::disconnect(bufferTask, 0, this, 0);
     }
     bufferTask = newTask;
-    QObject::connect(bufferTask, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray*)),
-                     this, SLOT(deliverBuffData(RequestState,QByteArray*)));
+    QObject::connect(bufferTask, SIGNAL(haveBufferDownloadReply(RequestState,QByteArray)),
+                     this, SLOT(deliverBuffData(RequestState,QByteArray)));
     recomputeNodeState();
 }
 
@@ -252,21 +252,18 @@ bool FileTreeNode::isChildOf(FileTreeNode * possibleParent)
     return false;
 }
 
-void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList)
+void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData> dataList)
 {
-    if (lsTask == sender())
-    {
-        lsTask = NULL;
-    }
+    lsTask = NULL;
     if (taskState == RequestState::GOOD)
     {
-        if (verifyControlNode(dataList) == false)
+        if (verifyControlNode(&dataList) == false)
         {
             qDebug("ERROR: File tree data/node mismatch");
             recomputeNodeState();
             return;
         }
-        this->updateFileNodeData(dataList);
+        this->updateFileNodeData(&dataList);
         return;
     }
 
@@ -274,7 +271,7 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
     {
         ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
     }
-    else if (taskState == RequestState::FAIL)
+    else if (taskState == RequestState::FAIL) //TODO: check this, some failures do not imply the file does not exist
     {
         if (!nodeVisible)
         {
@@ -285,20 +282,24 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData>* da
     recomputeNodeState();
 }
 
-void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray * bufferData)
+void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray bufferData)
 {
-    if (bufferTask == QObject::sender())
-    {
-        bufferTask = NULL;
-    }
+    bufferTask = NULL;
     if (taskState == RequestState::GOOD)
     {
         qDebug("Download of buffer complete: %s", qPrintable(fileData.getFullPath()));
-        setFileBuffer(bufferData);
+        if (bufferData.isNull())
+        {
+            setFileBuffer(NULL);
+        }
+        else
+        {
+            setFileBuffer(&bufferData);
+        }
         return;
     }
 
-    if (taskState == RequestState::FAIL)
+    if (taskState == RequestState::FAIL)//TODO: check this, some failures do not imply the file does not exist
     {
         if (!nodeVisible)
         {

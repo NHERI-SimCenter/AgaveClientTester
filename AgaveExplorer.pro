@@ -69,7 +69,8 @@ SOURCES += main.cpp \
     remoteModelViews/remotefiletree.cpp \
     remoteModelViews/remotejoblister.cpp \
     remoteModelViews/selectedfilelabel.cpp \
-    remoteModelViews/remotefileitem.cpp
+    remoteModelViews/remotefileitem.cpp \
+    ../AgaveClientInterface/agaveInterfaces/agavethread.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -110,7 +111,8 @@ HEADERS += \
     remoteModelViews/remotefiletree.h \
     remoteModelViews/remotejoblister.h \
     remoteModelViews/selectedfilelabel.h \
-    remoteModelViews/remotefileitem.h
+    remoteModelViews/remotefileitem.h \
+    ../AgaveClientInterface/agaveInterfaces/agavethread.h
 
 FORMS += \
     instances/explorerwindow.ui \

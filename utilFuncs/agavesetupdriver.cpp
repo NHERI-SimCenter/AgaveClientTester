@@ -49,6 +49,10 @@ AgaveSetupDriver::AgaveSetupDriver(QObject *parent, bool debug) : QObject(parent
 
     qRegisterMetaType<RequestState>("RequestState");
     qRegisterMetaType<FileNodeRef>("FileNodeRef");
+    qRegisterMetaType<FileMetaData>("FileMetaData");
+    qRegisterMetaType<RemoteJobData>("RemoteJobData");
+    qRegisterMetaType<QList<FileMetaData>>("QList<FileMetaData>");
+    qRegisterMetaType<QList<RemoteJobData>>("QList<RemoteJobData>");
 }
 
 AgaveSetupDriver::~AgaveSetupDriver()
@@ -58,12 +62,16 @@ AgaveSetupDriver::~AgaveSetupDriver()
     if (myJobHandle != NULL) delete myJobHandle;
     if (myFileHandle != NULL) delete myFileHandle;
 
-    if (theConnector != NULL) delete theConnector;
+    if (theConnectThread != NULL)
+    {
+        theConnectThread->quit();
+        theConnectThread->wait();
+    }
 }
 
-RemoteDataInterface * AgaveSetupDriver::getDataConnection()
+RemoteDataThread * AgaveSetupDriver::getDataConnection()
 {
-    return theConnector;
+    return theConnectThread;
 }
 
 JobOperator * AgaveSetupDriver::getJobHandler()
@@ -110,9 +118,9 @@ void AgaveSetupDriver::shutdown()
     }
     doingShutdown = true;
     qDebug("Beginning graceful shutdown.");
-    if (theConnector != NULL)
+    if (theConnectThread != NULL)
     {
-        RemoteDataReply * revokeTask = theConnector->closeAllConnections();
+        RemoteDataReply * revokeTask = theConnectThread->closeAllConnections();
         if (revokeTask != NULL)
         {
             QObject::connect(revokeTask, SIGNAL(connectionsClosed(RequestState)), this, SLOT(shutdownCallback()));

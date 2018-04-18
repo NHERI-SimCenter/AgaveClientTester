@@ -62,7 +62,7 @@ public:
     void setDetailTask(RemoteDataReply * newTask);
 
 private slots:
-    void deliverJobDetails(RequestState taskState, RemoteJobData * fullJobData);
+    void deliverJobDetails(RequestState taskState, RemoteJobData fullJobData);
 
 private:
     QStandardItemModel * myModel = NULL;

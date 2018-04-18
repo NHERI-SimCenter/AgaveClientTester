@@ -40,7 +40,7 @@
 
 enum class RequestState;
 class AgaveSetupDriver;
-class RemoteDataInterface;
+class RemoteDataThread;
 
 namespace Ui {
 class AuthForm;
@@ -62,7 +62,7 @@ private slots:
 
 private:
     Ui::AuthForm *ui;
-    RemoteDataInterface * theConnection;
+    RemoteDataThread * theConnection;
     AgaveSetupDriver * myDriver;
 
     bool authInProgress = false;

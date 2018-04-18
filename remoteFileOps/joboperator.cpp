@@ -60,13 +60,10 @@ void JobOperator::linkToJobLister(RemoteJobLister * newLister)
     newLister->setModel(&theJobList);
 }
 
-void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> * theData)
+void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJobData> theData)
 {
-    if (QObject::sender() == currentJobReply)
-    {
-        //Note: RemoteDataReply destroys itself after signal
-        currentJobReply = NULL;
-    }
+    //Note: RemoteDataReply destroys itself after signal
+    currentJobReply = NULL;
     if (replyState != RequestState::GOOD)
     {
         ae_globals::displayPopup("Error: unable to list jobs. Please check your network connection and try again.", "Network Error:");
@@ -76,7 +73,7 @@ void JobOperator::refreshRunningJobList(RequestState replyState, QList<RemoteJob
 
     bool notDone = false;
 
-    for (auto itr = theData->rbegin(); itr != theData->rend(); itr++)
+    for (auto itr = theData.rbegin(); itr != theData.rend(); itr++)
     {
         if (jobData.contains((*itr).getID()))
         {
@@ -154,6 +151,6 @@ void JobOperator::demandJobDataRefresh()
         return;
     }
     currentJobReply = ae_globals::get_connection()->getListOfJobs();
-    QObject::connect(currentJobReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>*)),
-                     this, SLOT(refreshRunningJobList(RequestState,QList<RemoteJobData>*)));
+    QObject::connect(currentJobReply, SIGNAL(haveJobList(RequestState,QList<RemoteJobData>)),
+                     this, SLOT(refreshRunningJobList(RequestState,QList<RemoteJobData>)));
 }

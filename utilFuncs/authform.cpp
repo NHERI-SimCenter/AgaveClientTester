@@ -94,6 +94,7 @@ void AuthForm::performAuth()
     if (authReply == NULL)
     {
         myDriver->fatalInterfaceError("Unable to connect to DesignSafe. Please check internet connection.");
+        return;
     }
     this->setCursor(QCursor(Qt::WaitCursor));
 

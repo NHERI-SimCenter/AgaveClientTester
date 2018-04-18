@@ -93,8 +93,8 @@ public:
     bool isChildOf(FileTreeNode * possibleParent);
 
 private slots:
-    void deliverLSdata(RequestState taskState, QList<FileMetaData>* dataList);
-    void deliverBuffData(RequestState taskState, QByteArray * bufferData);
+    void deliverLSdata(RequestState taskState, QList<FileMetaData> dataList);
+    void deliverBuffData(RequestState taskState, QByteArray bufferData);
 
 private:
     void slateNodeForDelete();
