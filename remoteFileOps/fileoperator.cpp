@@ -174,6 +174,12 @@ void FileOperator::getDeleteReply(RequestState replyState)
 {
     fileOpPending->release();
 
+    if (replyState != RequestState::GOOD)
+    {
+        ae_globals::displayPopup("Unable to delete file. Please check connection and try again.");
+        return;
+    }
+
     lsClosestNodeToParent(getStringFromInitParams("toDelete"));
     emit fileOpDone(replyState, "Delete enacted");
 }
