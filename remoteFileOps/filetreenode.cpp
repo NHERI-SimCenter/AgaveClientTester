@@ -267,11 +267,7 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData> dat
         return;
     }
 
-    if (taskState == RequestState::NO_CONNECT)
-    {
-        ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
-    }
-    else if (taskState == RequestState::FAIL) //TODO: check this, some failures do not imply the file does not exist
+    if (taskState == RequestState::FILE_NOT_FOUND)
     {
         if (!nodeVisible)
         {
@@ -279,6 +275,11 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData> dat
             return;
         }
     }
+    else
+    {
+        ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
+    }
+
     recomputeNodeState();
 }
 
@@ -299,7 +300,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray bufferData
         return;
     }
 
-    if (taskState == RequestState::FAIL)//TODO: check this, some failures do not imply the file does not exist
+    if (taskState == RequestState::FILE_NOT_FOUND)
     {
         if (!nodeVisible)
         {
@@ -307,7 +308,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray bufferData
             return;
         }
     }
-    else if (taskState == RequestState::NO_CONNECT)
+    else
     {
         ae_globals::displayPopup("Unable to connect to DesignSafe file server. If this problem persists, please contact DesignDafe.", "Connection Issue");
     }

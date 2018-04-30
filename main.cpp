@@ -40,6 +40,7 @@
 
 #include "instances/explorerdriver.h"
 #include "../AgaveClientInterface/remotedatainterface.h"
+#include "ae_globals.h"
 
 void emptyMessageHandler(QtMsgType, const QMessageLogContext &, const QString &){}
 
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     QFile simCenterStyle(":/styleCommon/style.qss");
     if (!simCenterStyle.open(QFile::ReadOnly))
     {
-        programDriver.fatalInterfaceError("Missing file for graphics style. Your install is probably corrupted.");
+        ae_globals::displayFatalPopup("Missing file for graphics style. Your install is probably corrupted.");
     }
     QString commonStyle = QLatin1String(simCenterStyle.readAll());
 
@@ -84,7 +85,7 @@ int main(int argc, char *argv[])
 
     if (QSslSocket::supportsSsl() == false)
     {
-        programDriver.fatalInterfaceError("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
+        ae_globals::displayFatalPopup("SSL support was not detected on this computer.\nPlease insure that some version of SSL is installed,\n such as by installing OpenSSL.\nInstalling a web browser will probably also work.");
     }
 
     if (debugLoggingEnabled && logRawOutput)

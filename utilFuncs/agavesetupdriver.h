@@ -75,7 +75,6 @@ private slots:
 
 public slots:
     void shutdown();
-    void fatalInterfaceError(QString errText);
 
 protected:
     RemoteDataThread * theConnectThread = NULL;

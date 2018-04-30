@@ -97,11 +97,6 @@ void AgaveSetupDriver::getAuthReply(RequestState authReply)
     }
 }
 
-void AgaveSetupDriver::fatalInterfaceError(QString errText)
-{
-    ae_globals::displayFatalPopup(errText);
-}
-
 void AgaveSetupDriver::subWindowHidden(bool nowVisible)
 {
     if (nowVisible == false)

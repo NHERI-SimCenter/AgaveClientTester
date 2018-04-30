@@ -60,8 +60,6 @@ ExplorerDriver::ExplorerDriver(QObject *parent, bool debug) : AgaveSetupDriver(p
     tmpHandle->registerAgaveAppInfo("cwe-serial", "cwe-serial-0.1.0", {"stage"}, {"file_input", "directory"}, "directory");
     tmpHandle->registerAgaveAppInfo("cwe-parallel", "cwe-parallel-0.1.0", {"stage"}, {"file_input", "directory"}, "directory");
 
-    QObject::connect(tmpHandle, SIGNAL(sendFatalErrorMessage(QString)), this, SLOT(fatalInterfaceError(QString)));
-
     theConnectThread = tmpHandle;
 }
 
@@ -86,7 +84,7 @@ void ExplorerDriver::closeAuthScreen()
 {
     if (mainWindow == NULL)
     {
-        fatalInterfaceError("Fatal Error in window system: No Main Window");
+        ae_globals::displayFatalPopup("Fatal Error in window system: No Main Window");
         return;
     }
 

@@ -87,24 +87,6 @@ FileTreeNode * FileOperator::getFileNodeFromNodeRef(const FileNodeRef &thedata, 
     return ret;
 }
 
-QString FileOperator::getStringFromInitParams(QString stringKey)
-{
-    QString ret;
-    RemoteDataReply * theReply = qobject_cast<RemoteDataReply *> (QObject::sender());
-    if (theReply == NULL)
-    {
-        ae_globals::displayFatalPopup("Unable to get sender object of reply signal");
-        return ret;
-    }
-    ret = theReply->getTaskParamList()->value(stringKey);
-    if (ret.isEmpty())
-    {
-        ae_globals::displayFatalPopup("Missing init param");
-        return ret;
-    }
-    return ret;
-}
-
 void FileOperator::enactRootRefresh()
 {
     qDebug("Enacting refresh of root.");
@@ -165,23 +147,24 @@ void FileOperator::sendDeleteReq(const FileNodeRef &selectedNode)
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveDeleteReply(RequestState)),
-                     this, SLOT(getDeleteReply(RequestState)));
+    QObject::connect(theReply, SIGNAL(haveDeleteReply(RequestState, QString)),
+                     this, SLOT(getDeleteReply(RequestState, QString)));
     emit fileOpStarted();
 }
 
-void FileOperator::getDeleteReply(RequestState replyState)
+void FileOperator::getDeleteReply(RequestState replyState, QString toDelete)
 {
     fileOpPending->release();
 
-    if (replyState != RequestState::GOOD)
+    if (replyState == RequestState::GOOD)
     {
-        ae_globals::displayPopup("Unable to delete file. Please check connection and try again.");
-        return;
+        lsClosestNodeToParent(toDelete);
+        emit fileOpDone(replyState, QString("File successfully deleted: %1").arg(toDelete));
     }
-
-    lsClosestNodeToParent(getStringFromInitParams("toDelete"));
-    emit fileOpDone(replyState, "Delete enacted");
+    else
+    {
+        emit fileOpDone(replyState, QString("Unable to delete file: %1").arg(RemoteDataInterface::interpretRequestState(replyState)));
+    }
 }
 
 void FileOperator::sendMoveReq(const FileNodeRef &moveFrom, QString newName)
@@ -201,22 +184,27 @@ void FileOperator::sendMoveReq(const FileNodeRef &moveFrom, QString newName)
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData)),
-                     this, SLOT(getMoveReply(RequestState,FileMetaData)));
+    QObject::connect(theReply, SIGNAL(haveMoveReply(RequestState,FileMetaData, QString)),
+                     this, SLOT(getMoveReply(RequestState,FileMetaData, QString)));
     emit fileOpStarted();
 }
 
-void FileOperator::getMoveReply(RequestState replyState, FileMetaData revisedFileData)
+void FileOperator::getMoveReply(RequestState replyState, FileMetaData revisedFileData, QString from)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
-        lsClosestNodeToParent(getStringFromInitParams("from"));
+        lsClosestNodeToParent(from);
         lsClosestNode(revisedFileData.getFullPath());
+        emit fileOpDone(replyState, QString("File successfully moved from: %1 to: %2")
+                        .arg(from)
+                        .arg(revisedFileData.getFullPath()));
     }
-
-    emit fileOpDone(replyState, "Move Enacted");
+    else
+    {
+        emitStdFileOpErr("Unable to move file", replyState);
+    }
 }
 
 void FileOperator::sendCopyReq(const FileNodeRef &copyFrom, QString newName)
@@ -248,9 +236,12 @@ void FileOperator::getCopyReply(RequestState replyState, FileMetaData newFileDat
     if (replyState == RequestState::GOOD)
     {
         lsClosestNode(newFileData.getFullPath());
+        emit fileOpDone(replyState, QString("File successfully copied: %1").arg(newFileData.getFullPath()));
     }
-
-    emit fileOpDone(replyState, "Copy Enacted");
+    else
+    {
+        emitStdFileOpErr("Unable to copy file", replyState);
+    }
 }
 
 void FileOperator::sendRenameReq(const FileNodeRef &selectedNode, QString newName)
@@ -268,22 +259,27 @@ void FileOperator::sendRenameReq(const FileNodeRef &selectedNode, QString newNam
         //TODO, should have more meaningful error here
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData)),
-                     this, SLOT(getRenameReply(RequestState,FileMetaData)));
+    QObject::connect(theReply, SIGNAL(haveRenameReply(RequestState,FileMetaData, QString)),
+                     this, SLOT(getRenameReply(RequestState,FileMetaData, QString)));
     emit fileOpStarted();
 }
 
-void FileOperator::getRenameReply(RequestState replyState, FileMetaData newFileData)
+void FileOperator::getRenameReply(RequestState replyState, FileMetaData newFileData, QString oldName)
 {
     fileOpPending->release();
 
     if (replyState == RequestState::GOOD)
     {
-        lsClosestNodeToParent(getStringFromInitParams("fullName"));
+        lsClosestNodeToParent(oldName);
         lsClosestNodeToParent(newFileData.getFullPath());
+        emit fileOpDone(replyState, QString("File successfully renamed from %1 to %2")
+                        .arg(oldName)
+                        .arg(newFileData.getFullPath()));
     }
-
-    emit fileOpDone(replyState, "Rename enacted");
+    else
+    {
+        emitStdFileOpErr("Unable to rename file", replyState);
+    }
 }
 
 void FileOperator::sendCreateFolderReq(const FileNodeRef &selectedNode, QString newName)
@@ -313,9 +309,13 @@ void FileOperator::getMkdirReply(RequestState replyState, FileMetaData newFolder
     if (replyState == RequestState::GOOD)
     {
         lsClosestNode(newFolderData.getContainingPath());
+        emit fileOpDone(replyState, QString("New Folder Created at %1")
+                        .arg(newFolderData.getFullPath()));
     }
-
-    emit fileOpDone(replyState, "mkdir enacted");
+    else
+    {
+        emitStdFileOpErr("Unable to create remote folder", replyState);
+    }
 }
 
 void FileOperator::sendUploadReq(const FileNodeRef &uploadTarget, QString localFile)
@@ -359,9 +359,13 @@ void FileOperator::getUploadReply(RequestState replyState, FileMetaData newFileD
     if (replyState == RequestState::GOOD)
     {
         lsClosestNodeToParent(newFileData.getFullPath());
+        emit fileOpDone(replyState, QString("File successfully uploaded to %1")
+                        .arg(newFileData.getFullPath()));
     }
-
-    emit fileOpDone(replyState, "upload enacted");
+    else
+    {
+        emitStdFileOpErr("Unable to upload file", replyState);
+    }
 }
 
 void FileOperator::sendDownloadReq(const FileNodeRef &targetFile, QString localDest)
@@ -376,24 +380,23 @@ void FileOperator::sendDownloadReq(const FileNodeRef &targetFile, QString localD
         fileOpPending->release();
         return;
     }
-    QObject::connect(theReply, SIGNAL(haveDownloadReply(RequestState)),
-                     this, SLOT(getDownloadReply(RequestState)));
+    QObject::connect(theReply, SIGNAL(haveDownloadReply(RequestState, QString)),
+                     this, SLOT(getDownloadReply(RequestState, QString)));
     emit fileOpStarted();
 }
 
-void FileOperator::getDownloadReply(RequestState replyState)
+void FileOperator::getDownloadReply(RequestState replyState, QString localDest)
 {
     fileOpPending->release();
 
-    emit fileOpDone(replyState, "download enacted");
-
-    if (replyState != RequestState::GOOD)
+    if (replyState == RequestState::GOOD)
     {
-        quickInfoPopup("Error: Unable to download requested file.");
+        emit fileOpDone(replyState, QString("Download complete to %1")
+                        .arg(localDest));
     }
     else
     {
-        quickInfoPopup(QString("Download complete to: %1").arg(getStringFromInitParams("localDest")));
+        emitStdFileOpErr("Unable to download requested file", replyState);
     }
 }
 
@@ -429,7 +432,7 @@ void FileOperator::enactRecursiveDownload(const FileNodeRef &targetFolder, QStri
     if (targetFolder.getFileType() != FileType::DIR)
     {
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, "ERROR: Only folders can be downloaded recursively.");
+        emit fileOpDone(RequestState::INVALID_PARAM, "ERROR: Only folders can be downloaded recursively.");
         return;
     }
 
@@ -438,28 +441,28 @@ void FileOperator::enactRecursiveDownload(const FileNodeRef &targetFolder, QStri
     if (!downloadParent.exists())
     {
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, "ERROR: Download destination does not exist.");
+        emit fileOpDone(RequestState::LOCAL_FILE_ERROR, "ERROR: Download destination does not exist.");
         return;
     }
 
     if (downloadParent.exists(targetFolder.getFileName()))
     {
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, "ERROR: Download destination already occupied.");
+        emit fileOpDone(RequestState::LOCAL_FILE_ERROR, "ERROR: Download destination already occupied.");
         return;
     }
 
     if (!downloadParent.mkdir(targetFolder.getFileName()))
     {
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, "ERROR: Unable to create local destination for download, please check that you have permissions to write to the specified folder.");
+        emit fileOpDone(RequestState::LOCAL_FILE_ERROR, "ERROR: Unable to create local destination for download, please check that you have permissions to write to the specified folder.");
         return;
     }
     recursiveLocalHead = downloadParent;
     if (!recursiveLocalHead.cd(targetFolder.getFileName()))
     {
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, "ERROR: Unable to create local destination for download, please check that you have permissions to write to the specified folder.");
+        emit fileOpDone(RequestState::LOCAL_FILE_ERROR, "ERROR: Unable to create local destination for download, please check that you have permissions to write to the specified folder.");
         return;
     }
 
@@ -483,7 +486,7 @@ void FileOperator::enactRecursiveUpload(const FileNodeRef &containingDestFolder,
     if (recursivefileOpPending->lockClosed())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Still cleaning up tasks from last upload attempt. Please Wait.");
+        fileOpDone(RequestState::NOT_READY, "ERROR: Still cleaning up tasks from last upload attempt. Please Wait.");
         return;
     }
 
@@ -491,42 +494,42 @@ void FileOperator::enactRecursiveUpload(const FileNodeRef &containingDestFolder,
     if (!recursiveLocalHead.exists())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: The folder to upload does not exist.");
+        fileOpDone(RequestState::INVALID_PARAM, "ERROR: The folder to upload does not exist.");
         return;
     }
 
     if (!recursiveLocalHead.isReadable())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Unable to read from local folder to upload, please check that you have permissions to read the specified folder.");
+        fileOpDone(RequestState::LOCAL_FILE_ERROR, "ERROR: Unable to read from local folder to upload, please check that you have permissions to read the specified folder.");
         return;
     }
 
     if (recursiveLocalHead.dirName().isEmpty())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Cannot upload unnamed or root folders.");
+        fileOpDone(RequestState::INVALID_PARAM, "ERROR: Cannot upload unnamed or root folders.");
         return;
     }
 
     if (containingDestFolder.getFileType() != FileType::DIR)
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: The destination for an upload must be a folder.");
+        fileOpDone(RequestState::INVALID_PARAM, "ERROR: The destination for an upload must be a folder.");
         return;
     }
 
     if (!containingDestFolder.folderContentsLoaded())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: The destination for an upload must be fully loaded.");
+        fileOpDone(RequestState::INVALID_PARAM, "ERROR: The destination for an upload must be fully loaded.");
         return;
     }
 
     if (!containingDestFolder.getChildWithName(recursiveLocalHead.dirName()).isNil())
     {
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: The destination for the upload is already occupied.");
+        fileOpDone(RequestState::INVALID_PARAM, "ERROR: The destination for the upload is already occupied.");
         return;
     }
 
@@ -553,7 +556,7 @@ void FileOperator::abortRecursiveProcess()
 
     currentRecursiveTask = FileOp_RecursiveTask::NONE;
     fileOpPending->release();
-    fileOpDone(RequestState::FAIL, toDisplay);
+    fileOpDone(RequestState::STOPPED_BY_USER, toDisplay);
     return;
 }
 
@@ -654,21 +657,14 @@ void FileOperator::getRecursiveUploadReply(RequestState replyState, FileMetaData
 {
     recursivefileOpPending->release();
 
-    if (replyState == RequestState::NO_CONNECT)
-    {
-        currentRecursiveTask = FileOp_RecursiveTask::NONE;
-        fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Network connection lost during folder upload.");
-        return;
-    }
-
     if (replyState != RequestState::GOOD)
     {
         currentRecursiveTask = FileOp_RecursiveTask::NONE;
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Folder upload failed to upload file.");
+        emitStdFileOpErr("Folder upload failed to upload file", replyState);
         return;
     }
+
     lsClosestNodeToParent(newFileData.getFullPath());
 }
 
@@ -676,19 +672,11 @@ void FileOperator::getRecursiveMkdirReply(RequestState replyState, FileMetaData 
 {
     recursivefileOpPending->release();
 
-    if (replyState == RequestState::NO_CONNECT)
-    {
-        currentRecursiveTask = FileOp_RecursiveTask::NONE;
-        fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Network connection lost during folder upload.");
-        return;
-    }
-
     if (replyState != RequestState::GOOD)
     {
         currentRecursiveTask = FileOp_RecursiveTask::NONE;
         fileOpPending->release();
-        fileOpDone(RequestState::FAIL, "ERROR: Folder upload failed to create new remote folder.");
+        emitStdFileOpErr("Folder upload failed to create new remote folder", replyState);
         return;
     }
     lsClosestNode(newFolderData.getContainingPath());
@@ -924,7 +912,7 @@ void FileOperator::recursiveDownloadProcessRetry()
         {
             currentRecursiveTask = FileOp_RecursiveTask::NONE;
             fileOpPending->release();
-            fileOpDone(RequestState::GOOD,"Remote folder downloaded.");
+            fileOpDone(RequestState::GOOD,"Remote folder downloaded");
             return;
         }
 
@@ -938,12 +926,12 @@ void FileOperator::recursiveDownloadProcessRetry()
         }
         else
         {
-            outText = "ERROR: Unable to write local files for download, please check that you have permissions to write to the specified folder.";
+            outText = "Unable to write local files for download, please check that you have permissions to write to the specified folder.";
         }
 
         currentRecursiveTask = FileOp_RecursiveTask::NONE;
         fileOpPending->release();
-        emit fileOpDone(RequestState::FAIL, outText);
+        emit fileOpDone(RequestState::UNCLASSIFIED, outText);
         return;
     }
 }
@@ -1063,19 +1051,19 @@ void FileOperator::recursiveUploadProcessRetry()
     fileOpPending->release();
     if (theError == RecursiveErrorCodes::MKDIR_FAIL)
     {
-        emit fileOpDone(RequestState::FAIL, "Create folder operation failed during recursive upload. Check your network connection and try again.");
+        emit fileOpDone(RequestState::UNCLASSIFIED, "Create folder operation failed during recursive upload. Check your network connection and try again.");
         return;
     }
 
     if (theError == RecursiveErrorCodes::UPLOAD_FAIL)
     {
-        emit fileOpDone(RequestState::FAIL, "File upload operation failed during recursive upload. Check your network connection and try again.");
+        emit fileOpDone(RequestState::UNCLASSIFIED, "File upload operation failed during recursive upload. Check your network connection and try again.");
         return;
     }
 
     if (theError == RecursiveErrorCodes::TYPE_MISSMATCH)
     {
-        emit fileOpDone(RequestState::FAIL, "Internal error. File type mismatch. Remote files may be being accessed outside of this program.");
+        emit fileOpDone(RequestState::UNCLASSIFIED, "Internal error. File type mismatch. Remote files may be being accessed outside of this program.");
         return;
     }
 }
@@ -1168,4 +1156,11 @@ bool FileOperator::sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString l
     QObject::connect(theReply, SIGNAL(haveUploadReply(RequestState,FileMetaData)),
                      this, SLOT(getRecursiveUploadReply(RequestState,FileMetaData)));
     return true;
+}
+
+void FileOperator::emitStdFileOpErr(QString errString, RequestState errState)
+{
+    emit fileOpDone(errState, QString("%1: %2")
+                    .arg(errString)
+                    .arg(RemoteDataInterface::interpretRequestState(errState)));
 }
