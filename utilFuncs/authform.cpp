@@ -40,7 +40,7 @@
 #include "copyrightdialog.h"
 
 #include "agavesetupdriver.h"
-#include "ae_globals.h"
+#include "../ae_globals.h"
 
 AuthForm::AuthForm(AgaveSetupDriver * theDriver, QWidget *parent) :
     QMainWindow(parent),
