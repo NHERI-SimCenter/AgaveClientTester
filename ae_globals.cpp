@@ -78,6 +78,16 @@ bool ae_globals::isValidFolderName(QString folderName)
     {
         return false;
     }
+
+    for (QChar aLetter : folderName)
+    {
+        if (aLetter.isDigit()) continue;
+        if (aLetter.isSpace()) continue;
+        if (aLetter.isLetter()) continue;
+        if (aLetter == '_') continue;
+        return false;
+    }
+
     //TODO: PRS
     return true;
 }
