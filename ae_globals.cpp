@@ -50,7 +50,7 @@ void ae_globals::displayFatalPopup(QString message, QString header)
     errorMessage.setDefaultButton(QMessageBox::Close);
     errorMessage.setIcon(QMessageBox::Critical);
     errorMessage.exec();
-    QCoreApplication::instance()->exit(-1);
+    QCoreApplication::instance()->exit(1);
 }
 
 void ae_globals::displayFatalPopup(QString message)
