@@ -430,6 +430,7 @@ FileTreeNode * FileTreeNode::pathSearchHelper(QString filename, bool stopEarly)
     if (isRootNode() == false) return NULL;
 
     QStringList filePathParts = FileMetaData::getPathNameList(filename);
+    if (filePathParts.isEmpty()) return NULL;
     FileTreeNode * searchNode = this;
 
     QString rootName = filePathParts.takeFirst();
