@@ -416,7 +416,6 @@ void FileOperator::sendDownloadBuffReq(const FileNodeRef &targetFile)
         return;
     }
     trueNode->setBuffTask(theReply);
-    emit fileOpStarted();
 }
 
 bool FileOperator::performingRecursiveDownload()
