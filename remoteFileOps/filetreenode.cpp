@@ -173,7 +173,7 @@ void FileTreeNode::setLStask(RemoteDataReply * newTask)
 {
     if (!isFolder())
     {
-        qDebug("ERROR: LS called on file rather than folder.");
+        qCDebug(agaveAppLayer, "ERROR: LS called on file rather than folder.");
         return;
     }
     if (lsTask != NULL)
@@ -195,7 +195,7 @@ void FileTreeNode::setBuffTask(RemoteDataReply * newTask)
 {
     if (isFolder())
     {
-        qDebug("ERROR: Buffer download called on folder.");
+        qCDebug(agaveAppLayer, "ERROR: Buffer download called on folder.");
         return;
     }
     if (bufferTask != NULL)
@@ -259,7 +259,7 @@ void FileTreeNode::deliverLSdata(RequestState taskState, QList<FileMetaData> dat
     {
         if (verifyControlNode(&dataList) == false)
         {
-            qDebug("ERROR: File tree data/node mismatch");
+            qCDebug(agaveAppLayer, "ERROR: File tree data/node mismatch");
             recomputeNodeState();
             return;
         }
@@ -288,7 +288,7 @@ void FileTreeNode::deliverBuffData(RequestState taskState, QByteArray bufferData
     bufferTask = NULL;
     if (taskState == RequestState::GOOD)
     {
-        qDebug("Download of buffer complete: %s", qPrintable(fileData.getFullPath()));
+        qCDebug(agaveAppLayer, "Download of buffer complete: %s", qPrintable(fileData.getFullPath()));
         if (bufferData.isNull())
         {
             setFileBuffer(NULL);

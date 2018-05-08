@@ -90,7 +90,7 @@ FileTreeNode * FileOperator::getFileNodeFromNodeRef(const FileNodeRef &thedata, 
 
 void FileOperator::enactRootRefresh()
 {
-    qDebug("Enacting refresh of root.");
+    qCDebug(agaveAppLayer, "Enacting refresh of root.");
     RemoteDataReply * theReply = ae_globals::get_connection()->remoteLS("/");
     if (theReply == NULL)
     {
@@ -117,7 +117,7 @@ void FileOperator::enactFolderRefresh(const FileNodeRef &selectedNode, bool clea
     }
     QString fullFilePath = trueNode->getFileData().getFullPath();
 
-    qDebug("File Path Needs refresh: %s", qPrintable(fullFilePath));
+    qCDebug(agaveAppLayer, "File Path Needs refresh: %s", qPrintable(fullFilePath));
     RemoteDataReply * theReply = ae_globals::get_connection()->remoteLS(fullFilePath);
     if (theReply == NULL)
     {
@@ -140,7 +140,7 @@ void FileOperator::sendDeleteReq(const FileNodeRef &selectedNode)
     if (!fileOpPending->checkAndClaim()) return;
 
     QString targetFile = selectedNode.getFullPath();
-    qDebug("Starting delete procedure: %s",qPrintable(targetFile));
+    qCDebug(agaveAppLayer, "Starting delete procedure: %s",qPrintable(targetFile));
     RemoteDataReply * theReply = ae_globals::get_connection()->deleteFile(targetFile);
     if (theReply == NULL)
     {
@@ -175,9 +175,9 @@ void FileOperator::sendMoveReq(const FileNodeRef &moveFrom, QString newName)
 
     ae_globals::get_connection()->setCurrentRemoteWorkingDirectory(moveFrom.getContainingPath());
 
-    qDebug("Starting move procedure: %s to %s",
-           qPrintable(moveFrom.getFullPath()),
-           qPrintable(newName));
+    qCDebug(agaveAppLayer, "Starting move procedure: %s to %s",
+            qPrintable(moveFrom.getFullPath()),
+            qPrintable(newName));
     RemoteDataReply * theReply = ae_globals::get_connection()->moveFile(moveFrom.getFullPath(), newName);
     if (theReply == NULL)
     {
@@ -215,7 +215,7 @@ void FileOperator::sendCopyReq(const FileNodeRef &copyFrom, QString newName)
 
     ae_globals::get_connection()->setCurrentRemoteWorkingDirectory(copyFrom.getContainingPath());
 
-    qDebug("Starting copy procedure: %s to %s",
+    qCDebug(agaveAppLayer, "Starting copy procedure: %s to %s",
            qPrintable(copyFrom.getFullPath()),
            qPrintable(newName));
     RemoteDataReply * theReply = ae_globals::get_connection()->copyFile(copyFrom.getFullPath(), newName);
@@ -250,7 +250,7 @@ void FileOperator::sendRenameReq(const FileNodeRef &selectedNode, QString newNam
     if (!selectedNode.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
 
-    qDebug("Starting rename procedure: %s to %s",
+    qCDebug(agaveAppLayer, "Starting rename procedure: %s to %s",
            qPrintable(selectedNode.getFullPath()),
            qPrintable(newName));
     RemoteDataReply * theReply = ae_globals::get_connection()->renameFile(selectedNode.getFullPath(), newName);
@@ -288,7 +288,7 @@ void FileOperator::sendCreateFolderReq(const FileNodeRef &selectedNode, QString 
     if (!selectedNode.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return; 
 
-    qDebug("Starting create folder procedure: %s at %s",
+    qCDebug(agaveAppLayer,"Starting create folder procedure: %s at %s",
            qPrintable(selectedNode.getFullPath()),
            qPrintable(newName));
     RemoteDataReply * theReply = ae_globals::get_connection()->mkRemoteDir(selectedNode.getFullPath(), newName);
@@ -324,7 +324,7 @@ void FileOperator::sendUploadReq(const FileNodeRef &uploadTarget, QString localF
     if (!uploadTarget.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
 
-    qDebug("Starting upload procedure: %s to %s", qPrintable(localFile),
+    qCDebug(agaveAppLayer, "Starting upload procedure: %s to %s", qPrintable(localFile),
            qPrintable(uploadTarget.getFullPath()));
     RemoteDataReply * theReply = ae_globals::get_connection()->uploadFile(uploadTarget.getFullPath(), localFile);
     if (theReply == NULL)
@@ -341,7 +341,7 @@ void FileOperator::sendUploadBuffReq(const FileNodeRef &uploadTarget, QByteArray
 {
     if (!uploadTarget.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
-    qDebug("Starting upload procedure: to %s", qPrintable(uploadTarget.getFullPath()));
+    qCDebug(agaveAppLayer, "Starting upload procedure: to %s", qPrintable(uploadTarget.getFullPath()));
     RemoteDataReply * theReply = ae_globals::get_connection()->uploadBuffer(uploadTarget.getFullPath(), fileBuff, newName);
     if (theReply == NULL)
     {
@@ -373,7 +373,7 @@ void FileOperator::sendDownloadReq(const FileNodeRef &targetFile, QString localD
 {   
     if (!targetFile.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
-    qDebug("Starting download procedure: %s to %s", qPrintable(targetFile.getFullPath()),
+    qCDebug(agaveAppLayer, "Starting download procedure: %s to %s", qPrintable(targetFile.getFullPath()),
            qPrintable(localDest));
     RemoteDataReply * theReply = ae_globals::get_connection()->downloadFile(localDest, targetFile.getFullPath());
     if (theReply == NULL)
@@ -409,7 +409,7 @@ void FileOperator::sendDownloadBuffReq(const FileNodeRef &targetFile)
     {
         return;
     }
-    qDebug("Starting download buffer procedure: %s", qPrintable(targetFile.getFullPath()));
+    qCDebug(agaveAppLayer, "Starting download buffer procedure: %s", qPrintable(targetFile.getFullPath()));
     RemoteDataReply * theReply = ae_globals::get_connection()->downloadBuffer(targetFile.getFullPath());
     if (theReply == NULL)
     {
@@ -564,7 +564,7 @@ void FileOperator::sendCompressReq(const FileNodeRef &selectedFolder)
 {
     if (!selectedFolder.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
-    qDebug("Folder compress specified");
+    qCDebug(agaveAppLayer, "Folder compress specified");
     QMultiMap<QString, QString> oneInput;
     oneInput.insert("compression_type","tgz");
 
@@ -603,7 +603,7 @@ void FileOperator::sendDecompressReq(const FileNodeRef &selectedFolder)
 {
     if (!selectedFolder.fileNodeExtant()) return;
     if (!fileOpPending->checkAndClaim()) return;
-    qDebug("Folder de-compress specified");
+    qCDebug(agaveAppLayer, "Folder de-compress specified");
     QMultiMap<QString, QString> oneInput;
 
     if (selectedFolder.getFileType() == FileType::DIR)
@@ -778,7 +778,7 @@ const FileNodeRef FileOperator::speculateFileWithName(const FileNodeRef &baseNod
         }
         if (!searchNode->isFolder())
         {
-            qDebug("Invalid file speculation path.");
+            qCDebug(agaveAppLayer, "Invalid file speculation path.");
             return fail;
         }
         if (searchNode->getNodeState() == NodeState::FOLDER_CONTENTS_LOADED)
@@ -1128,7 +1128,7 @@ bool FileOperator::sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QSt
 {
     if (!recursivefileOpPending->checkAndClaim()) return false;
 
-    qDebug("Starting Recursive mkdir procedure: %s at %s",
+    qCDebug(agaveAppLayer, "Starting Recursive mkdir procedure: %s at %s",
            qPrintable(selectedNode->getFileData().getFullPath()),
            qPrintable(newName));
     RemoteDataReply * theReply = ae_globals::get_connection()->mkRemoteDir(selectedNode->getFileData().getFullPath(), newName);
@@ -1145,7 +1145,7 @@ bool FileOperator::sendRecursiveCreateFolderReq(FileTreeNode * selectedNode, QSt
 bool FileOperator::sendRecursiveUploadReq(FileTreeNode * uploadTarget, QString localFile)
 {
     if (!recursivefileOpPending->checkAndClaim()) return false;
-    qDebug("Starting recursively enacted upload procedure: %s to %s", qPrintable(localFile),
+    qCDebug(agaveAppLayer, "Starting recursively enacted upload procedure: %s to %s", qPrintable(localFile),
            qPrintable(uploadTarget->getFileData().getFullPath()));
     RemoteDataReply * theReply = ae_globals::get_connection()->uploadFile(uploadTarget->getFileData().getFullPath(), localFile);
     if (theReply == NULL)

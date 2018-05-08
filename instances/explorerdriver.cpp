@@ -128,7 +128,7 @@ void ExplorerDriver::loadAppList(RequestState replyState, QVariantList appList)
 {
     if (replyState != RequestState::GOOD)
     {
-        qDebug("App List not available.");
+        qCDebug(agaveAppLayer, "App List not available.");
         return;
     }
 
@@ -141,4 +141,16 @@ void ExplorerDriver::loadAppList(RequestState replyState, QVariantList appList)
             mainWindow->addAppToList(appName);
         }
     }
+}
+
+void ExplorerDriver::loadStyleFiles()
+{
+    QFile simCenterStyle(":/styleCommon/style.qss");
+    if (!simCenterStyle.open(QFile::ReadOnly))
+    {
+        ae_globals::displayFatalPopup("Missing file for graphics style. Your install is probably corrupted.");
+    }
+    QString commonStyle = QLatin1String(simCenterStyle.readAll());
+
+    qApp->setStyleSheet(commonStyle);
 }
