@@ -110,6 +110,11 @@ void AgaveSetupDriver::performDebugFiltering(QLoggingCategory *category, bool de
         category->setEnabled(QtDebugMsg, debugEnabled);
         return;
     }
+    if (qstrcmp(category->categoryName(), "default") == 0)
+    {
+        category->setEnabled(QtDebugMsg, debugEnabled);
+        return;
+    }
     category->setEnabled(QtDebugMsg, false);
 }
 
@@ -151,7 +156,7 @@ void AgaveSetupDriver::shutdown()
         return;
     }
     doingShutdown = true;
-   qCDebug(agaveAppLayer, "Beginning graceful shutdown.");
+    qCDebug(agaveAppLayer, "Beginning graceful shutdown.");
     if (theConnectThread != NULL)
     {
         RemoteDataReply * revokeTask = theConnectThread->closeAllConnections();

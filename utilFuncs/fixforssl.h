@@ -3,7 +3,15 @@
 
 #include <QMainWindow>
 #include <QSslSocket>
+#include <QDesktopServices>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QDir>
+#include <QFile>
+#include <QProcess>
 
+#ifdef Q_OS_WIN
 namespace Ui {
 class FixForSSL;
 }
@@ -18,8 +26,25 @@ public:
 
     static bool performSSLcheck();
 
+private slots:
+    void exitProgram();
+    void showLicense();
+    void getSSL();
+
+    void getDownloadReply();
+
 private:
     Ui::FixForSSL *ui;
+
+    QNetworkAccessManager networkManger;
 };
+#else
+class FixForSSL
+{
+public:
+    FixForSSL();
+    static bool performSSLcheck();
+};
+#endif
 
 #endif // FIXFORSSL_H

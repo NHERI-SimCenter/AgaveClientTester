@@ -120,8 +120,12 @@ FORMS += \
     instances/explorerwindow.ui \
     utilFuncs/authform.ui \
     utilFuncs/copyrightdialog.ui \
-    utilFuncs/singlelinedialog.ui \
+    utilFuncs/singlelinedialog.ui
+
+#win32 {
+FORMS += \
     utilFuncs/fixforssl.ui
+#}
 
 RESOURCES += \
     SimCenterCommon/commonResources.qrc \
