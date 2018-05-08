@@ -94,16 +94,39 @@ void FixForSSL::getDownloadReply()
     downloadedFile.write(theData);
     downloadedFile.close();
 
-    const QString program = "zip.exe";
-    const QStringList arguments = QStringList() << "-X0q" << zipFileName << "mimetype";
+    QString program = "powershell.exe -nologo -noprofile -command \"& { Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('%1', 'openssl'); }\"";
+    program = program.arg(zipFileName);
     QProcess unzipProgram;
     unzipProgram.setWorkingDirectory(myProgramFolder.absolutePath());
-    unzipProgram.start(program, arguments);
+    unzipProgram.start(program);
 
-    if (!unzipProgram.waitForFinished(4000))
+    if (!unzipProgram.waitForFinished(15000))
     {
-
+        ae_globals::displayFatalPopup("CWE program unable extract SSL libraries from download. Please install a version openssl manually. 1");
+        return;
     }
+
+    QDir sslFolder = myProgramFolder;
+    if (!sslFolder.cd("openssl"))
+    {
+        ae_globals::displayFatalPopup("CWE program unable extract SSL libraries from download. Please install a version openssl manually. 3");
+        return;
+    }
+
+    if (!QFile::copy(sslFolder.absoluteFilePath("libeay32.dll"), myProgramFolder.absoluteFilePath("libeay32.dll")))
+    {
+        ae_globals::displayFatalPopup("CWE program unable extract SSL libraries from download. Please install a version openssl manually. 4");
+        return;
+    }
+
+    if (!QFile::copy(sslFolder.absoluteFilePath("ssleay32.dll"), myProgramFolder.absoluteFilePath("ssleay32.dll")))
+    {
+        ae_globals::displayFatalPopup("CWE program unable extract SSL libraries from download. Please install a version openssl manually. 5");
+        return;
+    }
+
+    ae_globals::displayPopup("SSL setup complete. Please restart CWE program to use.","Setup Somplete");
+    qApp->exit(0);
 }
 #else
 FixForSSL::FixForSSL() {}
