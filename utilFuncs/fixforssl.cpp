@@ -10,7 +10,6 @@ bool FixForSSL::performSSLcheck()
 {
     if (QSslSocket::supportsSsl() == false)
     {
-        //TODO: Lines commented out for debug purposes
         #ifdef Q_OS_WIN
             FixForSSL * sslWindow = new FixForSSL();
             sslWindow->show();
